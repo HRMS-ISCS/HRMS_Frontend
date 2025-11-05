@@ -1,7 +1,8 @@
-// Dashboard.jsx
+// // // Dashboard.jsx
 import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, AlertTriangle, CheckCircle } from "lucide-react"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 
 export default function Dashboard() {
   const [employeeCounts, setEmployeeCounts] = useState({
@@ -57,6 +58,22 @@ export default function Dashboard() {
     }
   ]
 
+  // Prepare pie chart data
+  const pieChartData = [
+    {
+      name: "Internal Employees",
+      value: employeeCounts.internal_employees,
+      color: "#10B981",
+      percentage: totalEmployees > 0 ? ((employeeCounts.internal_employees / totalEmployees) * 100).toFixed(1) : 0
+    },
+    {
+      name: "External Employees", 
+      value: employeeCounts.external_employees,
+      color: "#F59E0B",
+      percentage: totalEmployees > 0 ? ((employeeCounts.external_employees / totalEmployees) * 100).toFixed(1) : 0
+    }
+  ]
+
   const recentActivities = [
     { id: 1, action: "New employee onboarded", employee: "Sarah Johnson", time: "2 hours ago", type: "success" },
     { id: 2, action: "Leave request approved", employee: "Mike Chen", time: "4 hours ago", type: "info" },
@@ -70,12 +87,48 @@ export default function Dashboard() {
     { id: 3, task: "Update employee handbook", deadline: "This week", priority: "low" }
   ]
 
+  // Custom tooltip for pie chart
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      return (
+        <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-200">
+          <p className="font-medium text-gray-800">{data.name}</p>
+          <p className="text-blue-600">Count: {data.value}</p>
+          <p className="text-gray-600">Percentage: {data.percentage}%</p>
+        </div>
+      )
+    }
+    return null
+  }
+
+  // Custom label function for pie chart
+  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+    const RADIAN = Math.PI / 180
+    const radius = outerRadius + 25
+    const x = cx + radius * Math.cos(-midAngle * RADIAN)
+    const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#374151" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        className="font-semibold text-sm"
+      >
+        {`${(percent * 100).toFixed(1)}%`}
+      </text>
+    )
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -106,6 +159,123 @@ export default function Dashboard() {
           )
         })}
       </div>
+
+      {/* Employee Distribution Pie Chart */}
+      <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-gray-800 mb-1">Employee Distribution</h3>
+            <p className="text-sm text-gray-500">Internal vs External workforce breakdown</p>
+          </div>
+          <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
+            <p className="text-2xl font-bold text-blue-600 mt-1">{totalEmployees}</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
+          {/* Pie Chart */}
+          <div className="lg:col-span-2 flex justify-center">
+            <div className="relative">
+              <div className="h-72 w-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderLabel}
+                      outerRadius={90}
+                      innerRadius={45}
+                      fill="#8884d8"
+                      dataKey="value"
+                      stroke="#ffffff"
+                      strokeWidth={3}
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Center Label */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center bg-white rounded-full p-4 shadow-sm border border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</p>
+                  <p className="text-2xl font-bold text-gray-800">{totalEmployees}</p>
+                  <p className="text-xs text-gray-500">Employees</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Statistics Summary */}
+          <div className="lg:col-span-3 space-y-4">
+            {pieChartData.map((item, index) => (
+              <div key={index} className="group hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div 
+                        className="w-6 h-6 rounded-full shadow-sm border-2 border-white"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <div 
+                        className="absolute inset-0 w-6 h-6 rounded-full opacity-20 group-hover:animate-pulse"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800 text-base">{item.name}</span>
+                      <p className="text-xs text-gray-500 mt-1">Active employees</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold text-gray-800">{item.value}</p>
+                      <div 
+                        className="px-2 py-1 rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: item.color }}
+                      >
+                        {item.percentage}%
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">of workforce</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Summary Card */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+              <div className="flex items-center gap-3 mb-2">
+                <Users size={18} className="text-blue-600" />
+                <h4 className="font-semibold text-blue-900">Workforce Summary</h4>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-blue-700 font-medium">Majority Type</p>
+                  <p className="text-blue-900 font-semibold">
+                    {employeeCounts.internal_employees > employeeCounts.external_employees ? 'Internal' : 'External'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-blue-700 font-medium">Distribution</p>
+                  <p className="text-blue-900 font-semibold">
+                    {Math.abs(parseFloat(pieChartData[0]?.percentage || 0) - parseFloat(pieChartData[1]?.percentage || 0)).toFixed(1)}% difference
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -195,7 +365,7 @@ export default function Dashboard() {
             <TrendingUp size={24} className="text-orange-600" />
             <span className="text-sm font-medium text-gray-700">Generate Report</span>
           </button>
-        </div>
+          </div>
       </Card>
     </div>
   )

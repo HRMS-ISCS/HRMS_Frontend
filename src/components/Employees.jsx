@@ -1,4 +1,3 @@
-// // // //Employees.jsx
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,8 +93,10 @@ export default function Employees() {
     }
   };
 
-  const searchEmployeeById = async () => {
-    if (!searchEmployeeId.trim()) {
+  const searchEmployeeById = async (employeeId = null) => {
+    const idToSearch = employeeId || searchEmployeeId.trim();
+    
+    if (!idToSearch) {
       setSearchError('Please enter an employee ID');
       return;
     }
@@ -103,7 +104,7 @@ export default function Employees() {
     setSearchLoading(true);
     setSearchError("");
     try {
-      const response = await fetch(`http://127.0.0.1:8000/db/employment-applications/${searchEmployeeId}`);
+      const response = await fetch(`http://127.0.0.1:8000/db/employment-applications/${idToSearch}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -115,6 +116,7 @@ export default function Employees() {
       const data = await response.json();
       setSearchedEmployee(data);
       setSearchMode(true);
+      setSearchEmployeeId(idToSearch); // Update the search input with the ID
       // Reset expanded sections when new employee is loaded
       setExpandedSections({
         personalProfile: true,
@@ -338,7 +340,7 @@ export default function Employees() {
               <User size={24} className="text-blue-600" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-800">
+              <h2 className="text-xl font-semibold text-gray-700">
                 {`${personalProfile.first_name || ''} ${personalProfile.middle_name || ''} ${personalProfile.last_name || ''}`.trim() || 'N/A'}
               </h2>
               <p className="text-blue-600 font-medium">Employee ID: {employee.employee_id}</p>
@@ -740,10 +742,7 @@ export default function Employees() {
               variant="ghost" 
               size="sm" 
               className="h-6 px-2 text-xs"
-              onClick={() => {
-                setSearchEmployeeId(employee.employee_id);
-                searchEmployeeById();
-              }}
+              onClick={() => searchEmployeeById(employee.employee_id)}
             >
               <Eye size={12} className="mr-1" />
               View
@@ -809,10 +808,7 @@ export default function Employees() {
                       variant="ghost" 
                       size="sm" 
                       className="h-6 px-2 text-xs"
-                      onClick={() => {
-                        setSearchEmployeeId(employee.employee_id);
-                        searchEmployeeById();
-                      }}
+                      onClick={() => searchEmployeeById(employee.employee_id)}
                     >
                       <Eye size={12} className="mr-1" />
                       View
@@ -832,7 +828,7 @@ export default function Employees() {
       {/* Compact Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
             <Users size={24} className="text-blue-600" />
             Employee Management
           </h1>
@@ -855,7 +851,7 @@ export default function Employees() {
               />
             </div>
             <Button
-              onClick={searchEmployeeById}
+              onClick={() => searchEmployeeById()}
               disabled={searchLoading}
               size="sm"
               className="h-8 px-3"
@@ -953,7 +949,7 @@ export default function Employees() {
               <AlertCircle size={24} className="text-red-500" />
               <div>
                 <p className="text-red-700 font-medium text-sm">{error}</p>
-                <Button onClick={() => {}} className="mt-3" variant="outline" size="sm">
+                <Button onClick={fetchAllEmployees} className="mt-3" variant="outline" size="sm">
                   Try Again
                 </Button>
               </div>
