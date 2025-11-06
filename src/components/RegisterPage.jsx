@@ -279,275 +279,637 @@ export default function RegisterPage() {
     { id: 6, title: "Declaration", description: "Final signature" },
   ];
 
+  // return (
+  //   <div className="min-h-screen bg-gradient-to-br from-gray-50 to-slate-100">
+  //     <style jsx>{`
+  //       .page-container {
+  //         position: relative;
+  //         overflow: hidden;
+  //       }
+
+  //       .page-content {
+  //         transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  //         transform-origin: center;
+  //       }
+
+  //       .slide-left {
+  //         transform: translateX(-100%) rotateY(-15deg);
+  //         opacity: 0;
+  //       }
+
+  //       .slide-right {
+  //         transform: translateX(100%) rotateY(15deg);
+  //         opacity: 0;
+  //       }
+
+  //       .step-indicator {
+  //         transition: all 0.3s ease;
+  //         cursor: pointer;
+  //         position: relative;
+  //       }
+
+  //       .step-indicator:hover {
+  //         transform: translateX(4px);
+  //       }
+
+  //       .step-indicator:hover .step-tooltip {
+  //         opacity: 1;
+  //         visibility: visible;
+  //         transform: translateX(8px);
+  //       }
+
+  //       .step-tooltip {
+  //         position: absolute;
+  //         top: 50%;
+  //         left: 100%;
+  //         transform: translateY(-50%) translateX(4px);
+  //         background: rgba(0, 0, 0, 0.8);
+  //         color: white;
+  //         padding: 4px 8px;
+  //         border-radius: 4px;
+  //         font-size: 11px;
+  //         white-space: nowrap;
+  //         opacity: 0;
+  //         visibility: hidden;
+  //         transition: all 0.3s ease;
+  //         z-index: 1000;
+  //       }
+
+  //       .step-line {
+  //         transition: all 0.5s ease;
+  //       }
+
+  //       .form-card {
+  //         perspective: 1000px;
+  //       }
+
+  //       .book-shadow {
+  //         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+  //           0 1px 2px rgba(0, 0, 0, 0.24), 0 10px 20px rgba(0, 0, 0, 0.1);
+  //       }
+
+  //       .page-turn-effect {
+  //         background: linear-gradient(45deg, #f8fafc 0%, #ffffff 100%);
+  //         border: 1px solid rgba(148, 163, 184, 0.1);
+  //       }
+
+  //       .steps-container {
+  //         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  //         border-right: 1px solid rgba(148, 163, 184, 0.1);
+  //       }
+
+  //       .navbar {
+  //         background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  //         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  //           0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  //       }
+
+  //       .navbar-content {
+  //         backdrop-filter: blur(10px);
+  //       }
+
+  //       @media (max-width: 768px) {
+  //         .step-indicator:hover {
+  //           transform: none;
+  //         }
+  //         .step-tooltip {
+  //           display: none;
+  //         }
+  //       }
+  //     `}</style>
+
+  //     {/* Navbar Header */}
+  //     <div className="sticky top-0 z-50 bg-white shadow-md border-b border-slate-200">
+  //       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-4">
+  //         <div className="flex items-center justify-between">
+  //           {/* Left - Back Button and Mobile Menu */}
+  //           <div className="flex items-center gap-2">
+  //             {/* Mobile Menu Button */}
+  //             <Button
+  //               onClick={() => setSidebarOpen(true)}
+  //               variant="outline"
+  //               size="sm"
+  //               className="md:hidden flex items-center gap-1 text-slate-700 hover:bg-slate-100"
+  //             >
+  //               <Menu size={16} />
+  //               <span className="hidden xs:inline">Steps</span>
+  //             </Button>
+
+  //             {/* Back Button */}
+  //             <Button
+  //               onClick={handleBack}
+  //               variant="outline"
+  //               size="sm"
+  //               className="flex items-center gap-1 sm:gap-2 text-slate-700 hover:bg-slate-100 hover:scale-105 transition-all duration-200 text-xs sm:text-sm"
+  //               disabled={isTransitioning}
+  //             >
+  //               <ArrowLeft size={14} sm:size={16} />
+  //               <span className="hidden xs:inline">Back</span>
+  //             </Button>
+  //           </div>
+
+  //           {/* Center - Title */}
+  //           <div className="flex-1 text-center px-2">
+  //             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 tracking-wide">
+  //               <span className="hidden sm:inline">ISCS Employee Registration</span>
+  //               <span className="sm:hidden">ISCS Registration</span>
+  //             </h1>
+  //             <div className="text-xs sm:text-sm text-slate-500 mt-1 hidden sm:block">
+  //               Complete your registration process
+  //             </div>
+  //           </div>
+
+  //           {/* Right - Step Counter */}
+  //           <div className="flex items-center gap-2 sm:gap-3 bg-slate-100 rounded-full px-2 sm:px-4 py-1 sm:py-2 border border-slate-300">
+  //             <div className="text-slate-700 text-xs sm:text-sm font-medium">
+  //               <span className="hidden xs:inline">Step </span>
+  //               {currentStep}/{steps.length}
+  //             </div>
+  //             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+
+  //     {/* Mobile Sidebar Overlay */}
+  //     {sidebarOpen && (
+  //       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+  //         <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300">
+  //           {/* Mobile Sidebar Header */}
+  //           <div className="flex items-center justify-between p-4 border-b">
+  //             <h3 className="text-lg font-semibold text-gray-800">Registration Steps</h3>
+  //             <Button
+  //               onClick={() => setSidebarOpen(false)}
+  //               variant="ghost"
+  //               size="sm"
+  //               className="p-1"
+  //             >
+  //               <X size={20} />
+  //             </Button>
+  //           </div>
+
+  //           {/* Mobile Steps */}
+  //           <div className="p-4">
+  //             <div className="space-y-3">
+  //               {steps.map((step, index) => (
+  //                 <div key={step.id} className="relative">
+  //                   <div
+  //                     className={`flex items-center gap-4 step-indicator p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
+  //                       currentStep === step.id
+  //                         ? "bg-blue-100 text-blue-800 shadow-lg transform scale-[1.02] border border-blue-200"
+  //                         : currentStep > step.id
+  //                         ? "bg-blue-50 text-blue-700 shadow-md hover:shadow-lg hover:scale-[1.01] border border-blue-100"
+  //                         : "bg-white/70 hover:bg-blue-50 hover:shadow-md hover:scale-[1.01] border border-slate-200 hover:border-blue-200"
+  //                     } ${isTransitioning ? "pointer-events-none" : ""}`}
+  //                     onClick={() => navigateToStep(step.id)}
+  //                   >
+  //                     {/* Step Number/Check */}
+  //                     <div
+  //                       className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
+  //                         currentStep > step.id
+  //                           ? "bg-blue-200 text-blue-800"
+  //                           : currentStep === step.id
+  //                           ? "bg-blue-200 text-blue-800"
+  //                           : "bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 group-hover:from-blue-100 group-hover:to-blue-100 group-hover:text-blue-600"
+  //                       }`}
+  //                     >
+  //                       {currentStep > step.id ? (
+  //                         <CheckCircle2 size={18} />
+  //                       ) : (
+  //                         <span className="text-sm font-bold">{step.id}</span>
+  //                       )}
+  //                     </div>
+
+  //                     {/* Step Content */}
+  //                     <div className="flex-1 min-w-0">
+  //                       <div
+  //                         className={`font-semibold text-base leading-tight transition-colors duration-300 ${
+  //                           currentStep >= step.id
+  //                             ? "text-current"
+  //                             : "text-slate-600 group-hover:text-slate-800"
+  //                         }`}
+  //                       >
+  //                         {step.title}
+  //                       </div>
+  //                       <div
+  //                         className={`text-sm mt-1 leading-tight ${
+  //                           currentStep >= step.id
+  //                             ? "text-current opacity-80"
+  //                             : "text-slate-500 group-hover:text-slate-600"
+  //                         }`}
+  //                       >
+  //                         {step.description}
+  //                       </div>
+  //                     </div>
+  //                   </div>
+
+  //                   {/* Connecting Line */}
+  //                   {index < steps.length - 1 && (
+  //                     <div className="ml-9 my-1">
+  //                       <div
+  //                         className={`w-1 h-4 rounded-full step-line transition-all duration-500 ${
+  //                           currentStep > step.id
+  //                             ? "bg-blue-300"
+  //                             : currentStep === step.id
+  //                             ? "bg-blue-400"
+  //                             : "bg-slate-300"
+  //                         }`}
+  //                       />
+  //                     </div>
+  //                   )}
+  //                 </div>
+  //               ))}
+  //             </div>
+
+  //             {/* Progress Summary */}
+  //             <div className="mt-8 p-4 bg-white/60 rounded-xl border border-slate-200">
+  //               <div className="flex items-center justify-between mb-3">
+  //                 <span className="text-sm font-semibold text-slate-700">
+  //                   Overall Progress
+  //                 </span>
+  //                 <span className="text-sm font-bold text-slate-800">
+  //                   {Math.round((currentStep / steps.length) * 100)}%
+  //                 </span>
+  //               </div>
+  //               <div className="flex items-center gap-3">
+  //                 <div className="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden">
+  //                   <div
+  //                     className="bg-blue-300 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+  //                     style={{
+  //                       width: `${(currentStep / steps.length) * 100}%`,
+  //                     }}
+  //                   ></div>
+  //                 </div>
+  //                 <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
+  //                   {currentStep}/{steps.length}
+  //                 </span>
+  //               </div>
+  //               <div className="mt-2 text-xs text-slate-500 text-center">
+  //                 {currentStep === steps.length
+  //                   ? "Ready to submit!"
+  //                   : `${steps.length - currentStep} steps remaining`}
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     )}
+
+  //     <div className="max-w-7xl mx-auto p-2 sm:p-4">
+  //       {/* Display Generated Employee ID if available */}
+  //       {generatedEmployeeId && (
+  //         <div className="text-center mb-4 sm:mb-6 mt-2 sm:mt-4">
+  //           <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full shadow-sm">
+  //             <CheckCircle2 size={16} sm:size={20} className="text-green-600 flex-shrink-0" />
+  //             <span className="text-gray-700 font-medium text-sm sm:text-base">
+  //               <span className="hidden sm:inline">Employee ID Generated: </span>
+  //               <span className="sm:hidden">ID: </span>
+  //             </span>
+  //             <span className="text-base sm:text-lg font-bold text-green-700">
+  //               {generatedEmployeeId}
+  //             </span>
+  //           </div>
+  //         </div>
+  //       )}
+
+  //       {/* Main Content Layout */}
+  //       <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
+  //         {/* Desktop Sidebar - Hidden on mobile */}
+  //         <div className="hidden md:block w-80 flex-shrink-0">
+  //           <Card className="steps-container p-0 h-fit overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-slate-200 shadow-xl">
+  //             {/* Header Section */}
+  //             <div className="p-6">
+  //               <div className="flex items-center gap-3 mb-2">
+  //                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+  //                   <CheckCircle2 size={18} className="text-blue-600" />
+  //                 </div>
+  //                 <h3 className="text-xl font-bold text-gray-800">
+  //                   Registration Progress
+  //                 </h3>
+  //               </div>
+  //               <p className="text-gray-600 text-sm">
+  //                 Complete all steps to finish registration
+  //               </p>
+  //             </div>
+
+  //             {/* Steps Section */}
+  //             <div className="p-6">
+  //               <div className="space-y-3">
+  //                 {steps.map((step, index) => (
+  //                   <div key={step.id} className="relative">
+  //                     <div
+  //                       className={`flex items-center gap-4 step-indicator p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
+  //                         currentStep === step.id
+  //                           ? "bg-blue-100 text-blue-800 shadow-lg transform scale-[1.02] border border-blue-200"
+  //                           : currentStep > step.id
+  //                           ? "bg-blue-50 text-blue-700 shadow-md hover:shadow-lg hover:scale-[1.01] border border-blue-100"
+  //                           : "bg-white/70 hover:bg-blue-50 hover:shadow-md hover:scale-[1.01] border border-slate-200 hover:border-blue-200"
+  //                       } ${isTransitioning ? "pointer-events-none" : ""}`}
+  //                       onClick={() => navigateToStep(step.id)}
+  //                     >
+  //                       {/* Step Number/Check */}
+  //                       <div
+  //                         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
+  //                           currentStep > step.id
+  //                             ? "bg-blue-200 text-blue-800"
+  //                             : currentStep === step.id
+  //                             ? "bg-blue-200 text-blue-800"
+  //                             : "bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 group-hover:from-blue-100 group-hover:to-blue-100 group-hover:text-blue-600"
+  //                         }`}
+  //                       >
+  //                         {currentStep > step.id ? (
+  //                           <CheckCircle2 size={20} />
+  //                         ) : (
+  //                           <span className="text-base font-bold">
+  //                             {step.id}
+  //                           </span>
+  //                         )}
+  //                       </div>
+
+  //                       {/* Step Content */}
+  //                       <div className="flex-1 min-w-0">
+  //                         <div
+  //                           className={`font-semibold text-base leading-tight transition-colors duration-300 ${
+  //                             currentStep >= step.id
+  //                               ? "text-current"
+  //                               : "text-slate-600 group-hover:text-slate-800"
+  //                           }`}
+  //                         >
+  //                           {step.title}
+  //                         </div>
+  //                         <div
+  //                           className={`text-sm mt-1 leading-tight ${
+  //                             currentStep >= step.id
+  //                               ? "text-current opacity-80"
+  //                               : "text-slate-500 group-hover:text-slate-600"
+  //                           }`}
+  //                         >
+  //                           {step.description}
+  //                         </div>
+  //                       </div>
+
+  //                       {/* Status Indicators */}
+  //                       <div className="flex flex-col items-center gap-1">
+  //                         {currentStep === step.id && (
+  //                           <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse shadow-lg"></div>
+  //                         )}
+  //                         {currentStep > step.id && (
+  //                           <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
+  //                         )}
+  //                         {currentStep < step.id && (
+  //                           <div className="w-2 h-2 bg-slate-300 rounded-full group-hover:bg-blue-300 transition-colors duration-300"></div>
+  //                         )}
+  //                       </div>
+  //                     </div>
+
+  //                     {/* Connecting Line */}
+  //                     {index < steps.length - 1 && (
+  //                       <div className="ml-10 my-1">
+  //                         <div
+  //                           className={`w-1 h-4 rounded-full step-line transition-all duration-500 ${
+  //                             currentStep > step.id
+  //                               ? "bg-blue-300"
+  //                               : currentStep === step.id
+  //                               ? "bg-blue-400"
+  //                               : "bg-slate-300"
+  //                           }`}
+  //                         />
+  //                       </div>
+  //                     )}
+
+  //                     {/* Tooltip */}
+  //                     <div className="step-tooltip">
+  //                       Click to go to {step.title}
+  //                     </div>
+  //                   </div>
+  //                 ))}
+  //               </div>
+
+  //               {/* Progress Summary */}
+  //               <div className="mt-8 p-4 bg-white/60 rounded-xl border border-slate-200">
+  //                 <div className="flex items-center justify-between mb-3">
+  //                   <span className="text-sm font-semibold text-slate-700">
+  //                     Overall Progress
+  //                   </span>
+  //                   <span className="text-sm font-bold text-slate-800">
+  //                     {Math.round((currentStep / steps.length) * 100)}%
+  //                   </span>
+  //                 </div>
+  //                 <div className="flex items-center gap-3">
+  //                   <div className="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden">
+  //                     <div
+  //                       className="bg-blue-300 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+  //                       style={{
+  //                         width: `${(currentStep / steps.length) * 100}%`,
+  //                       }}
+  //                     ></div>
+  //                   </div>
+  //                   <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
+  //                     {currentStep}/{steps.length}
+  //                   </span>
+  //                 </div>
+  //                 <div className="mt-2 text-xs text-slate-500 text-center">
+  //                   {currentStep === steps.length
+  //                     ? "Ready to submit!"
+  //                     : `${steps.length - currentStep} steps remaining`}
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </Card>
+  //         </div>
+
+  //         {/* Form Content - Full width on mobile, flex-1 on desktop */}
+  //         <div className="flex-1 page-container">
+  //           <Card
+  //             className={`form-card book-shadow page-turn-effect transition-all duration-300 ${
+  //               isTransitioning ? "scale-[0.98]" : "scale-100"
+  //             }`}
+  //           >
+  //             <div className={`p-4 sm:p-6 md:p-8 page-content ${slideDirection}`}>
+  //               {currentStep === 1 && (
+  //                 <EmploymentApplicationForm
+  //                   initialData={formData.employmentApplication}
+  //                   onSubmit={handleEmploymentFormSubmit}
+  //                 />
+  //               )}
+  //               {currentStep === 2 && (
+  //                 <PersonalProfileForm
+  //                   initialData={formData.personalProfile}
+  //                   generatedEmployeeId={generatedEmployeeId}
+  //                   onSubmit={handlePersonalProfileSubmit}
+  //                   onBack={() => navigateToStep(1)}
+  //                 />
+  //               )}
+  //               {currentStep === 3 && (
+  //                 <BankAndFamilyForm
+  //                   initialData={formData.bankAndFamily}
+  //                   generatedEmployeeId={generatedEmployeeId}
+  //                   onSubmit={handleBankAndFamilySubmit}
+  //                   onBack={() => navigateToStep(2)}
+  //                 />
+  //               )}
+  //               {currentStep === 4 && (
+  //                 <ProfessionalTrainingForm
+  //                   initialData={formData.professionalTraining}
+  //                   generatedEmployeeId={generatedEmployeeId}
+  //                   onSubmit={handleProfessionalTrainingSubmit}
+  //                   onBack={() => navigateToStep(3)}
+  //                 />
+  //               )}
+  //               {currentStep === 5 && (
+  //                 <ProfessionalReferencesForm
+  //                   initialData={formData.professionalReferences}
+  //                   generatedEmployeeId={generatedEmployeeId}
+  //                   onSubmit={handleProfessionalReferencesSubmit}
+  //                   onBack={() => navigateToStep(4)}
+  //                 />
+  //               )}
+  //               {currentStep === 6 && (
+  //                 <DeclarationForm
+  //                   initialData={formData.declaration}
+  //                   generatedEmployeeId={generatedEmployeeId}
+  //                   onSubmit={handleDeclarationSubmit}
+  //                   onBack={() => navigateToStep(5)}
+  //                 />
+  //               )}
+  //             </div>
+  //           </Card>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <style jsx>{`
         .page-container {
           position: relative;
           overflow: hidden;
         }
-
         .page-content {
           transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
           transform-origin: center;
         }
-
         .slide-left {
           transform: translateX(-100%) rotateY(-15deg);
           opacity: 0;
         }
-
         .slide-right {
           transform: translateX(100%) rotateY(15deg);
           opacity: 0;
         }
-
-        .step-indicator {
-          transition: all 0.3s ease;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .step-indicator:hover {
-          transform: translateX(4px);
-        }
-
-        .step-indicator:hover .step-tooltip {
-          opacity: 1;
-          visibility: visible;
-          transform: translateX(8px);
-        }
-
-        .step-tooltip {
-          position: absolute;
-          top: 50%;
-          left: 100%;
-          transform: translateY(-50%) translateX(4px);
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 11px;
-          white-space: nowrap;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.3s ease;
-          z-index: 1000;
-        }
-
-        .step-line {
-          transition: all 0.5s ease;
-        }
-
-        .form-card {
-          perspective: 1000px;
-        }
-
-        .book-shadow {
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-            0 1px 2px rgba(0, 0, 0, 0.24), 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .page-turn-effect {
-          background: linear-gradient(45deg, #f8fafc 0%, #ffffff 100%);
-          border: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .steps-container {
-          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-          border-right: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .navbar {
-          background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-            0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .navbar-content {
-          backdrop-filter: blur(10px);
-        }
-
-        @media (max-width: 768px) {
-          .step-indicator:hover {
-            transform: none;
-          }
-          .step-tooltip {
-            display: none;
-          }
-        }
       `}</style>
 
-      {/* Navbar Header */}
-      <div className="sticky top-0 z-50 bg-white shadow-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Left - Back Button and Mobile Menu */}
-            <div className="flex items-center gap-2">
-              {/* Mobile Menu Button */}
-              <Button
-                onClick={() => setSidebarOpen(true)}
-                variant="outline"
-                size="sm"
-                className="md:hidden flex items-center gap-1 text-slate-700 hover:bg-slate-100"
-              >
-                <Menu size={16} />
-                <span className="hidden xs:inline">Steps</span>
-              </Button>
+      {/* HEADER NAV */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-md border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          {/* Left: Back + Menu */}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setSidebarOpen(true)}
+              variant="outline"
+              size="sm"
+              className="md:hidden flex items-center gap-1 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+            >
+              <Menu size={16} />
+              <span className="hidden xs:inline">Steps</span>
+            </Button>
 
-              {/* Back Button */}
-              <Button
-                onClick={handleBack}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 sm:gap-2 text-slate-700 hover:bg-slate-100 hover:scale-105 transition-all duration-200 text-xs sm:text-sm"
-                disabled={isTransitioning}
-              >
-                <ArrowLeft size={14} sm:size={16} />
-                <span className="hidden xs:inline">Back</span>
-              </Button>
-            </div>
+            <Button
+              onClick={handleBack}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200"
+              disabled={isTransitioning}
+            >
+              <ArrowLeft size={16} />
+              <span>Back</span>
+            </Button>
+          </div>
 
-            {/* Center - Title */}
-            <div className="flex-1 text-center px-2">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 tracking-wide">
-                <span className="hidden sm:inline">ISCS Employee Registration</span>
-                <span className="sm:hidden">ISCS Registration</span>
-              </h1>
-              <div className="text-xs sm:text-sm text-slate-500 mt-1 hidden sm:block">
-                Complete your registration process
-              </div>
-            </div>
+          {/* Center: Title */}
+          <div className="text-center flex-1">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">
+              ISCS Employee Registration
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500">
+              Complete your registration process
+            </p>
+          </div>
 
-            {/* Right - Step Counter */}
-            <div className="flex items-center gap-2 sm:gap-3 bg-slate-100 rounded-full px-2 sm:px-4 py-1 sm:py-2 border border-slate-300">
-              <div className="text-slate-700 text-xs sm:text-sm font-medium">
-                <span className="hidden xs:inline">Step </span>
-                {currentStep}/{steps.length}
-              </div>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            </div>
+          {/* Right: Step Counter */}
+          <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-green-50 border border-slate-200 px-4 py-2 rounded-full shadow-sm">
+            <span className="text-slate-700 text-sm font-semibold">
+              Step {currentStep}/{steps.length}
+            </span>
+            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-          <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300">
-            {/* Mobile Sidebar Header */}
+        <div className="fixed inset-0 z-50 bg-black/40 md:hidden">
+          <div className="absolute left-0 top-0 h-full w-72 bg-white shadow-2xl transform transition-transform duration-300">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">Registration Steps</h3>
+              <h3 className="font-semibold text-gray-800">Registration Steps</h3>
               <Button
                 onClick={() => setSidebarOpen(false)}
                 variant="ghost"
                 size="sm"
-                className="p-1"
               >
-                <X size={20} />
+                <X size={18} />
               </Button>
             </div>
 
-            {/* Mobile Steps */}
-            <div className="p-4">
-              <div className="space-y-3">
-                {steps.map((step, index) => (
-                  <div key={step.id} className="relative">
-                    <div
-                      className={`flex items-center gap-4 step-indicator p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
-                        currentStep === step.id
-                          ? "bg-blue-100 text-blue-800 shadow-lg transform scale-[1.02] border border-blue-200"
-                          : currentStep > step.id
-                          ? "bg-blue-50 text-blue-700 shadow-md hover:shadow-lg hover:scale-[1.01] border border-blue-100"
-                          : "bg-white/70 hover:bg-blue-50 hover:shadow-md hover:scale-[1.01] border border-slate-200 hover:border-blue-200"
-                      } ${isTransitioning ? "pointer-events-none" : ""}`}
-                      onClick={() => navigateToStep(step.id)}
-                    >
-                      {/* Step Number/Check */}
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
-                          currentStep > step.id
-                            ? "bg-blue-200 text-blue-800"
-                            : currentStep === step.id
-                            ? "bg-blue-200 text-blue-800"
-                            : "bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 group-hover:from-blue-100 group-hover:to-blue-100 group-hover:text-blue-600"
-                        }`}
-                      >
-                        {currentStep > step.id ? (
-                          <CheckCircle2 size={18} />
-                        ) : (
-                          <span className="text-sm font-bold">{step.id}</span>
-                        )}
-                      </div>
-
-                      {/* Step Content */}
-                      <div className="flex-1 min-w-0">
-                        <div
-                          className={`font-semibold text-base leading-tight transition-colors duration-300 ${
-                            currentStep >= step.id
-                              ? "text-current"
-                              : "text-slate-600 group-hover:text-slate-800"
-                          }`}
-                        >
-                          {step.title}
-                        </div>
-                        <div
-                          className={`text-sm mt-1 leading-tight ${
-                            currentStep >= step.id
-                              ? "text-current opacity-80"
-                              : "text-slate-500 group-hover:text-slate-600"
-                          }`}
-                        >
-                          {step.description}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Connecting Line */}
-                    {index < steps.length - 1 && (
-                      <div className="ml-9 my-1">
-                        <div
-                          className={`w-1 h-4 rounded-full step-line transition-all duration-500 ${
-                            currentStep > step.id
-                              ? "bg-blue-300"
-                              : currentStep === step.id
-                              ? "bg-blue-400"
-                              : "bg-slate-300"
-                          }`}
-                        />
-                      </div>
+            <div className="p-4 space-y-4 overflow-y-auto">
+              {steps.map((step) => (
+                <div
+                  key={step.id}
+                  onClick={() => navigateToStep(step.id)}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer border ${
+                    currentStep === step.id
+                      ? "bg-blue-100 border-blue-300 text-blue-800 font-semibold"
+                      : currentStep > step.id
+                      ? "bg-green-50 border-green-200 text-green-800"
+                      : "bg-white border-slate-200 hover:bg-blue-50"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                      currentStep > step.id
+                        ? "bg-green-200 text-green-700"
+                        : currentStep === step.id
+                        ? "bg-blue-200 text-blue-800"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {currentStep > step.id ? (
+                      <CheckCircle2 size={18} />
+                    ) : (
+                      step.id
                     )}
                   </div>
-                ))}
-              </div>
-
-              {/* Progress Summary */}
-              <div className="mt-8 p-4 bg-white/60 rounded-xl border border-slate-200">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-slate-700">
-                    Overall Progress
-                  </span>
-                  <span className="text-sm font-bold text-slate-800">
-                    {Math.round((currentStep / steps.length) * 100)}%
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden">
-                    <div
-                      className="bg-blue-300 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
-                      style={{
-                        width: `${(currentStep / steps.length) * 100}%`,
-                      }}
-                    ></div>
+                  <div>
+                    <p className="font-medium text-sm">{step.title}</p>
+                    <p className="text-xs text-gray-500">{step.description}</p>
                   </div>
-                  <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
-                    {currentStep}/{steps.length}
-                  </span>
                 </div>
-                <div className="mt-2 text-xs text-slate-500 text-center">
-                  {currentStep === steps.length
-                    ? "Ready to submit!"
-                    : `${steps.length - currentStep} steps remaining`}
+              ))}
+
+              {/* Progress */}
+              <div className="mt-6 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                  <span>Overall Progress</span>
+                  <span>{Math.round((currentStep / steps.length) * 100)}%</span>
+                </div>
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(currentStep / steps.length) * 100}%`,
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -555,177 +917,88 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto p-2 sm:p-4">
-        {/* Display Generated Employee ID if available */}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {generatedEmployeeId && (
-          <div className="text-center mb-4 sm:mb-6 mt-2 sm:mt-4">
-            <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full shadow-sm">
-              <CheckCircle2 size={16} sm:size={20} className="text-green-600 flex-shrink-0" />
-              <span className="text-gray-700 font-medium text-sm sm:text-base">
-                <span className="hidden sm:inline">Employee ID Generated: </span>
-                <span className="sm:hidden">ID: </span>
-              </span>
-              <span className="text-base sm:text-lg font-bold text-green-700">
-                {generatedEmployeeId}
+          <div className="flex justify-center mb-6">
+            <div className="bg-gradient-to-r from-green-100 to-emerald-50 border border-green-300 rounded-full px-5 py-2 flex items-center gap-2 shadow-sm">
+              <CheckCircle2 className="text-green-600" size={18} />
+              <span className="font-semibold text-green-700">
+                Employee ID: {generatedEmployeeId}
               </span>
             </div>
           </div>
         )}
 
-        {/* Main Content Layout */}
-        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
-          {/* Desktop Sidebar - Hidden on mobile */}
-          <div className="hidden md:block w-80 flex-shrink-0">
-            <Card className="steps-container p-0 h-fit overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border-slate-200 shadow-xl">
-              {/* Header Section */}
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <CheckCircle2 size={18} className="text-blue-600" />
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block w-72">
+            <Card className="bg-white/70 backdrop-blur-md border border-white/40 shadow-lg p-6 rounded-2xl">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">
+                Registration Progress
+              </h3>
+              <p className="text-sm text-gray-500 mb-5">
+                Complete all steps to finish registration
+              </p>
+
+              <div className="space-y-3">
+                {steps.map((step) => (
+                  <div
+                    key={step.id}
+                    onClick={() => navigateToStep(step.id)}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer border ${
+                      currentStep === step.id
+                        ? "bg-blue-100 border-blue-300 text-blue-800 font-semibold"
+                        : currentStep > step.id
+                        ? "bg-green-50 border-green-200 text-green-800"
+                        : "bg-white/70 border-slate-200 hover:bg-blue-50"
+                    }`}
+                  >
+                    <div
+                      className={`w-10 h-10 flex items-center justify-center rounded-lg font-semibold ${
+                        currentStep > step.id
+                          ? "bg-green-200 text-green-800"
+                          : currentStep === step.id
+                          ? "bg-blue-200 text-blue-800"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {currentStep > step.id ? <CheckCircle2 size={18} /> : step.id}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{step.title}</p>
+                      <p className="text-xs text-gray-500">{step.description}</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Registration Progress
-                  </h3>
-                </div>
-                <p className="text-gray-600 text-sm">
-                  Complete all steps to finish registration
-                </p>
+                ))}
               </div>
 
-              {/* Steps Section */}
-              <div className="p-6">
-                <div className="space-y-3">
-                  {steps.map((step, index) => (
-                    <div key={step.id} className="relative">
-                      <div
-                        className={`flex items-center gap-4 step-indicator p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
-                          currentStep === step.id
-                            ? "bg-blue-100 text-blue-800 shadow-lg transform scale-[1.02] border border-blue-200"
-                            : currentStep > step.id
-                            ? "bg-blue-50 text-blue-700 shadow-md hover:shadow-lg hover:scale-[1.01] border border-blue-100"
-                            : "bg-white/70 hover:bg-blue-50 hover:shadow-md hover:scale-[1.01] border border-slate-200 hover:border-blue-200"
-                        } ${isTransitioning ? "pointer-events-none" : ""}`}
-                        onClick={() => navigateToStep(step.id)}
-                      >
-                        {/* Step Number/Check */}
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
-                            currentStep > step.id
-                              ? "bg-blue-200 text-blue-800"
-                              : currentStep === step.id
-                              ? "bg-blue-200 text-blue-800"
-                              : "bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 group-hover:from-blue-100 group-hover:to-blue-100 group-hover:text-blue-600"
-                          }`}
-                        >
-                          {currentStep > step.id ? (
-                            <CheckCircle2 size={20} />
-                          ) : (
-                            <span className="text-base font-bold">
-                              {step.id}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Step Content */}
-                        <div className="flex-1 min-w-0">
-                          <div
-                            className={`font-semibold text-base leading-tight transition-colors duration-300 ${
-                              currentStep >= step.id
-                                ? "text-current"
-                                : "text-slate-600 group-hover:text-slate-800"
-                            }`}
-                          >
-                            {step.title}
-                          </div>
-                          <div
-                            className={`text-sm mt-1 leading-tight ${
-                              currentStep >= step.id
-                                ? "text-current opacity-80"
-                                : "text-slate-500 group-hover:text-slate-600"
-                            }`}
-                          >
-                            {step.description}
-                          </div>
-                        </div>
-
-                        {/* Status Indicators */}
-                        <div className="flex flex-col items-center gap-1">
-                          {currentStep === step.id && (
-                            <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse shadow-lg"></div>
-                          )}
-                          {currentStep > step.id && (
-                            <div className="w-2 h-2 bg-blue-400 rounded-full opacity-60"></div>
-                          )}
-                          {currentStep < step.id && (
-                            <div className="w-2 h-2 bg-slate-300 rounded-full group-hover:bg-blue-300 transition-colors duration-300"></div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Connecting Line */}
-                      {index < steps.length - 1 && (
-                        <div className="ml-10 my-1">
-                          <div
-                            className={`w-1 h-4 rounded-full step-line transition-all duration-500 ${
-                              currentStep > step.id
-                                ? "bg-blue-300"
-                                : currentStep === step.id
-                                ? "bg-blue-400"
-                                : "bg-slate-300"
-                            }`}
-                          />
-                        </div>
-                      )}
-
-                      {/* Tooltip */}
-                      <div className="step-tooltip">
-                        Click to go to {step.title}
-                      </div>
-                    </div>
-                  ))}
+              {/* Progress bar */}
+              <div className="mt-6">
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round((currentStep / steps.length) * 100)}%</span>
                 </div>
-
-                {/* Progress Summary */}
-                <div className="mt-8 p-4 bg-white/60 rounded-xl border border-slate-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-slate-700">
-                      Overall Progress
-                    </span>
-                    <span className="text-sm font-bold text-slate-800">
-                      {Math.round((currentStep / steps.length) * 100)}%
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden">
-                      <div
-                        className="bg-blue-300 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
-                        style={{
-                          width: `${(currentStep / steps.length) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-full">
-                      {currentStep}/{steps.length}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xs text-slate-500 text-center">
-                    {currentStep === steps.length
-                      ? "Ready to submit!"
-                      : `${steps.length - currentStep} steps remaining`}
-                  </div>
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(currentStep / steps.length) * 100}%`,
+                    }}
+                  />
                 </div>
               </div>
             </Card>
           </div>
 
-          {/* Form Content - Full width on mobile, flex-1 on desktop */}
-          <div className="flex-1 page-container">
+          {/* Right Form Panel */}
+          <div className="flex-1">
             <Card
-              className={`form-card book-shadow page-turn-effect transition-all duration-300 ${
-                isTransitioning ? "scale-[0.98]" : "scale-100"
+              className={`bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] transition-all duration-500 ${
+                isTransitioning ? "scale-95 opacity-90" : "scale-100 opacity-100"
               }`}
             >
-              <div className={`p-4 sm:p-6 md:p-8 page-content ${slideDirection}`}>
+              <div className={`p-6 sm:p-8 page-content ${slideDirection}`}>
                 {currentStep === 1 && (
                   <EmploymentApplicationForm
                     initialData={formData.employmentApplication}
@@ -779,4 +1052,5 @@ export default function RegisterPage() {
       </div>
     </div>
   );
+
 }
