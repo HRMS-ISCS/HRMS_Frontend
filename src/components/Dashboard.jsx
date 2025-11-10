@@ -1,7 +1,7 @@
 // // // Dashboard.jsx
 import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, AlertTriangle, CheckCircle } from "lucide-react"
+import { Users, UserPlus, Calendar, TrendingUp, Clock, Award } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 
 export default function Dashboard() {
@@ -10,84 +10,57 @@ export default function Dashboard() {
     external_employees: 0
   })
 
+  const [genderCounts, setGenderCounts] = useState({
+    Male: 0,
+    Female: 0,
+    Other: 0,
+    Total_Employees: 0
+  })
+
   useEffect(() => {
+    // Internal & External employees
     fetch("http://127.0.0.1:8000/dashboard/employment-applications/count/internal-external")
       .then((res) => res.json())
-      .then((data) => {
-        setEmployeeCounts(data)
-      })
-      .catch((err) => {
-        console.error("Error fetching employee counts:", err)
-      })
+      .then((data) => setEmployeeCounts(data))
+      .catch((err) => console.error("Error fetching employee counts:", err))
+
+    // Gender count data
+    fetch("http://127.0.0.1:8000/dashboard/gender-count")
+      .then((res) => res.json())
+      .then((data) => setGenderCounts(data))
+      .catch((err) => console.error("Error fetching gender counts:", err))
   }, [])
 
   const totalEmployees = employeeCounts.internal_employees + employeeCounts.external_employees
 
   const stats = [
-    {
-      title: "Total Employees",
-      value: totalEmployees,
-      change: "+12%",
-      changeType: "increase",
-      icon: Users,
-      color: "bg-blue-500"
-    },
-    {
-      title: "Internal Employees",
-      value: employeeCounts.internal_employees,
-      change: "+3%",
-      changeType: "increase",
-      icon: Users,
-      color: "bg-green-500"
-    },
-    {
-      title: "External Employees",
-      value: employeeCounts.external_employees,
-      change: "+2%",
-      changeType: "increase",
-      icon: Users,
-      color: "bg-yellow-500"
-    },
-    {
-      title: "Performance",
-      value: "92%",
-      change: "+8%",
-      changeType: "increase",
-      icon: TrendingUp,
-      color: "bg-purple-500"
-    }
+    { title: "Total Employees", value: totalEmployees, change: "+12%", changeType: "increase", icon: Users, color: "bg-blue-500" },
+    { title: "Internal Employees", value: employeeCounts.internal_employees, change: "+3%", changeType: "increase", icon: Users, color: "bg-green-500" },
+    { title: "External Employees", value: employeeCounts.external_employees, change: "+2%", changeType: "increase", icon: Users, color: "bg-yellow-500" },
+    { title: "Performance", value: "92%", change: "+8%", changeType: "increase", icon: TrendingUp, color: "bg-purple-500" }
   ]
 
-  // Prepare pie chart data
   const pieChartData = [
     {
       name: "Internal Employees",
       value: employeeCounts.internal_employees,
-      color: "#10B981",
+      color: "#f8a688",
       percentage: totalEmployees > 0 ? ((employeeCounts.internal_employees / totalEmployees) * 100).toFixed(1) : 0
     },
     {
-      name: "External Employees", 
+      name: "External Employees",
       value: employeeCounts.external_employees,
-      color: "#F59E0B",
+      color: "#53c9cf",
       percentage: totalEmployees > 0 ? ((employeeCounts.external_employees / totalEmployees) * 100).toFixed(1) : 0
     }
   ]
 
-  const recentActivities = [
-    { id: 1, action: "New employee onboarded", employee: "Sarah Johnson", time: "2 hours ago", type: "success" },
-    { id: 2, action: "Leave request approved", employee: "Mike Chen", time: "4 hours ago", type: "info" },
-    { id: 3, action: "Performance review completed", employee: "Emily Davis", time: "6 hours ago", type: "success" },
-    { id: 4, action: "Document uploaded", employee: "Alex Rodriguez", time: "1 day ago", type: "warning" }
+  // Gender pie chart (full circle)
+  const genderPieData = [
+    { name: "Male", value: genderCounts.Male, color: "#23989a" },  // teal
+    { name: "Female", value: genderCounts.Female, color: "#d6ad3a" } // mustard
   ]
 
-  const pendingTasks = [
-    { id: 1, task: "Review performance evaluations", deadline: "Today", priority: "high" },
-    { id: 2, task: "Approve leave requests", deadline: "Tomorrow", priority: "medium" },
-    { id: 3, task: "Update employee handbook", deadline: "This week", priority: "low" }
-  ]
-
-  // Custom tooltip for pie chart
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
@@ -95,26 +68,24 @@ export default function Dashboard() {
         <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-200">
           <p className="font-medium text-gray-800">{data.name}</p>
           <p className="text-blue-600">Count: {data.value}</p>
-          <p className="text-gray-600">Percentage: {data.percentage}%</p>
+          {data.percentage && <p className="text-gray-600">Percentage: {data.percentage}%</p>}
         </div>
       )
     }
     return null
   }
 
-  // Custom label function for pie chart
   const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180
     const radius = outerRadius + 25
     const x = cx + radius * Math.cos(-midAngle * RADIAN)
     const y = cy + radius * Math.sin(-midAngle * RADIAN)
-
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="#374151" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="#374151"
+        textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         className="font-semibold text-sm"
       >
@@ -122,6 +93,12 @@ export default function Dashboard() {
       </text>
     )
   }
+
+  const pendingTasks = [
+    { id: 1, task: "Review performance evaluations", deadline: "Today", priority: "high" },
+    { id: 2, task: "Approve leave requests", deadline: "Tomorrow", priority: "medium" },
+    { id: 3, task: "Update employee handbook", deadline: "This week", priority: "low" }
+  ]
 
   return (
     <div className="p-6 space-y-6">
@@ -147,7 +124,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                   <p className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</p>
-                  <p className={`text-sm mt-1 ${stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className={`text-sm mt-1 ${stat.changeType === "increase" ? "text-green-600" : "text-red-600"}`}>
                     {stat.change} from last month
                   </p>
                 </div>
@@ -160,7 +137,7 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Employee Distribution Pie Chart */}
+        {/* Employee Distribution Pie Chart */}
       <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -194,10 +171,7 @@ export default function Dashboard() {
                       strokeWidth={3}
                     >
                       {pieChartData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.color}
-                        />
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
@@ -222,14 +196,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div 
-                        className="w-6 h-6 rounded-full shadow-sm border-2 border-white"
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <div 
-                        className="absolute inset-0 w-6 h-6 rounded-full opacity-20 group-hover:animate-pulse"
-                        style={{ backgroundColor: item.color }}
-                      ></div>
+                      <div className="w-6 h-6 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
                     </div>
                     <div>
                       <span className="font-semibold text-gray-800 text-base">{item.name}</span>
@@ -239,10 +206,7 @@ export default function Dashboard() {
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
                       <p className="text-2xl font-bold text-gray-800">{item.value}</p>
-                      <div 
-                        className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                        style={{ backgroundColor: item.color }}
-                      >
+                      <div className="px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: item.color }}>
                         {item.percentage}%
                       </div>
                     </div>
@@ -251,69 +215,48 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
-            
-            {/* Summary Card */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-              <div className="flex items-center gap-3 mb-2">
-                <Users size={18} className="text-blue-600" />
-                <h4 className="font-semibold text-blue-900">Workforce Summary</h4>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-blue-700 font-medium">Majority Type</p>
-                  <p className="text-blue-900 font-semibold">
-                    {employeeCounts.internal_employees > employeeCounts.external_employees ? 'Internal' : 'External'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-blue-700 font-medium">Distribution</p>
-                  <p className="text-blue-900 font-semibold">
-                    {Math.abs(parseFloat(pieChartData[0]?.percentage || 0) - parseFloat(pieChartData[1]?.percentage || 0)).toFixed(1)}% difference
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </Card>
 
-      {/* Main Content Grid */}
+      {/* Gender Distribution Chart (Full Pie) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activities */}
         <div className="lg:col-span-2">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Recent Activities</h3>
-              <button className="text-sm text-blue-600 hover:text-blue-700">View all</button>
+              <h3 className="text-lg font-semibold text-gray-800">Gender Distribution</h3>
+              <span className="text-sm text-gray-500">Total: {genderCounts.Total_Employees}</span>
             </div>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      activity.type === "success" ? "bg-green-100" : activity.type === "info" ? "bg-blue-100" : "bg-yellow-100"
-                    }`}
-                  >
-                    {activity.type === "success" ? (
-                      <CheckCircle size={16} className="text-green-600" />
-                    ) : activity.type === "info" ? (
-                      <Clock size={16} className="text-blue-600" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-yellow-600" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800">{activity.action}</p>
-                    <p className="text-sm text-gray-600">{activity.employee}</p>
-                  </div>
-                  <span className="text-xs text-gray-500">{activity.time}</span>
-                </div>
-              ))}
+            <div className="flex justify-center">
+              <div className="h-72 w-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={genderPieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderLabel}
+                      outerRadius={100}
+                      innerRadius={0}   // ✅ makes it a full pie (no hole)
+                      dataKey="value"
+                      stroke="#ffffff"
+                      strokeWidth={3}
+                    >
+                      {genderPieData.map((entry, index) => (
+                        <Cell key={`cell-gender-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </Card>
         </div>
 
-        {/* Pending Tasks */}
+        {/* Pending Tasks (unchanged) */}
         <div>
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -345,7 +288,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions (unchanged) */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -365,7 +308,7 @@ export default function Dashboard() {
             <TrendingUp size={24} className="text-orange-600" />
             <span className="text-sm font-medium text-gray-700">Generate Report</span>
           </button>
-          </div>
+        </div>
       </Card>
     </div>
   )
