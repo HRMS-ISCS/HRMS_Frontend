@@ -1,4 +1,4 @@
-// // // Dashboard.jsx
+// // // // Dashboard.jsx
 import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, UserPlus, Calendar, TrendingUp, Clock, Award } from "lucide-react"
@@ -137,7 +137,7 @@ export default function Dashboard() {
         })}
       </div>
 
-        {/* Employee Distribution Pie Chart */}
+      {/* Employee Distribution Pie Chart */}
       <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -169,17 +169,26 @@ export default function Dashboard() {
                       dataKey="value"
                       stroke="#ffffff"
                       strokeWidth={3}
+                      paddingAngle={0}
+                      isAnimationActive={true}
                     >
                       {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip 
+                      content={<CustomTooltip />} 
+                      cursor={{ fill: 'transparent' }}
+                      wrapperStyle={{ outline: 'none', zIndex: 1000 }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
               {/* Center Label */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center bg-white rounded-full p-4 shadow-sm border border-gray-100">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</p>
                   <p className="text-2xl font-bold text-gray-800">{totalEmployees}</p>
@@ -238,7 +247,7 @@ export default function Dashboard() {
                       labelLine={false}
                       label={renderLabel}
                       outerRadius={100}
-                      innerRadius={0}   // ✅ makes it a full pie (no hole)
+                      innerRadius={0}
                       dataKey="value"
                       stroke="#ffffff"
                       strokeWidth={3}
@@ -256,7 +265,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Pending Tasks (unchanged) */}
+        {/* Pending Tasks */}
         <div>
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -288,7 +297,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions (unchanged) */}
+      {/* Quick Actions */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  Search, 
-  Loader2, 
-  RefreshCw, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  Users,
+  Search,
+  Loader2,
+  RefreshCw,
+  User,
+  Mail,
+  Phone,
   Briefcase,
   Calendar,
   Building2,
@@ -42,9 +42,8 @@ import {
   Zap,
   Grid,
   List,
-  MoreVertical
+  MoreVertical,
 } from "lucide-react";
-
 export default function Employees() {
   const [allEmployees, setAllEmployees] = useState([]);
   const [searchedEmployee, setSearchedEmployee] = useState(null);
@@ -54,7 +53,7 @@ export default function Employees() {
   const [error, setError] = useState("");
   const [searchError, setSearchError] = useState("");
   const [searchMode, setSearchMode] = useState(false);
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
   const [expandedSections, setExpandedSections] = useState({
     personalProfile: true,
     bankAccount: false,
@@ -65,7 +64,7 @@ export default function Employees() {
     professionalExperience: false,
     professionalReference: false,
     aboutSelf: false,
-    declaration: false
+    declaration: false,
   });
 
   // Fetch all employment applications on component mount
@@ -77,17 +76,19 @@ export default function Employees() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch('http://127.0.0.1:8000/db/employment-applications');
-      
+      const response = await fetch(
+        "http://127.0.0.1:8000/db/employment-applications"
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setAllEmployees(data);
     } catch (error) {
-      console.error('Error fetching employees:', error);
-      setError('Failed to fetch employee data. Please try again.');
+      console.error("Error fetching employees:", error);
+      setError("Failed to fetch employee data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -95,24 +96,26 @@ export default function Employees() {
 
   const searchEmployeeById = async (employeeId = null) => {
     const idToSearch = employeeId || searchEmployeeId.trim();
-    
+
     if (!idToSearch) {
-      setSearchError('Please enter an employee ID');
+      setSearchError("Please enter an employee ID");
       return;
     }
 
     setSearchLoading(true);
     setSearchError("");
     try {
-      const response = await fetch(`http://127.0.0.1:8000/db/employment-applications/${idToSearch}`);
-      
+      const response = await fetch(
+        `http://127.0.0.1:8000/db/employment-applications/${idToSearch}`
+      );
+
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Employee not found');
+          throw new Error("Employee not found");
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setSearchedEmployee(data);
       setSearchMode(true);
@@ -128,11 +131,13 @@ export default function Employees() {
         professionalExperience: false,
         professionalReference: false,
         aboutSelf: false,
-        declaration: false
+        declaration: false,
       });
     } catch (error) {
-      console.error('Error searching employee:', error);
-      setSearchError(error.message || 'Failed to search employee. Please try again.');
+      console.error("Error searching employee:", error);
+      setSearchError(
+        error.message || "Failed to search employee. Please try again."
+      );
       setSearchedEmployee(null);
     } finally {
       setSearchLoading(false);
@@ -147,143 +152,151 @@ export default function Employees() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       searchEmployeeById();
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const toggleSection = (sectionName) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [sectionName]: !prev[sectionName]
+      [sectionName]: !prev[sectionName],
     }));
   };
 
   const sectionColors = {
     personalProfile: {
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      headerBg: 'hover:bg-blue-50',
-      badgeBg: 'bg-blue-100',
-      badgeText: 'text-blue-700'
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+      headerBg: "hover:bg-blue-50",
+      badgeBg: "bg-blue-100",
+      badgeText: "text-blue-700",
     },
     bankAccount: {
-      bg: 'bg-green-50',
-      border: 'border-green-200',
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
-      headerBg: 'hover:bg-green-50',
-      badgeBg: 'bg-green-100',
-      badgeText: 'text-green-700'
+      bg: "bg-green-50",
+      border: "border-green-200",
+      iconBg: "bg-green-100",
+      iconColor: "text-green-600",
+      headerBg: "hover:bg-green-50",
+      badgeBg: "bg-green-100",
+      badgeText: "text-green-700",
     },
     maritalStatus: {
-      bg: 'bg-pink-50',
-      border: 'border-pink-200',
-      iconBg: 'bg-pink-100',
-      iconColor: 'text-pink-600',
-      headerBg: 'hover:bg-pink-50',
-      badgeBg: 'bg-pink-100',
-      badgeText: 'text-pink-700'
+      bg: "bg-pink-50",
+      border: "border-pink-200",
+      iconBg: "bg-pink-100",
+      iconColor: "text-pink-600",
+      headerBg: "hover:bg-pink-50",
+      badgeBg: "bg-pink-100",
+      badgeText: "text-pink-700",
     },
     familyBackground: {
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-      headerBg: 'hover:bg-purple-50',
-      badgeBg: 'bg-purple-100',
-      badgeText: 'text-purple-700'
+      bg: "bg-purple-50",
+      border: "border-purple-200",
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-600",
+      headerBg: "hover:bg-purple-50",
+      badgeBg: "bg-purple-100",
+      badgeText: "text-purple-700",
     },
     academicBackground: {
-      bg: 'bg-indigo-50',
-      border: 'border-indigo-200',
-      iconBg: 'bg-indigo-100',
-      iconColor: 'text-indigo-600',
-      headerBg: 'hover:bg-indigo-50',
-      badgeBg: 'bg-indigo-100',
-      badgeText: 'text-indigo-700'
+      bg: "bg-indigo-50",
+      border: "border-indigo-200",
+      iconBg: "bg-indigo-100",
+      iconColor: "text-indigo-600",
+      headerBg: "hover:bg-indigo-50",
+      badgeBg: "bg-indigo-100",
+      badgeText: "text-indigo-700",
     },
     professionalTraining: {
-      bg: 'bg-teal-50',
-      border: 'border-teal-200',
-      iconBg: 'bg-teal-100',
-      iconColor: 'text-teal-600',
-      headerBg: 'hover:bg-teal-50',
-      badgeBg: 'bg-teal-100',
-      badgeText: 'text-teal-700'
+      bg: "bg-teal-50",
+      border: "border-teal-200",
+      iconBg: "bg-teal-100",
+      iconColor: "text-teal-600",
+      headerBg: "hover:bg-teal-50",
+      badgeBg: "bg-teal-100",
+      badgeText: "text-teal-700",
     },
     professionalExperience: {
-      bg: 'bg-orange-50',
-      border: 'border-orange-200',
-      iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600',
-      headerBg: 'hover:bg-orange-50',
-      badgeBg: 'bg-orange-100',
-      badgeText: 'text-orange-700'
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+      iconBg: "bg-orange-100",
+      iconColor: "text-orange-600",
+      headerBg: "hover:bg-orange-50",
+      badgeBg: "bg-orange-100",
+      badgeText: "text-orange-700",
     },
     professionalReference: {
-      bg: 'bg-cyan-50',
-      border: 'border-cyan-200',
-      iconBg: 'bg-cyan-100',
-      iconColor: 'text-cyan-600',
-      headerBg: 'hover:bg-cyan-50',
-      badgeBg: 'bg-cyan-100',
-      badgeText: 'text-cyan-700'
+      bg: "bg-cyan-50",
+      border: "border-cyan-200",
+      iconBg: "bg-cyan-100",
+      iconColor: "text-cyan-600",
+      headerBg: "hover:bg-cyan-50",
+      badgeBg: "bg-cyan-100",
+      badgeText: "text-cyan-700",
     },
     aboutSelf: {
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-600',
-      headerBg: 'hover:bg-amber-50',
-      badgeBg: 'bg-amber-100',
-      badgeText: 'text-amber-700'
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      headerBg: "hover:bg-amber-50",
+      badgeBg: "bg-amber-100",
+      badgeText: "text-amber-700",
     },
     declaration: {
-      bg: 'bg-slate-50',
-      border: 'border-slate-200',
-      iconBg: 'bg-slate-100',
-      iconColor: 'text-slate-600',
-      headerBg: 'hover:bg-slate-50',
-      badgeBg: 'bg-slate-100',
-      badgeText: 'text-slate-700'
-    }
+      bg: "bg-slate-50",
+      border: "border-slate-200",
+      iconBg: "bg-slate-100",
+      iconColor: "text-slate-600",
+      headerBg: "hover:bg-slate-50",
+      badgeBg: "bg-slate-100",
+      badgeText: "text-slate-700",
+    },
   };
 
-  const CollapsibleSection = ({ title, sectionKey, icon: Icon, children, badge }) => {
+  const CollapsibleSection = ({
+    title,
+    sectionKey,
+    icon: Icon,
+    children,
+    badge,
+  }) => {
     const colors = sectionColors[sectionKey] || sectionColors.personalProfile;
-    
+
     return (
       <Card className={`overflow-hidden ${colors.border} shadow-sm mb-3`}>
-        <div 
+        <div
           className={`flex items-center justify-between p-3 cursor-pointer ${colors.headerBg} transition-all duration-200 border-b ${colors.border}`}
           onClick={() => toggleSection(sectionKey)}
         >
           <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 ${colors.iconBg} rounded-lg flex items-center justify-center`}>
+            <div
+              className={`w-8 h-8 ${colors.iconBg} rounded-lg flex items-center justify-center`}
+            >
               <Icon size={16} className={colors.iconColor} />
             </div>
             <div>
               <h3 className="font-semibold text-gray-800 text-sm">{title}</h3>
-              {badge && (
-                <span className="text-xs text-gray-500">{badge}</span>
-              )}
+              {badge && <span className="text-xs text-gray-500">{badge}</span>}
             </div>
           </div>
           <div className="flex items-center gap-2">
             {badge && (
-              <span className={`px-2 py-1 ${colors.badgeBg} ${colors.badgeText} rounded-full text-xs font-medium`}>
+              <span
+                className={`px-2 py-1 ${colors.badgeBg} ${colors.badgeText} rounded-full text-xs font-medium`}
+              >
                 {badge}
               </span>
             )}
@@ -297,9 +310,7 @@ export default function Employees() {
           </div>
         </div>
         {expandedSections[sectionKey] && (
-          <div className={`p-4 ${colors.bg}`}>
-            {children}
-          </div>
+          <div className={`p-4 ${colors.bg}`}>{children}</div>
         )}
       </Card>
     );
@@ -307,11 +318,13 @@ export default function Employees() {
 
   const InfoRow = ({ label, value, icon: Icon }) => (
     <div className="flex items-start gap-2 py-1">
-      {Icon && <Icon size={14} className="text-gray-500 flex-shrink-0 mt-0.5" />}
+      {Icon && (
+        <Icon size={14} className="text-gray-500 flex-shrink-0 mt-0.5" />
+      )}
       <div className="min-w-0 flex-1">
         <div className="text-xs text-gray-600 font-medium mb-1">{label}</div>
         <div className="text-sm text-gray-800 break-words bg-white px-2 py-1 rounded border border-gray-100">
-          {value || 'N/A'}
+          {value || "N/A"}
         </div>
       </div>
     </div>
@@ -341,17 +354,21 @@ export default function Employees() {
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-gray-700">
-                {`${personalProfile.first_name || ''} ${personalProfile.middle_name || ''} ${personalProfile.last_name || ''}`.trim() || 'N/A'}
+                {`${personalProfile.first_name || ""} ${
+                  personalProfile.middle_name || ""
+                } ${personalProfile.last_name || ""}`.trim() || "N/A"}
               </h2>
-              <p className="text-blue-600 font-medium">Employee ID: {employee.employee_id}</p>
+              <p className="text-blue-600 font-medium">
+                Employee ID: {employee.employee_id}
+              </p>
               <div className="flex items-center gap-4 mt-1">
                 <div className="flex items-center gap-1 text-gray-600 text-sm">
                   <Mail size={12} />
-                  <span>{personalProfile.mail_id || 'N/A'}</span>
+                  <span>{personalProfile.mail_id || "N/A"}</span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-600 text-sm">
                   <Phone size={12} />
-                  <span>{personalProfile.mobile_phone || 'N/A'}</span>
+                  <span>{personalProfile.mobile_phone || "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -363,27 +380,59 @@ export default function Employees() {
         </Card>
 
         {/* Personal Profile Section */}
-        <CollapsibleSection 
-          title="Personal Profile" 
-          sectionKey="personalProfile" 
+        <CollapsibleSection
+          title="Personal Profile"
+          sectionKey="personalProfile"
           icon={User}
           badge="Basic Information"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <InfoRow label="Date of Birth" value={formatDate(personalProfile.date_of_birth)} icon={Calendar} />
-              <InfoRow label="Gender" value={personalProfile.gender} icon={User} />
-              <InfoRow label="Blood Group" value={personalProfile.blood_group} icon={Heart} />
-              <InfoRow label="Nationality" value={personalProfile.nationality} icon={Flag} />
+              <InfoRow
+                label="Date of Birth"
+                value={formatDate(personalProfile.date_of_birth)}
+                icon={Calendar}
+              />
+              <InfoRow
+                label="Gender"
+                value={personalProfile.gender}
+                icon={User}
+              />
+              <InfoRow
+                label="Blood Group"
+                value={personalProfile.blood_group}
+                icon={Heart}
+              />
+              <InfoRow
+                label="Nationality"
+                value={personalProfile.nationality}
+                icon={Flag}
+              />
             </div>
             <div className="space-y-2">
-              <InfoRow label="Aadhar Number" value={personalProfile.aadhar_no} icon={CreditCard} />
-              <InfoRow label="PAN Card" value={personalProfile.pan_card_no} icon={CreditCard} />
-              <InfoRow label="Passport Number" value={personalProfile.passport_no} icon={Globe} />
-              <InfoRow label="UAN Number" value={personalProfile.uan_number} icon={Shield} />
+              <InfoRow
+                label="Aadhar Number"
+                value={personalProfile.aadhar_no}
+                icon={CreditCard}
+              />
+              <InfoRow
+                label="PAN Card"
+                value={personalProfile.pan_card_no}
+                icon={CreditCard}
+              />
+              <InfoRow
+                label="Passport Number"
+                value={personalProfile.passport_no}
+                icon={Globe}
+              />
+              <InfoRow
+                label="UAN Number"
+                value={personalProfile.uan_number}
+                icon={Shield}
+              />
             </div>
           </div>
-          
+
           {/* Address Information */}
           <div className="mt-6 pt-4 border-t border-blue-200">
             <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -397,8 +446,14 @@ export default function Employees() {
                   Current Address
                 </h5>
                 <div className="space-y-1 text-gray-700 text-sm">
-                  <div className="font-medium">{personalProfile.current_address_city}, {personalProfile.current_address_district}</div>
-                  <div>{personalProfile.current_address_state} - {personalProfile.current_address_pin_code}</div>
+                  <div className="font-medium">
+                    {personalProfile.current_address_city},{" "}
+                    {personalProfile.current_address_district}
+                  </div>
+                  <div>
+                    {personalProfile.current_address_state} -{" "}
+                    {personalProfile.current_address_pin_code}
+                  </div>
                 </div>
               </div>
               <div className="bg-white p-3 rounded-lg border border-blue-100">
@@ -407,8 +462,14 @@ export default function Employees() {
                   Permanent Address
                 </h5>
                 <div className="space-y-1 text-gray-700 text-sm">
-                  <div className="font-medium">{personalProfile.permanent_address_city}, {personalProfile.permanent_address_district}</div>
-                  <div>{personalProfile.permanent_address_state} - {personalProfile.permanent_address_pin_code}</div>
+                  <div className="font-medium">
+                    {personalProfile.permanent_address_city},{" "}
+                    {personalProfile.permanent_address_district}
+                  </div>
+                  <div>
+                    {personalProfile.permanent_address_state} -{" "}
+                    {personalProfile.permanent_address_pin_code}
+                  </div>
                 </div>
               </div>
             </div>
@@ -422,10 +483,26 @@ export default function Employees() {
             </h4>
             <div className="bg-white p-3 rounded-lg border border-blue-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <InfoRow label="Contact Name" value={personalProfile.emergency_contact_name} icon={User} />
-                <InfoRow label="Relation" value={personalProfile.emergency_contact_relation} icon={Heart} />
-                <InfoRow label="Mobile" value={personalProfile.emergency_contact_mobile} icon={Phone} />
-                <InfoRow label="Email" value={personalProfile.emergency_contact_mail_id} icon={Mail} />
+                <InfoRow
+                  label="Contact Name"
+                  value={personalProfile.emergency_contact_name}
+                  icon={User}
+                />
+                <InfoRow
+                  label="Relation"
+                  value={personalProfile.emergency_contact_relation}
+                  icon={Heart}
+                />
+                <InfoRow
+                  label="Mobile"
+                  value={personalProfile.emergency_contact_mobile}
+                  icon={Phone}
+                />
+                <InfoRow
+                  label="Email"
+                  value={personalProfile.emergency_contact_mail_id}
+                  icon={Mail}
+                />
               </div>
             </div>
           </div>
@@ -433,18 +510,34 @@ export default function Employees() {
 
         {/* Bank Account Section */}
         {bankAccount && (
-          <CollapsibleSection 
-            title="Bank Account Details" 
-            sectionKey="bankAccount" 
+          <CollapsibleSection
+            title="Bank Account Details"
+            sectionKey="bankAccount"
             icon={Banknote}
             badge="Financial Information"
           >
             <div className="bg-white p-3 rounded-lg border border-green-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <InfoRow label="Account Number" value={bankAccount.account_number} icon={CreditCard} />
-                <InfoRow label="Bank Name" value={bankAccount.bank_name} icon={Building} />
-                <InfoRow label="Branch" value={bankAccount.branch} icon={MapPin} />
-                <InfoRow label="IFSC Code" value={bankAccount.ifsc_code} icon={Code} />
+                <InfoRow
+                  label="Account Number"
+                  value={bankAccount.account_number}
+                  icon={CreditCard}
+                />
+                <InfoRow
+                  label="Bank Name"
+                  value={bankAccount.bank_name}
+                  icon={Building}
+                />
+                <InfoRow
+                  label="Branch"
+                  value={bankAccount.branch}
+                  icon={MapPin}
+                />
+                <InfoRow
+                  label="IFSC Code"
+                  value={bankAccount.ifsc_code}
+                  icon={Code}
+                />
               </div>
             </div>
           </CollapsibleSection>
@@ -452,16 +545,24 @@ export default function Employees() {
 
         {/* Marital Status Section */}
         {maritalStatus && (
-          <CollapsibleSection 
-            title="Marital Status" 
-            sectionKey="maritalStatus" 
+          <CollapsibleSection
+            title="Marital Status"
+            sectionKey="maritalStatus"
             icon={Heart}
             badge="Personal Status"
           >
             <div className="bg-white p-3 rounded-lg border border-pink-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <InfoRow label="Status" value={maritalStatus.marital_status} icon={Heart} />
-                <InfoRow label="Marriage Date" value={formatDate(maritalStatus.marriage_date)} icon={Calendar} />
+                <InfoRow
+                  label="Status"
+                  value={maritalStatus.marital_status}
+                  icon={Heart}
+                />
+                <InfoRow
+                  label="Marriage Date"
+                  value={formatDate(maritalStatus.marriage_date)}
+                  icon={Calendar}
+                />
               </div>
             </div>
           </CollapsibleSection>
@@ -469,24 +570,39 @@ export default function Employees() {
 
         {/* Family Background Section */}
         {familyBackground.length > 0 && (
-          <CollapsibleSection 
-            title="Family Background" 
-            sectionKey="familyBackground" 
+          <CollapsibleSection
+            title="Family Background"
+            sectionKey="familyBackground"
             icon={Users}
             badge={`${familyBackground.length} members`}
           >
             <div className="grid gap-3">
               {familyBackground.map((member, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-purple-100">
+                <div
+                  key={index}
+                  className="bg-white p-3 rounded-lg border border-purple-100"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <InfoRow label="Relationship" value={member.relationship_status} icon={Heart} />
+                    <InfoRow
+                      label="Relationship"
+                      value={member.relationship_status}
+                      icon={Heart}
+                    />
                     <InfoRow label="Name" value={member.name} icon={User} />
                     <InfoRow label="Gender" value={member.gender} icon={User} />
-                    <InfoRow label="Age" value={`${member.age} years`} icon={Calendar} />
+                    <InfoRow
+                      label="Age"
+                      value={`${member.age} years`}
+                      icon={Calendar}
+                    />
                   </div>
                   {member.date_of_birth && (
                     <div className="mt-3 pt-3 border-t border-purple-100">
-                      <InfoRow label="Date of Birth" value={formatDate(member.date_of_birth)} icon={Calendar} />
+                      <InfoRow
+                        label="Date of Birth"
+                        value={formatDate(member.date_of_birth)}
+                        icon={Calendar}
+                      />
                     </div>
                   )}
                 </div>
@@ -497,22 +613,51 @@ export default function Employees() {
 
         {/* Academic Background Section */}
         {academicBackground.length > 0 && (
-          <CollapsibleSection 
-            title="Academic Background" 
-            sectionKey="academicBackground" 
+          <CollapsibleSection
+            title="Academic Background"
+            sectionKey="academicBackground"
             icon={GraduationCap}
             badge={`${academicBackground.length} qualifications`}
           >
             <div className="grid gap-3">
               {academicBackground.map((education, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-indigo-100">
+                <div
+                  key={index}
+                  className="bg-white p-3 rounded-lg border border-indigo-100"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <InfoRow label="Qualification" value={education.qualification} icon={GraduationCap} />
-                    <InfoRow label="Specialization" value={education.specification} icon={BookOpen} />
-                    <InfoRow label="Institute" value={education.institute_name} icon={Building} />
-                    <InfoRow label="Year of Passing" value={education.year_of_passing} icon={Calendar} />
-                    <InfoRow label="Grade/Rank" value={education.rank_or_grade} icon={Award} />
-                    <InfoRow label="Duration" value={`${formatDate(education.duration_from)} - ${formatDate(education.duration_to)}`} icon={Calendar} />
+                    <InfoRow
+                      label="Qualification"
+                      value={education.qualification}
+                      icon={GraduationCap}
+                    />
+                    <InfoRow
+                      label="Specialization"
+                      value={education.specification}
+                      icon={BookOpen}
+                    />
+                    <InfoRow
+                      label="Institute"
+                      value={education.institute_name}
+                      icon={Building}
+                    />
+                    <InfoRow
+                      label="Year of Passing"
+                      value={education.year_of_passing}
+                      icon={Calendar}
+                    />
+                    <InfoRow
+                      label="Grade/Rank"
+                      value={education.rank_or_grade}
+                      icon={Award}
+                    />
+                    <InfoRow
+                      label="Duration"
+                      value={`${formatDate(
+                        education.duration_from
+                      )} - ${formatDate(education.duration_to)}`}
+                      icon={Calendar}
+                    />
                   </div>
                 </div>
               ))}
@@ -522,19 +667,34 @@ export default function Employees() {
 
         {/* Professional Training Section */}
         {professionalTraining.length > 0 && (
-          <CollapsibleSection 
-            title="Professional Training" 
-            sectionKey="professionalTraining" 
+          <CollapsibleSection
+            title="Professional Training"
+            sectionKey="professionalTraining"
             icon={BookOpen}
             badge={`${professionalTraining.length} trainings`}
           >
             <div className="grid gap-3">
               {professionalTraining.map((training, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-teal-100">
+                <div
+                  key={index}
+                  className="bg-white p-3 rounded-lg border border-teal-100"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <InfoRow label="Institute" value={training.institute_name} icon={Building} />
-                    <InfoRow label="Duration" value={training.duration} icon={Calendar} />
-                    <InfoRow label="Training Area" value={training.area_of_training} icon={Target} />
+                    <InfoRow
+                      label="Institute"
+                      value={training.institute_name}
+                      icon={Building}
+                    />
+                    <InfoRow
+                      label="Duration"
+                      value={training.duration}
+                      icon={Calendar}
+                    />
+                    <InfoRow
+                      label="Training Area"
+                      value={training.area_of_training}
+                      icon={Target}
+                    />
                   </div>
                 </div>
               ))}
@@ -544,26 +704,59 @@ export default function Employees() {
 
         {/* Professional Experience Section */}
         {professionalExperience.length > 0 && (
-          <CollapsibleSection 
-            title="Professional Experience" 
-            sectionKey="professionalExperience" 
+          <CollapsibleSection
+            title="Professional Experience"
+            sectionKey="professionalExperience"
             icon={Briefcase}
             badge={`${professionalExperience.length} positions`}
           >
             <div className="grid gap-3">
               {professionalExperience.map((experience, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-orange-100">
+                <div
+                  key={index}
+                  className="bg-white p-3 rounded-lg border border-orange-100"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <InfoRow label="Company" value={experience.company_name} icon={Building} />
-                    <InfoRow label="Designation" value={experience.designation} icon={Briefcase} />
-                    <InfoRow label="Location" value={experience.employer_location} icon={MapPin} />
-                    <InfoRow label="Employee ID" value={experience.employer_id} icon={CreditCard} />
-                    <InfoRow label="Period" value={`${formatDate(experience.period_from)} - ${formatDate(experience.period_to)}`} icon={Calendar} />
-                    <InfoRow label="CTC" value={experience.ctc ? `₹${experience.ctc} LPA` : 'N/A'} icon={Banknote} />
+                    <InfoRow
+                      label="Company"
+                      value={experience.company_name}
+                      icon={Building}
+                    />
+                    <InfoRow
+                      label="Designation"
+                      value={experience.designation}
+                      icon={Briefcase}
+                    />
+                    <InfoRow
+                      label="Location"
+                      value={experience.employer_location}
+                      icon={MapPin}
+                    />
+                    <InfoRow
+                      label="Employee ID"
+                      value={experience.employer_id}
+                      icon={CreditCard}
+                    />
+                    <InfoRow
+                      label="Period"
+                      value={`${formatDate(
+                        experience.period_from
+                      )} - ${formatDate(experience.period_to)}`}
+                      icon={Calendar}
+                    />
+                    <InfoRow
+                      label="CTC"
+                      value={experience.ctc ? `₹${experience.ctc} LPA` : "N/A"}
+                      icon={Banknote}
+                    />
                   </div>
                   {experience.reason_for_leaving && (
                     <div className="mt-3 pt-3 border-t border-orange-100">
-                      <InfoRow label="Reason for Leaving" value={experience.reason_for_leaving} icon={FileText} />
+                      <InfoRow
+                        label="Reason for Leaving"
+                        value={experience.reason_for_leaving}
+                        icon={FileText}
+                      />
                     </div>
                   )}
                 </div>
@@ -574,27 +767,62 @@ export default function Employees() {
 
         {/* Professional Reference Section */}
         {professionalReference.length > 0 && (
-          <CollapsibleSection 
-            title="Professional References" 
-            sectionKey="professionalReference" 
+          <CollapsibleSection
+            title="Professional References"
+            sectionKey="professionalReference"
             icon={UserCheck}
             badge={`${professionalReference.length} references`}
           >
             <div className="grid gap-3">
               {professionalReference.map((reference, index) => (
-                <div key={index} className="bg-white p-3 rounded-lg border border-cyan-100">
+                <div
+                  key={index}
+                  className="bg-white p-3 rounded-lg border border-cyan-100"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <InfoRow label="Name" value={reference.name} icon={User} />
-                    <InfoRow label="Designation" value={reference.designation} icon={Briefcase} />
-                    <InfoRow label="Company" value={reference.company} icon={Building} />
-                    <InfoRow label="Contact" value={reference.tel_no} icon={Phone} />
-                    <InfoRow label="Email" value={reference.email} icon={Mail} />
-                    <InfoRow label="Period Known" value={`${reference.period_known} years`} icon={Calendar} />
+                    <InfoRow
+                      label="Designation"
+                      value={reference.designation}
+                      icon={Briefcase}
+                    />
+                    <InfoRow
+                      label="Company"
+                      value={reference.company}
+                      icon={Building}
+                    />
+                    <InfoRow
+                      label="Contact"
+                      value={reference.tel_no}
+                      icon={Phone}
+                    />
+                    <InfoRow
+                      label="Email"
+                      value={reference.email}
+                      icon={Mail}
+                    />
+                    <InfoRow
+                      label="Period Known"
+                      value={`${reference.period_known} years`}
+                      icon={Calendar}
+                    />
                   </div>
                   <div className="mt-3 pt-3 border-t border-cyan-100">
-                    <InfoRow label="Address" value={reference.address} icon={MapPin} />
-                    <InfoRow label="Capacity Known" value={reference.capacity_known} icon={FileText} />
-                    <InfoRow label="Referred by ISCS Employee" value={reference.referred_by_employee_ISCS ? 'Yes' : 'No'} icon={UserCheck} />
+                    <InfoRow
+                      label="Address"
+                      value={reference.address}
+                      icon={MapPin}
+                    />
+                    <InfoRow
+                      label="Capacity Known"
+                      value={reference.capacity_known}
+                      icon={FileText}
+                    />
+                    <InfoRow
+                      label="Referred by ISCS Employee"
+                      value={reference.referred_by_employee_ISCS ? "Yes" : "No"}
+                      icon={UserCheck}
+                    />
                   </div>
                 </div>
               ))}
@@ -604,9 +832,9 @@ export default function Employees() {
 
         {/* About Self Section */}
         {Object.keys(aboutSelf).length > 0 && (
-          <CollapsibleSection 
-            title="About Self" 
-            sectionKey="aboutSelf" 
+          <CollapsibleSection
+            title="About Self"
+            sectionKey="aboutSelf"
             icon={Target}
             badge="Self Assessment"
           >
@@ -618,9 +846,21 @@ export default function Employees() {
                   Career & Achievements
                 </h5>
                 <div className="space-y-2">
-                  <InfoRow label="Career Ambition" value={aboutSelf.career_ambition} icon={Target} />
-                  <InfoRow label="Significant Achievements" value={aboutSelf.significant_achievements} icon={Award} />
-                  <InfoRow label="Professional Failures" value={aboutSelf.professional_failures} icon={AlertTriangle} />
+                  <InfoRow
+                    label="Career Ambition"
+                    value={aboutSelf.career_ambition}
+                    icon={Target}
+                  />
+                  <InfoRow
+                    label="Significant Achievements"
+                    value={aboutSelf.significant_achievements}
+                    icon={Award}
+                  />
+                  <InfoRow
+                    label="Professional Failures"
+                    value={aboutSelf.professional_failures}
+                    icon={AlertTriangle}
+                  />
                 </div>
               </div>
 
@@ -655,19 +895,29 @@ export default function Employees() {
 
         {/* Declaration Section */}
         {Object.keys(declaration).length > 0 && (
-          <CollapsibleSection 
-            title="Declaration" 
-            sectionKey="declaration" 
+          <CollapsibleSection
+            title="Declaration"
+            sectionKey="declaration"
             icon={FileText}
             badge="Legal Document"
           >
             <div className="bg-white p-3 rounded-lg border border-slate-100">
               <div className="space-y-3">
-                <InfoRow label="Declared by" value={declaration.name} icon={User} />
-                <InfoRow label="Date of Declaration" value={formatDate(declaration.date_of_declaration)} icon={Calendar} />
+                <InfoRow
+                  label="Declared by"
+                  value={declaration.name}
+                  icon={User}
+                />
+                <InfoRow
+                  label="Date of Declaration"
+                  value={formatDate(declaration.date_of_declaration)}
+                  icon={Calendar}
+                />
                 {declaration.declaration_text && (
                   <div className="pt-3 border-t border-slate-100">
-                    <h5 className="font-semibold text-gray-800 mb-3 text-sm">Declaration Text</h5>
+                    <h5 className="font-semibold text-gray-800 mb-3 text-sm">
+                      Declaration Text
+                    </h5>
                     <div className="bg-slate-50 p-3 rounded-lg text-sm text-gray-700 leading-relaxed border border-slate-200">
                       {declaration.declaration_text}
                     </div>
@@ -681,71 +931,157 @@ export default function Employees() {
     );
   };
 
-  // Compact Employee Card Component
+  // Enhanced Employee Card Component with Profile Picture Support
   const EmployeeCard = ({ employee }) => {
     const personalProfile = employee.personal_profile || {};
-    const name = `${personalProfile.first_name || ''} ${personalProfile.middle_name || ''} ${personalProfile.last_name || ''}`.trim() || employee.name || 'N/A';
-    const email = personalProfile.mail_id || employee.email || 'N/A';
-    const phone = personalProfile.mobile_phone || employee.phone || 'N/A';
-    
+    const name =
+      `${personalProfile.first_name || ""} ${
+        personalProfile.middle_name || ""
+      } ${personalProfile.last_name || ""}`.trim() ||
+      employee.name ||
+      "N/A";
+    const email = personalProfile.mail_id || employee.email || "N/A";
+    const phone = personalProfile.mobile_phone || employee.phone || "N/A";
+
+    // Generate initials for fallback
+    const getInitials = (fullName) => {
+      const names = fullName.split(" ").filter((n) => n);
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+      }
+      return names[0] ? names[0].substring(0, 2).toUpperCase() : "NA";
+    };
+
+    const initials = getInitials(name);
+    const profilePicture =
+      employee.profile_picture || personalProfile.profile_picture; // Ready for dynamic images
+
     return (
-      <Card className="p-3 hover:shadow-md transition-all border-l-4 border-l-blue-500 bg-white">
-        <div className="space-y-3">
-          {/* Header with Avatar and Status */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <User size={16} className="text-blue-600" />
+      <Card className="group hover:shadow-xl transition-all duration-300 bg-white overflow-hidden border border-gray-200 hover:border-teal-400 relative">
+        {/* Decorative gradient background - ISCS Teal/Cyan theme */}
+        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-br from-teal-500 via-cyan-600 to-blue-500 opacity-90"></div>
+
+        <div className="relative p-3">
+          {/* Status Badge - Top Right */}
+          <div className="absolute top-3 right-3 z-10">
+            <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm border border-green-200">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-700 font-semibold">
+                Active
+              </span>
+            </div>
+          </div>
+
+          {/* Profile Picture Section */}
+          <div className="flex flex-col items-center mb-3 pt-1">
+            <div className="relative">
+              {/* Profile Picture or Avatar */}
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-100 to-teal-100 flex items-center justify-center shadow-lg ring-4 ring-white group-hover:ring-teal-100 transition-all duration-300">
+                {profilePicture ? (
+                  <img
+                    src={profilePicture}
+                    alt={name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xl font-bold text-teal-600">
+                    {initials}
+                  </span>
+                )}
+              </div>
+
+              {/* Online indicator dot */}
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+            </div>
+
+            {/* Name and ID */}
+            <div className="text-center mt-2">
+              <h3 className="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-teal-600 transition-colors line-clamp-1">
+                {name}
+              </h3>
+              <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
+                <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
+                  #{employee.employee_id || "N/A"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Position and Department - With Icons */}
+          <div className="space-y-1.5 mb-2 pb-2 border-b border-gray-100">
+            <div className="flex items-center gap-2 bg-gradient-to-r from-cyan-50 to-teal-50 p-1.5 rounded-lg">
+              <div className="w-6 h-6 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Briefcase size={12} className="text-teal-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-500 font-medium">
+                  Position
+                </p>
+                <p className="text-xs text-gray-900 font-semibold truncate">
+                  {employee.position || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50 p-1.5 rounded-lg">
+              <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Building2 size={12} className="text-purple-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-500 font-medium">
+                  Department
+                </p>
+                <p className="text-xs text-gray-900 font-semibold truncate">
+                  {employee.client || employee.department || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Info - Compact */}
+          <div className="space-y-1 mb-2">
+            <div className="flex items-center gap-1.5 group/item hover:bg-gray-50 p-1 rounded transition-colors">
+              <div className="w-5 h-5 bg-cyan-50 rounded flex items-center justify-center flex-shrink-0">
+                <Mail size={10} className="text-cyan-600" />
+              </div>
+              <span className="text-[11px] text-gray-600 truncate flex-1">
+                {email}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 group/item hover:bg-gray-50 p-1 rounded transition-colors">
+              <div className="w-5 h-5 bg-green-50 rounded flex items-center justify-center flex-shrink-0">
+                <Phone size={10} className="text-green-600" />
+              </div>
+              <span className="text-[11px] text-gray-600">{phone}</span>
+            </div>
+          </div>
+
+          {/* Footer with Date and Action Button */}
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 bg-gray-100 rounded flex items-center justify-center">
+                <Calendar size={9} className="text-gray-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800 text-sm">{name}</h3>
-                <p className="text-xs text-gray-500">#{employee.employee_id || 'N/A'}</p>
+                <p className="text-[9px] text-gray-500 uppercase tracking-wide">
+                  Joined
+                </p>
+                <p className="text-[10px] text-gray-700 font-medium">
+                  {formatDate(
+                    employee.date_of_joining || personalProfile.date_of_joining
+                  )}
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-xs text-green-600 font-medium">Active</span>
-            </div>
-          </div>
 
-          {/* Position and Department */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-sm text-gray-700">
-              <Briefcase size={12} className="text-gray-400" />
-              <span className="font-medium">{employee.position || 'N/A'}</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Building2 size={12} className="text-gray-400" />
-              <span>{employee.client || employee.department || 'N/A'}</span>
-            </div>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Mail size={12} className="text-gray-400" />
-              <span className="truncate">{email}</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Phone size={12} className="text-gray-400" />
-              <span>{phone}</span>
-            </div>
-          </div>
-
-          {/* Footer with Date and Action */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Calendar size={12} />
-              <span>Joined {formatDate(employee.date_of_joining || personalProfile.date_of_joining)}</span>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 px-2 text-xs"
+            <Button
+              size="sm"
+              className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-sm"
               onClick={() => searchEmployeeById(employee.employee_id)}
             >
-              <Eye size={12} className="mr-1" />
-              View
+              <Eye size={11} className="mr-1" />
+              <span className="text-[11px] font-semibold">View</span>
             </Button>
           </div>
         </div>
@@ -760,53 +1096,89 @@ export default function Employees() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Employee</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Contact</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Position</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Department</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Joined</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Actions</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Employee
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Contact
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Position
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Department
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Joined
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {employees.map((employee, index) => {
               const personalProfile = employee.personal_profile || {};
-              const name = `${personalProfile.first_name || ''} ${personalProfile.middle_name || ''} ${personalProfile.last_name || ''}`.trim() || employee.name || 'N/A';
-              const email = personalProfile.mail_id || employee.email || 'N/A';
-              const phone = personalProfile.mobile_phone || employee.phone || 'N/A';
-              
+              const name =
+                `${personalProfile.first_name || ""} ${
+                  personalProfile.middle_name || ""
+                } ${personalProfile.last_name || ""}`.trim() ||
+                employee.name ||
+                "N/A";
+              const email = personalProfile.mail_id || employee.email || "N/A";
+              const phone =
+                personalProfile.mobile_phone || employee.phone || "N/A";
+
               return (
-                <tr key={employee.employee_id || index} className="hover:bg-gray-50">
+                <tr
+                  key={employee.employee_id || index}
+                  className="hover:bg-gray-50"
+                >
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                         <User size={12} className="text-blue-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-800">{name}</div>
-                        <div className="text-xs text-gray-500">#{employee.employee_id || 'N/A'}</div>
+                        <div className="text-sm font-medium text-gray-800">
+                          {name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          #{employee.employee_id || "N/A"}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-3 py-2">
                     <div className="space-y-1">
-                      <div className="text-xs text-gray-600 truncate max-w-[150px]">{email}</div>
+                      <div className="text-xs text-gray-600 truncate max-w-[150px]">
+                        {email}
+                      </div>
                       <div className="text-xs text-gray-500">{phone}</div>
                     </div>
                   </td>
                   <td className="px-3 py-2">
-                    <span className="text-sm text-gray-600">{employee.position || 'N/A'}</span>
+                    <span className="text-sm text-gray-600">
+                      {employee.position || "N/A"}
+                    </span>
                   </td>
                   <td className="px-3 py-2">
-                    <span className="text-sm text-gray-600">{employee.client || employee.department || 'N/A'}</span>
+                    <span className="text-sm text-gray-600">
+                      {employee.client || employee.department || "N/A"}
+                    </span>
                   </td>
                   <td className="px-3 py-2">
-                    <span className="text-xs text-gray-500">{formatDate(employee.date_of_joining || personalProfile.date_of_joining)}</span>
+                    <span className="text-xs text-gray-500">
+                      {formatDate(
+                        employee.date_of_joining ||
+                          personalProfile.date_of_joining
+                      )}
+                    </span>
                   </td>
                   <td className="px-3 py-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-6 px-2 text-xs"
                       onClick={() => searchEmployeeById(employee.employee_id)}
                     >
@@ -832,15 +1204,20 @@ export default function Employees() {
             <Users size={24} className="text-blue-600" />
             Employee Management
           </h1>
-          <p className="text-gray-600 text-sm">Manage and view employee applications</p>
+          <p className="text-gray-600 text-sm">
+            Manage and view employee applications
+          </p>
         </div>
-        
+
         {/* Compact Search and Controls */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Search Input */}
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search size={14} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search
+                size={14}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
               <Input
                 type="text"
                 value={searchEmployeeId}
@@ -856,45 +1233,63 @@ export default function Employees() {
               size="sm"
               className="h-8 px-3"
             >
-              {searchLoading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              {searchLoading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Search size={14} />
+              )}
             </Button>
           </div>
-          
+
           {/* View Toggle and Actions */}
           <div className="flex items-center gap-2">
             {searchMode && (
-              <Button onClick={clearSearch} variant="outline" size="sm" className="h-8 px-3 text-xs">
+              <Button
+                onClick={clearSearch}
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+              >
                 <Filter size={14} className="mr-1" />
                 Show All
               </Button>
             )}
-            
+
             {!searchMode && (
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <Button
-                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                  variant={viewMode === "cards" ? "default" : "ghost"}
                   size="sm"
                   className="h-6 px-2"
-                  onClick={() => setViewMode('cards')}
+                  onClick={() => setViewMode("cards")}
                 >
                   <Grid size={14} />
                 </Button>
                 <Button
-                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  variant={viewMode === "table" ? "default" : "ghost"}
                   size="sm"
                   className="h-6 px-2"
-                  onClick={() => setViewMode('table')}
+                  onClick={() => setViewMode("table")}
                 >
                   <List size={14} />
                 </Button>
               </div>
             )}
-            
-            <Button variant="outline" size="sm" className="h-8 px-3" disabled={loading} onClick={fetchAllEmployees}>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3"
+              disabled={loading}
+              onClick={fetchAllEmployees}
+            >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             </Button>
-            
-            <Button size="sm" className="h-8 px-3 bg-green-600 hover:bg-green-700">
+
+            <Button
+              size="sm"
+              className="h-8 px-3 bg-green-600 hover:bg-green-700"
+            >
               <Download size={14} className="mr-1" />
               Export
             </Button>
@@ -918,11 +1313,15 @@ export default function Employees() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-semibold text-gray-800">
-              {searchMode ? 'Employee Details' : 'All Employees'}
+              {searchMode ? "Employee Details" : "All Employees"}
             </h2>
             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-              {searchMode ? (searchedEmployee ? '1' : '0') : allEmployees.length} 
-              {searchMode ? ' Found' : ' Total'}
+              {searchMode
+                ? searchedEmployee
+                  ? "1"
+                  : "0"
+                : allEmployees.length}
+              {searchMode ? " Found" : " Total"}
             </span>
           </div>
           {!searchMode && (
@@ -949,7 +1348,12 @@ export default function Employees() {
               <AlertCircle size={24} className="text-red-500" />
               <div>
                 <p className="text-red-700 font-medium text-sm">{error}</p>
-                <Button onClick={fetchAllEmployees} className="mt-3" variant="outline" size="sm">
+                <Button
+                  onClick={fetchAllEmployees}
+                  className="mt-3"
+                  variant="outline"
+                  size="sm"
+                >
                   Try Again
                 </Button>
               </div>
@@ -965,10 +1369,13 @@ export default function Employees() {
         {/* All Employees Results */}
         {!searchMode && !loading && !error && allEmployees.length > 0 && (
           <>
-            {viewMode === 'cards' ? (
+            {viewMode === "cards" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {allEmployees.map((employee, index) => (
-                  <EmployeeCard key={employee.employee_id || index} employee={employee} />
+                  <EmployeeCard
+                    key={employee.employee_id || index}
+                    employee={employee}
+                  />
                 ))}
               </div>
             ) : (
@@ -983,8 +1390,12 @@ export default function Employees() {
             <div className="flex flex-col items-center gap-3">
               <Users size={32} className="text-gray-300" />
               <div>
-                <h3 className="font-medium text-gray-800 mb-1">No Employees Found</h3>
-                <p className="text-gray-600 text-sm">No employment applications have been submitted yet.</p>
+                <h3 className="font-medium text-gray-800 mb-1">
+                  No Employees Found
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  No employment applications have been submitted yet.
+                </p>
               </div>
             </div>
           </Card>
