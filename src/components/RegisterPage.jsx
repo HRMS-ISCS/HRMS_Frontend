@@ -118,6 +118,7 @@ export default function RegisterPage() {
           periodTo: "",
           ctc: "",
           reasonForLeaving: "",
+           uanNumber: "",
         },
       ],
       // Other Interests

@@ -1,49 +1,9 @@
+//Employees.jsx
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Users,
-  Search,
-  Loader2,
-  RefreshCw,
-  User,
-  Mail,
-  Phone,
-  Briefcase,
-  Calendar,
-  Building2,
-  Code,
-  AlertCircle,
-  CheckCircle2,
-  Eye,
-  Filter,
-  Download,
-  MapPin,
-  CreditCard,
-  GraduationCap,
-  Award,
-  Heart,
-  FileText,
-  Contact,
-  Building,
-  Banknote,
-  ChevronDown,
-  ChevronRight,
-  UserCheck,
-  Shield,
-  Home,
-  Flag,
-  Globe,
-  BookOpen,
-  Target,
-  TrendingUp,
-  AlertTriangle,
-  Zap,
-  Grid,
-  List,
-  MoreVertical,
-} from "lucide-react";
+import { Users, Search, Loader2, RefreshCw, User, Mail, Phone, Briefcase, Calendar, Building2, Code, AlertCircle, CheckCircle2, Eye, Filter, Download, MapPin, CreditCard, GraduationCap, Award, Heart, FileText, Contact, Building, Banknote, ChevronDown, ChevronRight, UserCheck, Shield, Home, Flag, Globe, BookOpen, Target, TrendingUp, AlertTriangle, Zap, Grid, List, MoreVertical } from "lucide-react";
 export default function Employees() {
   const [allEmployees, setAllEmployees] = useState([]);
   const [searchedEmployee, setSearchedEmployee] = useState(null);
@@ -265,7 +225,6 @@ export default function Employees() {
       badgeText: "text-slate-700",
     },
   };
-
   const CollapsibleSection = ({
     title,
     sectionKey,
