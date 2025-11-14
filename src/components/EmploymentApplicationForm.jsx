@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { User, Calendar, Briefcase, Building, Users, Code, ArrowRight, Mail, Phone, Save } from "lucide-react";
+import { User, Calendar, Briefcase, Building, Users, Code, ArrowRight, Mail, Phone, Save, CheckCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 export default function EmploymentApplicationForm({ initialData = {}, onSubmit }) {
+  const { toast } = useToast(); // Initialize toast
+  
   const [formData, setFormData] = useState({
     name: initialData.name || "",
     employeeIdPrefix: initialData.employeeIdPrefix || "",
@@ -130,7 +133,18 @@ export default function EmploymentApplicationForm({ initialData = {}, onSubmit }
 
       if (response.ok) {
         const generatedEmployeeId = result.id; // Extract the generated ID
-        alert(`Employee created successfully! ID: ${generatedEmployeeId}`);
+        
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Employee Created Successfully</span>
+            </div>
+          ),
+          description: `ID: ${generatedEmployeeId}`,
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
         
         // Update form data with generated employee ID
         const updatedFormData = {
@@ -142,19 +156,6 @@ export default function EmploymentApplicationForm({ initialData = {}, onSubmit }
         if (onSubmit) {
           onSubmit(updatedFormData);
         }
-        
-        // Reset form after successful submission (optional)
-        // setFormData({
-        //   name: "",
-        //   employeeIdPrefix: "",
-        //   email: "",
-        //   phone: "",
-        //   dateOfJoining: "",
-        //   position: "",
-        //   clientName: "",
-        //   skillSet: "",
-        //   generatedEmployeeId: ""
-        // });
       } else {
         // Handle API errors
         setErrors({ submit: result.detail || 'An error occurred while creating employee' });

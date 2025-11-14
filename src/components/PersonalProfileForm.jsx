@@ -8,7 +8,8 @@
 // import { Textarea } from "@/components/ui/textarea";
 // import {
 //   User, Calendar, MapPin, Phone, Mail, CreditCard, FileText, Camera,
-//   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud
+//   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud,
+//   X, AlertCircle
 // } from "lucide-react";
 
 // export default function PersonalProfileForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
@@ -17,12 +18,15 @@
 //   const [errors, setErrors] = useState({});
 //   const [loading, setLoading] = useState(false);
 //   const [submitLoading, setSubmitLoading] = useState(false);
+//   const [uploadSuccess, setUploadSuccess] = useState("");
+//   const [uploadError, setUploadError] = useState("");
 
 //   // Document upload states
 //   const [aadharFile, setAadharFile] = useState(null);
 //   const [panFile, setPanFile] = useState(null);
 //   const [resumeFile, setResumeFile] = useState(null);
 //   const [photoFile, setPhotoFile] = useState(null);
+//   const [photoPreview, setPhotoPreview] = useState(null);
 //   const [uploadEmployeeId, setUploadEmployeeId] = useState("");
 //   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -138,9 +142,18 @@
 
 //   const handleDocumentUpload = async () => {
 //     if (!uploadEmployeeId.trim()) {
-//       alert("Please enter Employee ID for upload.");
+//       setUploadError("Please enter Employee ID for upload.");
+//       setUploadSuccess("");
 //       return;
 //     }
+    
+//     const hasFiles = aadharFile || panFile || resumeFile || photoFile;
+//     if (!hasFiles) {
+//       setUploadError("Please select at least one document to upload.");
+//       setUploadSuccess("");
+//       return;
+//     }
+    
 //     const form = new FormData();
 //     if (aadharFile) form.append("aadhar_card", aadharFile);
 //     if (panFile) form.append("pan_card", panFile);
@@ -148,6 +161,9 @@
 //     if (photoFile) form.append("profile_photo", photoFile);
 
 //     setUploadLoading(true);
+//     setUploadError("");
+//     setUploadSuccess("");
+    
 //     try {
 //       const res = await fetch(`http://127.0.0.1:8000/users/Personal_Documents/${uploadEmployeeId}/bulk`, {
 //         method: 'PUT',
@@ -155,16 +171,63 @@
 //       });
 //       const result = await res.json();
 //       if (res.ok) {
-//         alert("Documents uploaded successfully.");
+//         setUploadSuccess("Documents uploaded successfully!");
+//         if (result.uploaded_files && Object.keys(result.uploaded_files).length > 0) {
+//           const uploadedDetails = Object.entries(result.uploaded_files)
+//             .map(([key, value]) => `${key}: ${value.file_name} (${value.size_MB}MB)`)
+//             .join(', ');
+//           setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
+//         }
+        
+//         // Clear files after successful upload
+//         setAadharFile(null);
+//         setPanFile(null);
+//         setResumeFile(null);
+//         setPhotoFile(null);
+//         setPhotoPreview(null);
 //       } else {
-//         alert("Upload failed: " + (result.detail || "Unknown error"));
+//         setUploadError("Upload failed: " + (result.detail || "Unknown error"));
 //       }
 //     } catch (err) {
 //       console.error(err);
-//       alert("Failed to upload documents.");
+//       setUploadError("Failed to upload documents.");
 //     } finally {
 //       setUploadLoading(false);
 //     }
+//   };
+
+//   // Handle profile photo selection and preview
+//   const handlePhotoChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       // Validate file type
+//       if (!file.type.startsWith('image/')) {
+//         setUploadError("Please select an image file for profile photo.");
+//         return;
+//       }
+      
+//       // Validate file size (5MB max)
+//       if (file.size > 5 * 1024 * 1024) {
+//         setUploadError("Profile photo size should not exceed 5MB.");
+//         return;
+//       }
+      
+//       setPhotoFile(file);
+//       setUploadError("");
+      
+//       // Create preview
+//       const reader = new FileReader();
+//       reader.onload = () => {
+//         setPhotoPreview(reader.result);
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
+
+//   // Remove profile photo
+//   const removePhoto = () => {
+//     setPhotoFile(null);
+//     setPhotoPreview(null);
 //   };
 
 //   return (
@@ -190,7 +253,7 @@
 //           />
 //           {errors.employeeId && <p className="text-sm text-red-600">{errors.employeeId}</p>}
 //         </div>
-//         {generatedEmployeeId && <p className="text-xs text-green-600 mt-2">✓ Employee ID automatically filled from the previous step</p>}
+//         {generatedEmployeeId && <p className="text-xs text-green-600 mt-2">✓ Employee ID automatically filled from previous step</p>}
 //       </Card>
 
 //       <form className="space-y-8">
@@ -617,18 +680,37 @@
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">Aadhar Card (PDF only)</Label>
 //               <Input type="file" accept=".pdf" onChange={(e) => setAadharFile(e.target.files[0])} />
+//               {aadharFile && <p className="text-sm text-green-600">Selected: {aadharFile.name}</p>}
 //             </div>
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">PAN Card (PDF only)</Label>
 //               <Input type="file" accept=".pdf" onChange={(e) => setPanFile(e.target.files[0])} />
+//               {panFile && <p className="text-sm text-green-600">Selected: {panFile.name}</p>}
 //             </div>
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">Resume (PDF only)</Label>
 //               <Input type="file" accept=".pdf" onChange={(e) => setResumeFile(e.target.files[0])} />
+//               {resumeFile && <p className="text-sm text-green-600">Selected: {resumeFile.name}</p>}
 //             </div>
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">Profile Photo (Image only)</Label>
-//               <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])} />
+//               <div className="flex items-center gap-2">
+//                 <Input type="file" accept="image/*" onChange={handlePhotoChange} />
+//                 {photoFile && (
+//                   <Button type="button" variant="outline" size="sm" onClick={removePhoto}>
+//                     <X size={14} />
+//                   </Button>
+//                 )}
+//               </div>
+//               {photoPreview && (
+//                 <div className="mt-2">
+//                   <img 
+//                     src={photoPreview} 
+//                     alt="Profile preview" 
+//                     className="w-20 h-20 object-cover rounded-md border border-gray-300" 
+//                   />
+//                 </div>
+//               )}
 //             </div>
 //           </div>
 
@@ -649,6 +731,21 @@
 //           >
 //             {uploadLoading ? "Uploading..." : "Submit Documents"}
 //           </Button>
+
+//           {/* Upload Success/Error Messages */}
+//           {uploadSuccess && (
+//             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+//               <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+//               <p className="text-green-800 text-sm">{uploadSuccess}</p>
+//             </div>
+//           )}
+
+//           {uploadError && (
+//             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+//               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+//               <p className="text-red-800 text-sm">{uploadError}</p>
+//             </div>
+//           )}
 //         </Card>
 
 //         {/* Submit Error */}
@@ -705,8 +802,10 @@ import {
   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud,
   X, AlertCircle
 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 export default function PersonalProfileForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+  const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [employeeId, setEmployeeId] = useState("");
   const [errors, setErrors] = useState({});
@@ -822,7 +921,17 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
       });
       const result = await res.json();
       if (res.ok) {
-        alert(`Profile created for Employee ID: ${result.employee_id}`);
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Profile Created Successfully</span>
+            </div>
+          ),
+          description: `Employee ID: ${result.employee_id}`,
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
       } else {
         setErrors({ submit: result.detail || 'Error occurred' });
       }
@@ -872,6 +981,18 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             .join(', ');
           setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
         }
+        
+        // Show success toast for document upload
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Documents Uploaded Successfully</span>
+            </div>
+          ),
+          description: "Your documents have been uploaded and saved.",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
         
         // Clear files after successful upload
         setAadharFile(null);

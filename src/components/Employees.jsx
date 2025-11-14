@@ -547,101 +547,195 @@ export default function Employees() {
     );
   };
 
-  const EmployeeCard = ({ employee }) => {
-    const personalProfile = employee.personal_profile || {};
-    const name = `${personalProfile.first_name || ""} ${personalProfile.middle_name || ""} ${personalProfile.last_name || ""}`.trim() || employee.name || "N/A";
-    const email = personalProfile.mail_id || employee.email || "N/A";
-    const phone = personalProfile.mobile_phone || employee.phone || "N/A";
-    const profilePicture = profilePictures[employee.employee_id];
+  // const EmployeeCard = ({ employee }) => {
+  //   const personalProfile = employee.personal_profile || {};
+  //   const name = `${personalProfile.first_name || ""} ${personalProfile.middle_name || ""} ${personalProfile.last_name || ""}`.trim() || employee.name || "N/A";
+  //   const email = personalProfile.mail_id || employee.email || "N/A";
+  //   const phone = personalProfile.mobile_phone || employee.phone || "N/A";
+  //   const profilePicture = profilePictures[employee.employee_id];
 
-    const getInitials = (fullName) => {
-      const names = fullName.split(" ").filter(n => n);
-      if (names.length >= 2) return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-      return names[0] ? names[0].substring(0, 2).toUpperCase() : "NA";
-    };
+  //   const getInitials = (fullName) => {
+  //     const names = fullName.split(" ").filter(n => n);
+  //     if (names.length >= 2) return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+  //     return names[0] ? names[0].substring(0, 2).toUpperCase() : "NA";
+  //   };
 
-    const initials = getInitials(name);
+  //   const initials = getInitials(name);
 
-    return (
-      <Card className="group hover:shadow-xl transition-all duration-300 bg-white overflow-hidden border border-gray-200 relative transform hover:-translate-y-2 hover:scale-105 preserve-3d">
-        <div className="h-2 bg-gray-100"></div>
-        <div className="relative p-4">
-          <div className="flex flex-col items-center mb-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center shadow-sm border-2 border-white">
-                {profilePicture ? (
-                  <img src={profilePicture} alt={name} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-xl font-bold text-gray-500">{initials}</span>
-                )}
-              </div>
-            </div>
-            <div className="text-center mt-2">
-              <h3 className="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-blue-600 transition-colors line-clamp-1">{name}</h3>
-              <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
-                <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">#{employee.employee_id || "N/A"}</span>
-              </div>
-            </div>
-          </div>
+  //   return (
+  //     <Card className="group hover:shadow-xl transition-all duration-300 bg-white overflow-hidden border border-gray-200 relative transform hover:-translate-y-2 hover:scale-105 preserve-3d">
+  //       <div className="h-2 bg-gray-100"></div>
+  //       <div className="relative p-4">
+  //         <div className="flex flex-col items-center mb-4">
+  //           <div className="relative">
+  //             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center shadow-sm border-2 border-white">
+  //               {profilePicture ? (
+  //                 <img src={profilePicture} alt={name} className="w-full h-full rounded-full object-cover" />
+  //               ) : (
+  //                 <span className="text-xl font-bold text-gray-500">{initials}</span>
+  //               )}
+  //             </div>
+  //           </div>
+  //           <div className="text-center mt-2">
+  //             <h3 className="font-bold text-gray-900 text-sm mb-0.5 group-hover:text-blue-600 transition-colors line-clamp-1">{name}</h3>
+  //             <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
+  //               <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">#{employee.employee_id || "N/A"}</span>
+  //             </div>
+  //           </div>
+  //         </div>
 
-          <div className="space-y-2 mb-3 pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-50 rounded flex items-center justify-center flex-shrink-0">
-                <Briefcase size={12} className="text-blue-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] text-gray-500 font-medium">Position</p>
-                <p className="text-xs text-gray-900 font-semibold truncate">{employee.position || "N/A"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-purple-50 rounded flex items-center justify-center flex-shrink-0">
-                <Building2 size={12} className="text-purple-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] text-gray-500 font-medium">Department</p>
-                <p className="text-xs text-gray-900 font-semibold truncate">{employee.client || employee.department || "N/A"}</p>
-              </div>
-            </div>
-          </div>
+  //         <div className="space-y-2 mb-3 pb-3 border-b border-gray-100">
+  //           <div className="flex items-center gap-2">
+  //             <div className="w-6 h-6 bg-blue-50 rounded flex items-center justify-center flex-shrink-0">
+  //               <Briefcase size={12} className="text-blue-600" />
+  //             </div>
+  //             <div className="min-w-0 flex-1">
+  //               <p className="text-[10px] text-gray-500 font-medium">Position</p>
+  //               <p className="text-xs text-gray-900 font-semibold truncate">{employee.position || "N/A"}</p>
+  //             </div>
+  //           </div>
+  //           <div className="flex items-center gap-2">
+  //             <div className="w-6 h-6 bg-purple-50 rounded flex items-center justify-center flex-shrink-0">
+  //               <Building2 size={12} className="text-purple-600" />
+  //             </div>
+  //             <div className="min-w-0 flex-1">
+  //               <p className="text-[10px] text-gray-500 font-medium">Department</p>
+  //               <p className="text-xs text-gray-900 font-semibold truncate">{employee.client || employee.department || "N/A"}</p>
+  //             </div>
+  //           </div>
+  //         </div>
 
-          <div className="space-y-2 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
-                <Mail size={10} className="text-gray-600" />
-              </div>
-              <span className="text-[11px] text-gray-600 truncate flex-1">{email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
-                <Phone size={10} className="text-gray-600" />
-              </div>
-              <span className="text-[11px] text-gray-600">{phone}</span>
-            </div>
-          </div>
+  //         <div className="space-y-2 mb-3">
+  //           <div className="flex items-center gap-2">
+  //             <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
+  //               <Mail size={10} className="text-gray-600" />
+  //             </div>
+  //             <span className="text-[11px] text-gray-600 truncate flex-1">{email}</span>
+  //           </div>
+  //           <div className="flex items-center gap-2">
+  //             <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
+  //               <Phone size={10} className="text-gray-600" />
+  //             </div>
+  //             <span className="text-[11px] text-gray-600">{phone}</span>
+  //           </div>
+  //         </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-gray-50 rounded flex items-center justify-center">
-                <Calendar size={9} className="text-gray-600" />
-              </div>
-              <div>
-                <p className="text-[9px] text-gray-500 uppercase tracking-wide">Joined</p>
-                <p className="text-[10px] text-gray-700 font-medium">
-                  {formatDate(employee.date_of_joining || personalProfile.date_of_joining)}
-                </p>
-              </div>
-            </div>
-            <Button size="sm" className="h-7 px-2.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm" onClick={() => searchEmployeeById(employee.employee_id)}>
-              <Eye size={11} className="mr-1" />
-              <span className="text-[11px] font-semibold">View</span>
-            </Button>
-          </div>
-        </div>
-      </Card>
-    );
+  //         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+  //           <div className="flex items-center gap-1">
+  //             <div className="w-4 h-4 bg-gray-50 rounded flex items-center justify-center">
+  //               <Calendar size={9} className="text-gray-600" />
+  //             </div>
+  //             <div>
+  //               <p className="text-[9px] text-gray-500 uppercase tracking-wide">Joined</p>
+  //               <p className="text-[10px] text-gray-700 font-medium">
+  //                 {formatDate(employee.date_of_joining || personalProfile.date_of_joining)}
+  //               </p>
+  //             </div>
+  //           </div>
+  //           <Button size="sm" className="h-7 px-2.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm" onClick={() => searchEmployeeById(employee.employee_id)}>
+  //             <Eye size={11} className="mr-1" />
+  //             <span className="text-[11px] font-semibold">View</span>
+  //           </Button>
+  //         </div>
+  //       </div>
+  //     </Card>
+  //   );
+  // };
+const EmployeeCard = ({ employee }) => {
+  const personalProfile = employee.personal_profile || {};
+  const name = `${personalProfile.first_name || ""} ${personalProfile.middle_name || ""} ${personalProfile.last_name || ""}`.trim() || employee.name || "N/A";
+  const email = personalProfile.mail_id || employee.email || "N/A";
+  const phone = personalProfile.mobile_phone || employee.phone || "N/A";
+  const profilePicture = profilePictures[employee.employee_id];
+
+  const getInitials = (fullName) => {
+    const names = fullName.split(" ").filter(n => n);
+    if (names.length >= 2) return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    return names[0] ? names[0].substring(0, 2).toUpperCase() : "NA";
   };
 
+  const initials = getInitials(name);
+
+  return (
+    <Card className="group hover:shadow-lg transition-all duration-300 bg-gradient-to-b from-blue-50 to-white overflow-hidden border border-gray-200 relative">
+      <div className="relative p-4">
+        <div className="flex flex-col items-center mb-4">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center shadow-sm border-4 border-white">
+              {profilePicture ? (
+                <img src={profilePicture} alt={name} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span className="text-xl font-bold text-blue-600">{initials}</span>
+              )}
+            </div>
+          </div>
+          <div className="text-center mt-2">
+            <h3 className="font-bold text-gray-900 text-sm mb-0.5">{name}</h3>
+            <div className="flex items-center justify-center">
+              <span className="font-mono bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
+                #{employee.employee_id || "N/A"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2 mb-3 pb-3 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-50 rounded flex items-center justify-center flex-shrink-0">
+              <Briefcase size={12} className="text-blue-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] text-gray-500 font-medium">Position</p>
+              <p className="text-xs text-gray-900 font-semibold truncate">{employee.position || "N/A"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-purple-50 rounded flex items-center justify-center flex-shrink-0">
+              <Building2 size={12} className="text-purple-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] text-gray-500 font-medium">Department</p>
+              <p className="text-xs text-gray-900 font-semibold truncate">{employee.client || employee.department || "N/A"}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
+              <Mail size={10} className="text-gray-600" />
+            </div>
+            <span className="text-[11px] text-gray-600 truncate flex-1">{email}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-gray-50 rounded flex items-center justify-center flex-shrink-0">
+              <Phone size={10} className="text-gray-600" />
+            </div>
+            <span className="text-[11px] text-gray-600">{phone}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 bg-gray-50 rounded flex items-center justify-center">
+              <Calendar size={9} className="text-gray-600" />
+            </div>
+            <div>
+              <p className="text-[9px] text-gray-500 uppercase tracking-wide">Joined</p>
+              <p className="text-[10px] text-gray-700 font-medium">
+                {formatDate(employee.date_of_joining || personalProfile.date_of_joining)}
+              </p>
+            </div>
+          </div>
+          <Button size="sm" className="h-7 px-2.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm" onClick={() => searchEmployeeById(employee.employee_id)}>
+            <Eye size={11} className="mr-1" />
+            <span className="text-[11px] font-semibold">View</span>
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};
   const EmployeeTable = ({ employees }) => (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">

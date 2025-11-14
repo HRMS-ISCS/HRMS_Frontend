@@ -8,7 +8,7 @@
 // import Navbar from "./components/Navbar"
 // import Dashboard from "./components/Dashboard"
 // import Employees from "./components/Employees"
-
+// import Documents from "./components/Documents" // Add this import
 
 // // Protected Route Component
 // function ProtectedRoute({ children, isLoggedIn }) {
@@ -44,7 +44,7 @@
 //           )
 //         } 
 //       />
-      
+       
 //       {/* Registration Route */}
 //       <Route
 //         path="/register"
@@ -87,6 +87,26 @@
 //                   <Navbar onLogout={handleLogout} />
 //                   <main className="min-h-screen pt-16">
 //                     <Employees />
+//                   </main>
+//                 </div>
+//               </div>
+//             </div>
+//           </ProtectedRoute>
+//         }
+//       />
+      
+//       {/* Documents Route - NEW */}
+//       <Route
+//         path="/documents"
+//         element={
+//           <ProtectedRoute isLoggedIn={isLoggedIn}>
+//             <div className="min-h-screen bg-gray-50">
+//               <div className="flex">
+//                 <Sidebar />
+//                 <div className="flex-1 ml-64">
+//                   <Navbar onLogout={handleLogout} />
+//                   <main className="min-h-screen pt-16">
+//                     <Documents />
 //                   </main>
 //                 </div>
 //               </div>
@@ -139,6 +159,7 @@ import Navbar from "./components/Navbar"
 import Dashboard from "./components/Dashboard"
 import Employees from "./components/Employees"
 import Documents from "./components/Documents" // Add this import
+import { Toaster } from "@/components/ui/toaster" // Import Toaster
 
 // Protected Route Component
 function ProtectedRoute({ children, isLoggedIn }) {
@@ -163,88 +184,91 @@ function AppContent({ isLoggedIn, isLoading, onLogin, onLogout, onLoadingComplet
   }
 
   return (
-    <Routes>
-      <Route 
-        path="/" 
-        element={
-          isLoggedIn ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <LoginPage onLogin={onLogin} />
-          )
-        } 
-      />
-       
-      {/* Registration Route */}
-      <Route
-        path="/register"
-        element={
-          isLoggedIn ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <RegisterPage />
-          )
-        }
-      />
-      
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <div className="min-h-screen bg-gray-50">
-              <div className="flex">
-                <Sidebar />
-                <div className="flex-1 ml-64">
-                  <Navbar onLogout={handleLogout} />
-                  <main className="min-h-screen pt-16">
-                    <Dashboard />
-                  </main>
+    <>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            isLoggedIn ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage onLogin={onLogin} />
+            )
+          } 
+        />
+         
+        {/* Registration Route */}
+        <Route
+          path="/register"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <RegisterPage />
+            )
+          }
+        />
+        
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="min-h-screen bg-gray-50">
+                <div className="flex">
+                  <Sidebar />
+                  <div className="flex-1 ml-64">
+                    <Navbar onLogout={handleLogout} />
+                    <main className="min-h-screen pt-16">
+                      <Dashboard />
+                    </main>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
-        path="/employees"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <div className="min-h-screen bg-gray-50">
-              <div className="flex">
-                <Sidebar />
-                <div className="flex-1 ml-64">
-                  <Navbar onLogout={handleLogout} />
-                  <main className="min-h-screen pt-16">
-                    <Employees />
-                  </main>
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/employees"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="min-h-screen bg-gray-50">
+                <div className="flex">
+                  <Sidebar />
+                  <div className="flex-1 ml-64">
+                    <Navbar onLogout={handleLogout} />
+                    <main className="min-h-screen pt-16">
+                      <Employees />
+                    </main>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-      
-      {/* Documents Route - NEW */}
-      <Route
-        path="/documents"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <div className="min-h-screen bg-gray-50">
-              <div className="flex">
-                <Sidebar />
-                <div className="flex-1 ml-64">
-                  <Navbar onLogout={handleLogout} />
-                  <main className="min-h-screen pt-16">
-                    <Documents />
-                  </main>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Documents Route - NEW */}
+        <Route
+          path="/documents"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="min-h-screen bg-gray-50">
+                <div className="flex">
+                  <Sidebar />
+                  <div className="flex-1 ml-64">
+                    <Navbar onLogout={handleLogout} />
+                    <main className="min-h-screen pt-16">
+                      <Documents />
+                    </main>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <Toaster /> {/* Add Toaster component here */}
+    </>
   )
 }
 
