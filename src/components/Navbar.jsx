@@ -46,7 +46,7 @@ export default function Navbar({ onLogout }) {
                 <User size={16} className="text-white" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-gray-800">John Doe</p>
+                <p className="text-sm font-medium text-gray-800">Sri ran</p>
                 <p className="text-xs text-gray-500">Administrator</p>
               </div>
               <ChevronDown size={16} className="text-gray-400" />
