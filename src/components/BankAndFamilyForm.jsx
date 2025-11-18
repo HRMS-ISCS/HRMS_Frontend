@@ -41,6 +41,9 @@
 //   const [maritalEmployeeId, setMaritalEmployeeId] = useState("");
 //   const [familyEmployeeId, setFamilyEmployeeId] = useState("");
 //   const [academicEmployeeId, setAcademicEmployeeId] = useState("");
+  
+//   // New state for bank suggestion dropdown
+//   const [bankSuggestion, setBankSuggestion] = useState("");
 
 //   // Set employee IDs from props when component mounts or when generatedEmployeeId changes
 //   useEffect(() => {
@@ -63,6 +66,24 @@
 //       setErrors(prev => ({
 //         ...prev,
 //         [name]: ""
+//       }));
+//     }
+//   };
+  
+//   // Handle bank suggestion change
+//   const handleBankSuggestionChange = (e) => {
+//     const value = e.target.value;
+//     setBankSuggestion(value);
+    
+//     if (value === "Axis Bank") {
+//       setFormData(prev => ({
+//         ...prev,
+//         bankName: "Axis Bank"
+//       }));
+//     } else if (value === "Non Axis Bank") {
+//       setFormData(prev => ({
+//         ...prev,
+//         bankName: ""
 //       }));
 //     }
 //   };
@@ -439,6 +460,23 @@
 //           </div>
           
 //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+//             {/* New Bank Suggestion Dropdown */}
+//             <div className="space-y-2">
+//               <Label htmlFor="bankSuggestion" className="text-gray-700 font-medium">
+//                 Bank Category
+//               </Label>
+//               <select
+//                 id="bankSuggestion"
+//                 value={bankSuggestion}
+//                 onChange={handleBankSuggestionChange}
+//                 className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+//               >
+//                 <option value="">Select an option</option>
+//                 <option value="Axis Bank">Axis Bank</option>
+//                 <option value="Non Axis Bank">Non Axis Bank</option>
+//               </select>
+//             </div>
+
 //             <div className="space-y-2">
 //               <Label htmlFor="bankName" className="text-gray-700 font-medium flex items-center gap-2">
 //                 <Building size={16} className="text-gray-500" />
@@ -451,8 +489,12 @@
 //                 onChange={handleChange}
 //                 placeholder="Enter bank name"
 //                 className={errors.bankName ? 'border-red-500' : ''}
+//                 readOnly={bankSuggestion === "Axis Bank"}
 //               />
 //               {errors.bankName && <p className="text-sm text-red-600">{errors.bankName}</p>}
+//               {bankSuggestion === "Axis Bank" && (
+//                 <p className="text-xs text-green-600 mt-1">✓ Auto-filled with Axis Bank</p>
+//               )}
 //             </div>
 
 //             <div className="space-y-2">
@@ -972,7 +1014,7 @@
 //     </div>
 //   );
 // }
-//BankAndFamilyForm.jsx
+// BankAndFamilyForm.jsx
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -994,8 +1036,10 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 export default function BankAndFamilyForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+  const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -1162,7 +1206,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       if (response.ok) {
         setBankSuccess(true);
         setErrors(prev => ({ ...prev, bankGeneral: "" }));
-        alert('Bank account details saved successfully!');
+        
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Bank Account Details Saved</span>
+            </div>
+          ),
+          description: "Your bank account information has been saved successfully.",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
       } else {
         setErrors(prev => ({ ...prev, bankGeneral: result.detail || 'Failed to save bank details' }));
       }
@@ -1207,7 +1262,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       if (response.ok) {
         setMaritalSuccess(true);
         setErrors(prev => ({ ...prev, maritalGeneral: "" }));
-        alert('Marital status saved successfully!');
+        
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Marital Status Saved</span>
+            </div>
+          ),
+          description: "Your marital status has been saved successfully.",
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
       } else {
         setErrors(prev => ({ ...prev, maritalGeneral: result.detail || 'Failed to save marital status' }));
       }
@@ -1261,7 +1327,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       if (successCount > 0) {
         setFamilySuccess(true);
         setErrors(prev => ({ ...prev, familyGeneral: "" }));
-        alert(`Family background saved successfully! (${successCount} members)`);
+        
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Family Background Saved</span>
+            </div>
+          ),
+          description: `${successCount} family member(s) information has been saved successfully.`,
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
       } else {
         setErrors(prev => ({ ...prev, familyGeneral: 'No family member data to save' }));
       }
@@ -1321,7 +1398,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       if (successCount > 0) {
         setAcademicSuccess(true);
         setErrors(prev => ({ ...prev, academicGeneral: "" }));
-        alert(`Academic background saved successfully! (${successCount} qualifications)`);
+        
+        // Show success toast instead of alert
+        toast({
+          title: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span>Academic Background Saved</span>
+            </div>
+          ),
+          description: `${successCount} qualification(s) have been saved successfully.`,
+          className: "bg-green-50 border-green-200 text-green-800",
+        });
       } else {
         setErrors(prev => ({ ...prev, academicGeneral: 'Failed to save academic qualifications' }));
       }
