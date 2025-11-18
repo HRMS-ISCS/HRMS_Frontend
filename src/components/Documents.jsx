@@ -1,4 +1,4 @@
-//Documents.jsx
+// src/components/Documents.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,10 @@ import {
   ExternalLink,
   ChevronDown,
   Users
-} from "lucide-react";  
+} from "lucide-react";
+import { apiRequest } from "../api"; // Import the API request function
 
 export default function Documents() {
-  //const [employeeId, setEmployeeId] = useState("");
   const [documents, setDocuments] = useState({
     aadhar_card: null,
     pan_card: null,
@@ -100,16 +100,9 @@ export default function Documents() {
   const fetchEmployees = async () => {
     setLoadingEmployees(true);
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/db/employment-applications`
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        setEmployees(data || []);
-      } else {
-        console.error("Failed to fetch employees");
-      }
+      // Use apiRequest function instead of direct fetch
+      const data = await apiRequest("/db/employment-applications");
+      setEmployees(data || []);
     } catch (err) {
       console.error("Error fetching employees:", err);
     } finally {
@@ -137,35 +130,28 @@ export default function Documents() {
     setSelectedDoc(null);
     
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/db/generate-sas/${selectedEmployee.employee_id}`
-      );
+      // Use apiRequest function instead of direct fetch
+      const data = await apiRequest(`/db/generate-sas/${selectedEmployee.employee_id}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Extract document data from the response
-        const newDocs = {
-          aadhar_card: data.documents.aadhar_card,
-          pan_card: data.documents.pan_card,
-          resume: data.documents.resume,
-          profile_photo: data.documents.profile_photo
-        };
-        
-        setDocuments(newDocs);
-        setFetchedEmployeeId(selectedEmployee.employee_id);
-        
-        // Check if any documents were found
-        const hasAnyDoc = Object.values(newDocs).some(doc => doc && doc.sas_url);
-        if (!hasAnyDoc) {
-          setError("No documents found for this Employee");
-        }
-      } else {
-        setError("Failed to fetch documents. Please try again.");
+      // Extract document data from response
+      const newDocs = {
+        aadhar_card: data.documents.aadhar_card,
+        pan_card: data.documents.pan_card,
+        resume: data.documents.resume,
+        profile_photo: data.documents.profile_photo
+      };
+      
+      setDocuments(newDocs);
+      setFetchedEmployeeId(selectedEmployee.employee_id);
+      
+      // Check if any documents were found
+      const hasAnyDoc = Object.values(newDocs).some(doc => doc && doc.sas_url);
+      if (!hasAnyDoc) {
+        setError("No documents found for this Employee");
       }
     } catch (err) {
       console.error("Error fetching documents:", err);
-      setError("Failed to fetch documents. Please try again.");
+      setError(err.message || "Failed to fetch documents. Please try again.");
     } finally {
       setLoading(false);
     }

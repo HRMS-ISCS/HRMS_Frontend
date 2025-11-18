@@ -1,4 +1,4 @@
-// //loginPage.jsx
+// src/auth/LoginPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,11 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Lock, Mail, User, Shield, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Lock, Shield, User } from "lucide-react";
 import iscsLogo from "@/assets/iscs-logo.png";
+import { login } from "../api";
 
 export default function LoginPage({ onLogin }) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,18 +23,15 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
     setError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    if (email && password) {
+    try {
+      await login(username, password);
       onLogin();
-    } else {
-      setError("Please enter both email and password.");
+      navigate("/dashboard");
+    } catch (error) {
+      setError(error.message || "An error occurred during login");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
-
-  const handleRegister = () => {
-    navigate("/register");
   };
 
   return (
@@ -95,17 +93,17 @@ export default function LoginPage({ onLogin }) {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <Label htmlFor="email" className="text-gray-700 text-sm font-medium">
-                      Email Address
+                    <Label htmlFor="username" className="text-gray-700 text-sm font-medium">
+                      Username or Email
                     </Label>
                     <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                       <Input
-                        id="email"
-                        type="email"
-                        placeholder="your.email@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        id="username"
+                        type="text"
+                        placeholder="Enter username or email"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         className="pl-10 h-10 border-gray-200 focus:border-blue-500 focus:ring-blue-200 bg-white/90 rounded-lg text-sm"
                         required
                       />
@@ -158,15 +156,6 @@ export default function LoginPage({ onLogin }) {
                     )}
                   </Button>
                 </form>
-
-                <Button
-                  onClick={handleRegister}
-                  variant="outline"
-                  className="w-full h-10 text-sm font-semibold border-2 border-gray-200 hover:border-blue-500 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                >
-                  <UserPlus size={16} className="mr-2" />
-                  Register as New Employee
-                </Button>
 
                 <div className="text-center">
                   <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">

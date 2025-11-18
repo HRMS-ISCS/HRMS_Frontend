@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, ChevronDown, ChevronUp, Building, ChevronLeft, ChevronRight } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
+import { apiRequest } from "../api" // Import our API request function
 
 export default function Dashboard() {
   const [employeeCounts, setEmployeeCounts] = useState({
@@ -33,24 +34,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Internal & External employees
-    fetch("http://127.0.0.1:8000/dashboard/employment-applications/count/internal-external")
-      .then((res) => res.json())
+    apiRequest("/dashboard/employment-applications/count/internal-external")
       .then((data) => setEmployeeCounts(data))
       .catch((err) => console.error("Error fetching employee counts:", err))
 
     // Gender count data
-    fetch("http://127.0.0.1:8000/dashboard/gender-count")
-      .then((res) => res.json())
+    apiRequest("/dashboard/gender-count")
       .then((data) => setGenderCounts(data))
       .catch((err) => console.error("Error fetching gender counts:", err))
 
     // Bank account data
-    fetch("http://127.0.0.1:8000/db/bank-accounts/axis-summary")
-      .then((res) => res.json())
+    apiRequest("/db/bank-accounts/axis-summary")
       .then((data) => setBankAccountData(data))
       .catch((err) => console.error("Error fetching bank account data:", err))
   }, [])
 
+  // Rest of the component remains the same...
   const totalEmployees = employeeCounts.internal_employees + employeeCounts.external_employees
 
   const stats = [

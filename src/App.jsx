@@ -1,5 +1,5 @@
-// App.jsx
-import React, { useState } from "react"
+// src/App.jsx
+import React, { useState, useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import LoginPage from "./auth/LoginPage"
 import RegisterPage from "./components/RegisterPage"
@@ -8,8 +8,9 @@ import Sidebar from "./components/Sidebar"
 import Navbar from "./components/Navbar"
 import Dashboard from "./components/Dashboard"
 import Employees from "./components/Employees"
-import Documents from "./components/Documents" // Add this import
-import { Toaster } from "@/components/ui/toaster" // Import Toaster
+import Documents from "./components/Documents"
+import { Toaster } from "@/components/ui/toaster"
+import { getToken, removeToken, getCurrentUser, hasValidToken } from "./api"
 
 // Protected Route Component
 function ProtectedRoute({ children, isLoggedIn }) {
@@ -24,8 +25,9 @@ function AppContent({ isLoggedIn, isLoading, onLogin, onLogout, onLoadingComplet
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    removeToken();
     onLogout()
-    navigate("/") // Navigate to login page after logout
+    navigate("/")
   }
 
   // Show loading screen after login
@@ -47,15 +49,23 @@ function AppContent({ isLoggedIn, isLoading, onLogin, onLogout, onLoadingComplet
           } 
         />
          
-        {/* Registration Route */}
+        {/* Registration Route - Now with sidebar and navbar layout */}
         <Route
           path="/register"
           element={
-            isLoggedIn ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <RegisterPage />
-            )
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="min-h-screen bg-gray-50">
+                <div className="flex">
+                  <Sidebar />
+                  <div className="flex-1 ml-64">
+                    <Navbar onLogout={handleLogout} />
+                    <main className="min-h-screen pt-16">
+                      <RegisterPage />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
           }
         />
         
@@ -117,7 +127,7 @@ function AppContent({ isLoggedIn, isLoading, onLogin, onLogout, onLoadingComplet
           }
         />
       </Routes>
-      <Toaster /> {/* Add Toaster component here */}
+      {typeof Toaster !== 'undefined' && <Toaster />}
     </>
   )
 }
@@ -125,19 +135,47 @@ function AppContent({ isLoggedIn, isLoading, onLogin, onLogout, onLoadingComplet
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingToken, setIsCheckingToken] = useState(true)
+
+  // Check for token on initial load
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        // First check if token exists
+        if (hasValidToken()) {
+          // Then validate it with the backend
+          await getCurrentUser();
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        console.error("Error validating token:", error);
+        removeToken();
+        setIsLoggedIn(false);
+      } finally {
+        setIsCheckingToken(false);
+      }
+    };
+
+    checkToken();
+  }, []);
 
   const handleLogin = () => {
-    setIsLoading(true) // Show loading screen
+    setIsLoading(true)
     setIsLoggedIn(true)
   }
 
   const handleLoadingComplete = () => {
-    setIsLoading(false) // Hide loading screen and show dashboard
+    setIsLoading(false)
   }
 
   const handleLogout = () => {
     setIsLoggedIn(false)
     setIsLoading(false)
+  }
+
+  // Show loading screen while checking token
+  if (isCheckingToken) {
+    return <LoadingScreen onLoadingComplete={() => setIsCheckingToken(false)} />
   }
 
   return (
