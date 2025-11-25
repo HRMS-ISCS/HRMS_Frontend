@@ -1,4 +1,4 @@
-// //DeclarationForm.jsx
+// // DeclarationForm.jsx
 // import React, { useState, useEffect } from "react";
 // import { Label } from "@/components/ui/label";
 // import { Input } from "@/components/ui/input";
@@ -16,8 +16,10 @@
 //   CheckCircle,
 //   AlertCircle
 // } from "lucide-react";
+// import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 // export default function DeclarationForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+//   const { toast } = useToast(); // Initialize toast
 //   const [formData, setFormData] = useState(initialData);
 //   const [errors, setErrors] = useState({});
 //   const [loading, setLoading] = useState(false);
@@ -34,12 +36,12 @@
 //     }
 //   }, [generatedEmployeeId]);
 
-//   // Fixed declaration text as per the form
-//   const declarationText = `I hereby certify that to the best of my knowledge and belief the information given are correct and if during my employment with ISCS Technologies Private Limited Hyderabad or any of its offices, any of the above answers are found to be false or if there is any omission of the material fact, I agree it may result in my discharge without other cause.
+//   // Fixed declaration text as per form
+//   const declarationText = `I hereby certify that to the best of my knowledge and belief information given are correct and if during my employment with ISCS Technologies Private Limited Hyderabad or any of its offices, any of the above answers are found to be false or if there is any omission of material fact, I agree it may result in my discharge without other cause.
 
 // I voluntarily consent to a thorough investigation by ISCS Technologies Private Limited of my past employment and activities of my background. I release ISCS Technologies Private Limited from all claims arising as a result of such investigation & I release from all liability or responsibility, all persons, Companies or Corporation supplying such information.
 
-// I agree that I will take Medical Examination whenever requested and I will comply to all office safety regulations and abide by the Company Rules, agreements, service rules, standing orders etc. which may be amended from time to time.`;
+// I agree that I will take Medical Examination whenever requested and I will comply to all office safety regulations and abide by Company Rules, agreements, service rules, standing orders etc. which may be amended from time to time.`;
 
 //   const handleChange = (field, value) => {
 //     setFormData(prev => ({
@@ -94,7 +96,18 @@
 //       if (response.ok) {
 //         setDeclarationSuccess(true);
 //         setErrors(prev => ({ ...prev, declarationGeneral: "" }));
-//         alert('Declaration saved successfully!');
+        
+//         // Show success toast instead of alert
+//         toast({
+//           title: (
+//             <div className="flex items-center gap-2">
+//               <CheckCircle className="h-5 w-5 text-green-500" />
+//               <span>Declaration Saved Successfully</span>
+//             </div>
+//           ),
+//           description: "Your declaration has been submitted and saved.",
+//           className: "bg-green-50 border-green-200 text-green-800",
+//         });
 //       } else {
 //         const errorData = await response.json();
 //         setErrors(prev => ({ ...prev, declarationGeneral: errorData.detail || 'Failed to save declaration' }));
@@ -190,9 +203,9 @@
           
 //           <div className="space-y-6 text-gray-700 leading-relaxed">
 //             <p className="text-justify">
-//               I hereby certify that to the best of my knowledge and belief the information given are correct and if during my 
+//               I hereby certify that to the best of my knowledge and belief information given are correct and if during my 
 //               employment with ISCS Technologies Private Limited Hyderabad or any of its offices, any of the above answers are 
-//               found to be false or if there is any omission of the material fact, I agree it may result in my discharge without other 
+//               found to be false or if there is any omission of material fact, I agree it may result in my discharge without other 
 //               cause.
 //             </p>
             
@@ -205,7 +218,7 @@
             
 //             <p className="text-justify">
 //               I agree that I will take Medical Examination whenever requested and I will comply to all office safety regulations and 
-//               abide by the Company Rules, agreements, service rules, standing orders etc. which may be amended from time to 
+//               abide by Company Rules, agreements, service rules, standing orders etc. which may be amended from time to 
 //               time.
 //             </p>
 //           </div>
@@ -342,7 +355,6 @@
 //     </div>
 //   );
 // }
-
 // DeclarationForm.jsx
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
@@ -361,7 +373,8 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
+import { useToast } from "@/components/ui/use-toast";
+import { apiRequest } from "../api"; // Import API request function
 
 export default function DeclarationForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
   const { toast } = useToast(); // Initialize toast
@@ -430,36 +443,36 @@ I agree that I will take Medical Examination whenever requested and I will compl
         declaration_text: declarationText
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/users/Declaration?employee_id=${declarationEmployeeId}`, {
+      // Use apiRequest function instead of direct fetch
+      await apiRequest(`/users/Declaration?employee_id=${declarationEmployeeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(apiData)
       });
 
-      if (response.ok) {
-        setDeclarationSuccess(true);
-        setErrors(prev => ({ ...prev, declarationGeneral: "" }));
-        
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Declaration Saved Successfully</span>
-            </div>
-          ),
-          description: "Your declaration has been submitted and saved.",
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
-      } else {
-        const errorData = await response.json();
-        setErrors(prev => ({ ...prev, declarationGeneral: errorData.detail || 'Failed to save declaration' }));
-      }
+      setDeclarationSuccess(true);
+      setErrors(prev => ({ ...prev, declarationGeneral: "" }));
+      
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Declaration Saved Successfully</span>
+          </div>
+        ),
+        description: "Your declaration has been submitted and saved.",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
     } catch (error) {
       console.error('Declaration API Error:', error);
-      setErrors(prev => ({ ...prev, declarationGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, declarationGeneral: error.message || 'Failed to save declaration' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save declaration. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setDeclarationLoading(false);
     }
@@ -502,7 +515,7 @@ I agree that I will take Medical Examination whenever requested and I will compl
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Declaration</h1>
-        <p className="text-gray-600">Please read and acknowledge the following declaration</p>
+        <p className="text-gray-600">Please read and acknowledge following declaration</p>
       </div>
 
       {/* Global Employee ID Display if available */}

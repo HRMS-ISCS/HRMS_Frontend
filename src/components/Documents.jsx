@@ -20,7 +20,7 @@ import {
   ChevronDown,
   Users
 } from "lucide-react";
-import { apiRequest } from "../api"; // Import the API request function
+import { apiRequest, getCurrentUser } from "../api"; // Import the API request function and getCurrentUser
 
 export default function Documents() {
   const [documents, setDocuments] = useState({
@@ -33,6 +33,8 @@ export default function Documents() {
   const [error, setError] = useState("");
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [fetchedEmployeeId, setFetchedEmployeeId] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState("");
   
   // New states for employee dropdown
   const [employees, setEmployees] = useState([]);
@@ -78,10 +80,34 @@ export default function Documents() {
     }
   ];
 
-  // Fetch employees on component mount
+  // Fetch current user on component mount
   useEffect(() => {
-    fetchEmployees();
+    const fetchCurrentUser = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setCurrentUser(userData);
+        setUserRole(userData.role?.toLowerCase());
+        
+        // If user is an employee, fetch their own documents
+        if (userData.role?.toLowerCase() === 'employee') {
+          setFetchedEmployeeId(userData.employee_id || userData.username);
+          fetchEmployeeDocuments(userData.employee_id || userData.username);
+        }
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+        setError("Failed to authenticate user");
+      }
+    };
+
+    fetchCurrentUser();
   }, []);
+
+  // Fetch employees on component mount (only for admin/hr)
+  useEffect(() => {
+    if (userRole === 'superadmin' || userRole === 'hr') {
+      fetchEmployees();
+    }
+  }, [userRole]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -110,6 +136,39 @@ export default function Documents() {
     }
   };
 
+  // Fetch documents for a specific employee
+  const fetchEmployeeDocuments = async (employeeId) => {
+    setLoading(true);
+    setError("");
+    setSelectedDoc(null);
+    
+    try {
+      // Use apiRequest function instead of direct fetch
+      const data = await apiRequest(`/db/generate-sas/${employeeId}`);
+      
+      // Extract document data from response
+      const newDocs = {
+        aadhar_card: data.documents.aadhar_card,
+        pan_card: data.documents.pan_card,
+        resume: data.documents.resume,
+        profile_photo: data.documents.profile_photo
+      };
+      
+      setDocuments(newDocs);
+      
+      // Check if any documents were found
+      const hasAnyDoc = Object.values(newDocs).some(doc => doc && doc.sas_url);
+      if (!hasAnyDoc) {
+        setError("No documents found for this Employee");
+      }
+    } catch (err) {
+      console.error("Error fetching documents:", err);
+      setError(err.message || "Failed to fetch documents. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filter employees based on search
   const filteredEmployees = employees.filter(emp => {
     const searchLower = employeeSearch.toLowerCase();
@@ -125,36 +184,8 @@ export default function Documents() {
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setSelectedDoc(null);
-    
-    try {
-      // Use apiRequest function instead of direct fetch
-      const data = await apiRequest(`/db/generate-sas/${selectedEmployee.employee_id}`);
-      
-      // Extract document data from response
-      const newDocs = {
-        aadhar_card: data.documents.aadhar_card,
-        pan_card: data.documents.pan_card,
-        resume: data.documents.resume,
-        profile_photo: data.documents.profile_photo
-      };
-      
-      setDocuments(newDocs);
-      setFetchedEmployeeId(selectedEmployee.employee_id);
-      
-      // Check if any documents were found
-      const hasAnyDoc = Object.values(newDocs).some(doc => doc && doc.sas_url);
-      if (!hasAnyDoc) {
-        setError("No documents found for this Employee");
-      }
-    } catch (err) {
-      console.error("Error fetching documents:", err);
-      setError(err.message || "Failed to fetch documents. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    setFetchedEmployeeId(selectedEmployee.employee_id);
+    fetchEmployeeDocuments(selectedEmployee.employee_id);
   };
 
   const handleViewDocument = (doc) => {
@@ -246,122 +277,131 @@ export default function Documents() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Employee Documents</h1>
-        <p className="text-gray-600">View and download employee documents securely</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          {userRole === 'employee' ? 'My Documents' : 'Employee Documents'}
+        </h1>
+        <p className="text-gray-600">
+          {userRole === 'employee' 
+            ? 'View and download your documents securely' 
+            : 'View and download employee documents securely'
+          }
+        </p>
       </div>
 
-      {/* Search Section */}
-      <Card className="p-5 mb-6 bg-white border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="text-blue-600" size={18} />
-          <h2 className="text-lg font-semibold text-gray-800">Select Employee</h2>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="relative" ref={dropdownRef}>
-            <Label className="text-sm font-medium text-gray-700 mb-1 block">Search Employee *</Label>
-            <div className="relative">
-              <Input
-                value={employeeSearch}
-                onChange={(e) => {
-                  setEmployeeSearch(e.target.value);
-                  setDropdownOpen(true);
-                  setHighlightedIndex(-1);
-                }}
-                onFocus={() => setDropdownOpen(true)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type to search by name or ID..."
-                className="pr-10 h-10 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              />
-              <ChevronDown 
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${dropdownOpen ? 'rotate-180' : ''}`}
-                size={18}
-              />
-            </div>
-            
-            {/* Compact Dropdown */}
-            {dropdownOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
-                <div className="max-h-36 overflow-y-auto">
-                  {loadingEmployees ? (
-                    <div className="px-3 py-2 text-center text-gray-500 text-sm">
-                      <RefreshCw className="animate-spin inline-block mr-2" size={14} />
-                      Loading...
-                    </div>
-                  ) : filteredEmployees.length > 0 ? (
-                    filteredEmployees.map((employee, index) => (
-                      <div
-                        key={employee.employee_id}
-                        onClick={() => handleSelectEmployee(employee)}
-                        className={`px-3 py-2 cursor-pointer transition-colors text-sm ${
-                          index === highlightedIndex 
-                            ? 'bg-blue-50 text-blue-700' 
-                            : 'hover:bg-gray-50 text-gray-700'
-                        } ${index !== filteredEmployees.length - 1 ? 'border-b border-gray-100' : ''}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{employee.name}</p>
-                            <p className="text-xs text-gray-500">ID: {employee.employee_id}</p>
-                          </div>
-                          <User size={14} className="text-gray-400 ml-2 flex-shrink-0" />
-                        </div>
+      {/* Search Section - Only for Admin/HR */}
+      {(userRole === 'superadmin' || userRole === 'hr') && (
+        <Card className="p-5 mb-6 bg-white border border-gray-200 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="text-blue-600" size={18} />
+            <h2 className="text-lg font-semibold text-gray-800">Select Employee</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="relative" ref={dropdownRef}>
+              <Label className="text-sm font-medium text-gray-700 mb-1 block">Search Employee *</Label>
+              <div className="relative">
+                <Input
+                  value={employeeSearch}
+                  onChange={(e) => {
+                    setEmployeeSearch(e.target.value);
+                    setDropdownOpen(true);
+                    setHighlightedIndex(-1);
+                  }}
+                  onFocus={() => setDropdownOpen(true)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type to search by name or ID..."
+                  className="pr-10 h-10 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+                />
+                <ChevronDown 
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${dropdownOpen ? 'rotate-180' : ''}`}
+                  size={18}
+                />
+              </div>
+              
+              {/* Compact Dropdown */}
+              {dropdownOpen && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+                  <div className="max-h-36 overflow-y-auto">
+                    {loadingEmployees ? (
+                      <div className="px-3 py-2 text-center text-gray-500 text-sm">
+                        <RefreshCw className="animate-spin inline-block mr-2" size={14} />
+                        Loading...
                       </div>
-                    ))
-                  ) : (
-                    <div className="px-3 py-2 text-center text-gray-500 text-sm">
-                      {employeeSearch ? "No employees found" : "No employees available"}
+                    ) : filteredEmployees.length > 0 ? (
+                      filteredEmployees.map((employee, index) => (
+                        <div
+                          key={employee.employee_id}
+                          onClick={() => handleSelectEmployee(employee)}
+                          className={`px-3 py-2 cursor-pointer transition-colors text-sm ${
+                            index === highlightedIndex 
+                              ? 'bg-blue-50 text-blue-700' 
+                              : 'hover:bg-gray-50 text-gray-700'
+                          } ${index !== filteredEmployees.length - 1 ? 'border-b border-gray-100' : ''}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{employee.name}</p>
+                              <p className="text-xs text-gray-500">ID: {employee.employee_id}</p>
+                            </div>
+                            <User size={14} className="text-gray-400 ml-2 flex-shrink-0" />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-center text-gray-500 text-sm">
+                        {employeeSearch ? "No employees found" : "No employees available"}
+                      </div>
+                    )}
+                  </div>
+                  {filteredEmployees.length > 3 && (
+                    <div className="px-3 py-1 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
+                      Scroll for more employees
                     </div>
                   )}
                 </div>
-                {filteredEmployees.length > 3 && (
-                  <div className="px-3 py-1 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
-                    Scroll for more employees
-                  </div>
+              )}
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                onClick={fetchDocuments}
+                disabled={loading || !selectedEmployee}
+                className="px-4 py-2 h-10 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw size={14} className="mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Search size={14} className="mr-2" />
+                    Get Documents
+                  </>
                 )}
+              </Button>
+              
+              {selectedEmployee && (
+                <Button
+                  onClick={handleClear}
+                  variant="outline"
+                  className="px-4 py-2 h-10 text-sm font-medium border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            
+            {selectedEmployee && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>Selected:</strong> {selectedEmployee.name} ({selectedEmployee.employee_id})
+                </p>
               </div>
             )}
           </div>
-          
-          <div className="flex gap-2">
-            <Button
-              onClick={fetchDocuments}
-              disabled={loading || !selectedEmployee}
-              className="px-4 py-2 h-10 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-            >
-              {loading ? (
-                <>
-                  <RefreshCw size={14} className="mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <Search size={14} className="mr-2" />
-                  Get Documents
-                </>
-              )}
-            </Button>
-            
-            {selectedEmployee && (
-              <Button
-                onClick={handleClear}
-                variant="outline"
-                className="px-4 py-2 h-10 text-sm font-medium border-gray-300 hover:bg-gray-50 transition-colors"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
-          
-          {selectedEmployee && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800">
-                <strong>Selected:</strong> {selectedEmployee.name} ({selectedEmployee.employee_id})
-              </p>
-            </div>
-          )}
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -376,7 +416,13 @@ export default function Documents() {
         <>
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800">
-              Documents for Employee: <span className="text-blue-600">{selectedEmployee?.name} ({fetchedEmployeeId})</span>
+              Documents for Employee: 
+              <span className="text-blue-600 ml-2">
+                {userRole === 'employee' 
+                  ? `${currentUser?.first_name} ${currentUser?.last_name} (${fetchedEmployeeId})`
+                  : `${selectedEmployee?.name} (${fetchedEmployeeId})`
+                }
+              </span>
             </h3>
           </div>
 

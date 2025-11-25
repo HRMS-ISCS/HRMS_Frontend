@@ -1,10 +1,42 @@
-//navbar.jsx
-import React, { useState } from "react"
-import { Search, Bell, Settings, LogOut, User, ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
+// src/components/Navbar.jsx
+import React, { useState, useEffect } from "react";
+import { Search, Bell, Settings, LogOut, User, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { removeToken, getCurrentUser } from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar({ onLogout }) {
-  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getCurrentUser();
+        setUserData(data);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleLogout = () => {
+    // Explicitly remove token
+    removeToken();
+    // Call the onLogout prop
+    onLogout();
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+    setShowUserMenu(false);
+  };
 
   return (
     <nav className="fixed top-0 left-64 right-0 h-16 bg-white shadow-sm border-b border-gray-200 z-30">
@@ -46,8 +78,12 @@ export default function Navbar({ onLogout }) {
                 <User size={16} className="text-white" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-gray-800">Sri ran</p>
-                <p className="text-xs text-gray-500">Administrator</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {loading ? "Loading..." : userData ? `${userData.first_name} ${userData.last_name}` : "User"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {loading ? "..." : userData ? userData.role : "Unknown"}
+                </p>
               </div>
               <ChevronDown size={16} className="text-gray-400" />
             </button>
@@ -55,7 +91,10 @@ export default function Navbar({ onLogout }) {
             {/* Dropdown Menu */}
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3">
+                <button 
+                  onClick={handleProfileClick}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                >
                   <User size={16} />
                   Profile
                 </button>
@@ -65,7 +104,7 @@ export default function Navbar({ onLogout }) {
                 </button>
                 <hr className="my-2" />
                 <button 
-                  onClick={onLogout}
+                  onClick={handleLogout}
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
                 >
                   <LogOut size={16} />
@@ -77,5 +116,5 @@ export default function Navbar({ onLogout }) {
         </div>
       </div>
     </nav>
-  )
+  );
 }

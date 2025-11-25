@@ -1,4 +1,4 @@
-// //BankAndFamilyForm.jsx
+// // BankAndFamilyForm.jsx
 // import React, { useState, useEffect } from "react";
 // import { Label } from "@/components/ui/label";
 // import { Input } from "@/components/ui/input";
@@ -20,8 +20,11 @@
 //   CheckCircle,
 //   AlertCircle
 // } from "lucide-react";
+// import { useToast } from "@/components/ui/use-toast";
+// import { apiRequest } from "../api"; // Import API request function
 
 // export default function BankAndFamilyForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+//   const { toast } = useToast(); // Initialize toast
 //   const [formData, setFormData] = useState(initialData);
 //   const [errors, setErrors] = useState({});
 //   const [loading, setLoading] = useState(false);
@@ -44,6 +47,9 @@
   
 //   // New state for bank suggestion dropdown
 //   const [bankSuggestion, setBankSuggestion] = useState("");
+  
+//   // New state to track if all required sections are completed
+//   const [allSectionsCompleted, setAllSectionsCompleted] = useState(false);
 
 //   // Set employee IDs from props when component mounts or when generatedEmployeeId changes
 //   useEffect(() => {
@@ -54,6 +60,13 @@
 //       setAcademicEmployeeId(generatedEmployeeId);
 //     }
 //   }, [generatedEmployeeId]);
+  
+//   // Check if all required sections are completed
+//   useEffect(() => {
+//     // Check if all required sections are completed
+//     const isCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+//     setAllSectionsCompleted(isCompleted);
+//   }, [bankSuccess, maritalSuccess, familySuccess, academicSuccess]);
 
 //   const handleChange = (e) => {
 //     const { name, value } = e.target;
@@ -84,6 +97,28 @@
 //       setFormData(prev => ({
 //         ...prev,
 //         bankName: ""
+//       }));
+//     }
+//   };
+
+//   // Handle marital status change with proper capitalization
+//   const handleMaritalStatusChange = (e) => {
+//     const value = e.target.value;
+    
+//     // Capitalize the first letter for backend compatibility
+//     const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    
+//     setFormData(prev => ({
+//       ...prev,
+//       maritalStatus: capitalizedValue,
+//       // Clear marriage date if status is Single
+//       marriageDate: capitalizedValue === 'Single' ? '' : prev.marriageDate
+//     }));
+    
+//     if (errors.maritalStatus) {
+//       setErrors(prev => ({
+//         ...prev,
+//         maritalStatus: ""
 //       }));
 //     }
 //   };
@@ -175,26 +210,36 @@
 //         account_type: formData.accountType || "Savings"
 //       };
 
-//       const response = await fetch(`http://127.0.0.1:8000/users/Bank_Account/${bankEmployeeId}`, {
+//       // Use apiRequest function without assigning to unused variable
+//       await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
 //         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
 //         body: JSON.stringify(apiData)
 //       });
 
-//       const result = await response.json();
-
-//       if (response.ok) {
-//         setBankSuccess(true);
-//         setErrors(prev => ({ ...prev, bankGeneral: "" }));
-//         alert('Bank account details saved successfully!');
-//       } else {
-//         setErrors(prev => ({ ...prev, bankGeneral: result.detail || 'Failed to save bank details' }));
-//       }
+//       setBankSuccess(true);
+//       setErrors(prev => ({ ...prev, bankGeneral: "" }));
+      
+//       // Show success toast
+//       toast({
+//         title: (
+//           <div className="flex items-center gap-2">
+//             <CheckCircle className="h-5 w-5 text-green-500" />
+//             <span>Bank Account Details Saved</span>
+//           </div>
+//         ),
+//         description: "Your bank account information has been saved successfully.",
+//         className: "bg-green-50 border-green-200 text-green-800",
+//       });
 //     } catch (error) {
 //       console.error('Bank API Error:', error);
-//       setErrors(prev => ({ ...prev, bankGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save bank details. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setBankLoading(false);
 //     }
@@ -217,29 +262,39 @@
 //     try {
 //       const apiData = {
 //         marital_status: formData.maritalStatus,
-//         marriage_date: formData.marriageDate || null
+//         marriage_date: formData.maritalStatus === 'Single' ? null : (formData.marriageDate || null)
 //       };
 
-//       const response = await fetch(`http://127.0.0.1:8000/users/MaritalStatus/${maritalEmployeeId}`, {
+//       // Use apiRequest function without assigning to unused variable
+//       await apiRequest(`/users/MaritalStatus/${maritalEmployeeId}`, {
 //         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
 //         body: JSON.stringify(apiData)
 //       });
 
-//       const result = await response.json();
-
-//       if (response.ok) {
-//         setMaritalSuccess(true);
-//         setErrors(prev => ({ ...prev, maritalGeneral: "" }));
-//         alert('Marital status saved successfully!');
-//       } else {
-//         setErrors(prev => ({ ...prev, maritalGeneral: result.detail || 'Failed to save marital status' }));
-//       }
+//       setMaritalSuccess(true);
+//       setErrors(prev => ({ ...prev, maritalGeneral: "" }));
+      
+//       // Show success toast
+//       toast({
+//         title: (
+//           <div className="flex items-center gap-2">
+//             <CheckCircle className="h-5 w-5 text-green-500" />
+//             <span>Marital Status Saved</span>
+//           </div>
+//         ),
+//         description: "Your marital status has been saved successfully.",
+//         className: "bg-green-50 border-green-200 text-green-800",
+//       });
 //     } catch (error) {
 //       console.error('Marital API Error:', error);
-//       setErrors(prev => ({ ...prev, maritalGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, maritalGeneral: error.message || 'Failed to save marital status' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save marital status. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setMaritalLoading(false);
 //     }
@@ -270,30 +325,44 @@
 //             age: member.dateOfBirth ? parseInt(calculateAge(member.dateOfBirth)) : null
 //           };
 
-//           const response = await fetch(`http://127.0.0.1:8000/users/FamilyBackground/${familyEmployeeId}`, {
+//           // Use apiRequest function without assigning to unused variable
+//           await apiRequest(`/users/FamilyBackground/${familyEmployeeId}`, {
 //             method: 'POST',
-//             headers: {
-//               'Content-Type': 'application/json',
-//             },
 //             body: JSON.stringify(apiData)
 //           });
-
-//           if (response.ok) {
-//             successCount++;
-//           }
+          
+//           successCount++;
 //         }
 //       }
 
 //       if (successCount > 0) {
 //         setFamilySuccess(true);
 //         setErrors(prev => ({ ...prev, familyGeneral: "" }));
-//         alert(`Family background saved successfully! (${successCount} members)`);
+        
+//         // Show success toast
+//         toast({
+//           title: (
+//             <div className="flex items-center gap-2">
+//               <CheckCircle className="h-5 w-5 text-green-500" />
+//               <span>Family Background Saved</span>
+//             </div>
+//           ),
+//           description: `${successCount} family member(s) information has been saved successfully.`,
+//           className: "bg-green-50 border-green-200 text-green-800",
+//         });
 //       } else {
 //         setErrors(prev => ({ ...prev, familyGeneral: 'No family member data to save' }));
 //       }
 //     } catch (error) {
 //       console.error('Family API Error:', error);
-//       setErrors(prev => ({ ...prev, familyGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, familyGeneral: error.message || 'Failed to connect to server' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save family background. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setFamilyLoading(false);
 //     }
@@ -331,29 +400,43 @@
 //           rank_or_grade: qualification.rankGradePercentage ? parseFloat(qualification.rankGradePercentage) : null
 //         };
 
-//         const response = await fetch(`http://127.0.0.1:8000/users/Academic_Background/${academicEmployeeId}`, {
+//         // Use apiRequest function without assigning to unused variable
+//         await apiRequest(`/users/Academic_Background/${academicEmployeeId}`, {
 //           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
 //           body: JSON.stringify(apiData)
 //         });
-
-//         if (response.ok) {
-//           successCount++;
-//         }
+        
+//         successCount++;
 //       }
 
 //       if (successCount > 0) {
 //         setAcademicSuccess(true);
 //         setErrors(prev => ({ ...prev, academicGeneral: "" }));
-//         alert(`Academic background saved successfully! (${successCount} qualifications)`);
+        
+//         // Show success toast
+//         toast({
+//           title: (
+//             <div className="flex items-center gap-2">
+//               <CheckCircle className="h-5 w-5 text-green-500" />
+//               <span>Academic Background Saved</span>
+//             </div>
+//           ),
+//           description: `${successCount} qualification(s) have been saved successfully.`,
+//           className: "bg-green-50 border-green-200 text-green-800",
+//         });
 //       } else {
 //         setErrors(prev => ({ ...prev, academicGeneral: 'Failed to save academic qualifications' }));
 //       }
 //     } catch (error) {
 //       console.error('Academic API Error:', error);
-//       setErrors(prev => ({ ...prev, academicGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, academicGeneral: error.message || 'Failed to connect to server' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save academic background. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setAcademicLoading(false);
 //     }
@@ -381,6 +464,16 @@
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
+    
+//     // Directly check if all sections are completed instead of relying on state
+//     const sectionsCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+    
+//     // Check if all sections are completed
+//     if (!sectionsCompleted) {
+//       setErrors(prev => ({ ...prev, submit: "Please complete all sections before proceeding" }));
+//       return;
+//     }
+    
 //     if (validateForm()) {
 //       setLoading(true);
 //       // Calculate ages for family members
@@ -431,7 +524,7 @@
 
 //       <div className="space-y-8">
 //         {/* Bank Account Details Section */}
-//         <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+//         <Card className={`p-6 ${bankSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'}`}>
 //           <div className="flex items-center justify-between mb-6">
 //             <div className="flex items-center gap-2">
 //               <CreditCard className="text-green-600" size={20} />
@@ -567,13 +660,18 @@
 //           <Button
 //             onClick={submitBankAccount}
 //             disabled={bankLoading}
-//             className="w-full bg-green-600 hover:bg-green-700 text-white"
+//             className={`w-full ${bankSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
 //           >
 //             {bankLoading ? (
 //               <div className="flex items-center gap-2">
 //                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 //                 Saving Bank Details...
 //               </div>
+//             ) : bankSuccess ? (
+//               <>
+//                 <CheckCircle size={16} className="mr-2" />
+//                 Bank Account Details Saved
+//               </>
 //             ) : (
 //               <>
 //                 <Save size={16} className="mr-2" />
@@ -584,7 +682,7 @@
 //         </Card>
 
 //         {/* Family Background Section */}
-//         <Card className="p-6 bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200">
+//         <Card className={`p-6 ${maritalSuccess && familySuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200'}`}>
 //           <div className="flex items-center justify-between mb-6">
 //             <div className="flex items-center gap-2">
 //               <Heart className="text-pink-600" size={20} />
@@ -621,14 +719,14 @@
 //                 id="maritalStatus"
 //                 name="maritalStatus"
 //                 value={formData.maritalStatus}
-//                 onChange={handleChange}
+//                 onChange={handleMaritalStatusChange}
 //                 className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 //               >
 //                 <option value="">Select marital status</option>
-//                 <option value="single">Single</option>
-//                 <option value="married">Married</option>
-//                 <option value="divorced">Divorced</option>
-//                 <option value="widowed">Widowed</option>
+//                 <option value="Single">Single</option>
+//                 <option value="Married">Married</option>
+//                 <option value="Divorced">Divorced</option>
+//                 <option value="Widowed">Widowed</option>
 //               </select>
 //             </div>
 
@@ -636,6 +734,9 @@
 //               <Label htmlFor="marriageDate" className="text-gray-700 font-medium flex items-center gap-2">
 //                 <Calendar size={16} className="text-gray-500" />
 //                 Marriage Date
+//                 {formData.maritalStatus === 'Single' && (
+//                   <span className="text-xs text-gray-500 ml-1">(Not applicable for Single status)</span>
+//                 )}
 //               </Label>
 //               <Input
 //                 id="marriageDate"
@@ -643,7 +744,12 @@
 //                 type="date"
 //                 value={formData.marriageDate}
 //                 onChange={handleChange}
+//                 disabled={formData.maritalStatus === 'Single'}
+//                 className={formData.maritalStatus === 'Single' ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed' : ''}
 //               />
+//               {formData.maritalStatus === 'Single' && (
+//                 <p className="text-xs text-gray-500 mt-1">Marriage date is automatically disabled for Single status</p>
+//               )}
 //             </div>
 //           </div>
 
@@ -657,13 +763,18 @@
 //           <Button
 //             onClick={submitMaritalStatus}
 //             disabled={maritalLoading}
-//             className="w-full bg-pink-600 hover:bg-pink-700 text-white mb-6"
+//             className={`w-full ${maritalSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-pink-600 hover:bg-pink-700'} text-white mb-6`}
 //           >
 //             {maritalLoading ? (
 //               <div className="flex items-center gap-2">
 //                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 //                 Saving Marital Status...
 //               </div>
+//             ) : maritalSuccess ? (
+//               <>
+//                 <CheckCircle size={16} className="mr-2" />
+//                 Marital Status Saved
+//               </>
 //             ) : (
 //               <>
 //                 <Save size={16} className="mr-2" />
@@ -768,13 +879,18 @@
 //           <Button
 //             onClick={submitFamilyBackground}
 //             disabled={familyLoading}
-//             className="w-full bg-rose-600 hover:bg-rose-700 text-white"
+//             className={`w-full ${familySuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-rose-600 hover:bg-rose-700'} text-white`}
 //           >
 //             {familyLoading ? (
 //               <div className="flex items-center gap-2">
 //                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 //                 Saving Family Details...
 //               </div>
+//             ) : familySuccess ? (
+//               <>
+//                 <CheckCircle size={16} className="mr-2" />
+//                 Family Background Saved
+//               </>
 //             ) : (
 //               <>
 //                 <Save size={16} className="mr-2" />
@@ -785,7 +901,7 @@
 //         </Card>
 
 //         {/* Academic Background Section */}
-//         <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+//         <Card className={`p-6 ${academicSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
 //           <div className="flex items-center justify-between mb-6">
 //             <div className="flex items-center gap-2">
 //               <GraduationCap className="text-blue-600" size={20} />
@@ -954,13 +1070,18 @@
 //           <Button
 //             onClick={submitAcademicBackground}
 //             disabled={academicLoading}
-//             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+//             className={`w-full ${academicSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
 //           >
 //             {academicLoading ? (
 //               <div className="flex items-center gap-2">
 //                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 //                 Saving Academic Details...
 //               </div>
+//             ) : academicSuccess ? (
+//               <>
+//                 <CheckCircle size={16} className="mr-2" />
+//                 Academic Background Saved
+//               </>
 //             ) : (
 //               <>
 //                 <Save size={16} className="mr-2" />
@@ -968,6 +1089,58 @@
 //               </>
 //             )}
 //           </Button>
+//         </Card>
+
+//         {/* Progress Indicator */}
+//         <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-6">
+//           <div className="mb-4">
+//             <div className="flex justify-between items-center mb-2">
+//               <h3 className="text-lg font-semibold text-gray-800">Form Completion Status</h3>
+//               <span className="text-sm font-medium text-gray-600">
+//                 {allSectionsCompleted ? 'All sections completed!' : `${[bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length}/4 sections completed`}
+//               </span>
+//             </div>
+//             <div className="w-full bg-gray-200 rounded-full h-2.5">
+//               <div 
+//                 className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+//                 style={{ width: `${([bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length / 4) * 100}%` }}
+//               ></div>
+//             </div>
+//           </div>
+          
+//           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+//             <div className={`text-center p-3 rounded-lg ${bankSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+//               <div className="flex justify-center mb-2">
+//                 {bankSuccess ? <CheckCircle className="text-green-600" size={20} /> : <CreditCard className="text-gray-400" size={20} />}
+//               </div>
+//               <p className="text-sm font-medium text-gray-700">Bank Details</p>
+//               <p className="text-xs text-gray-500 mt-1">{bankSuccess ? 'Completed' : 'Pending'}</p>
+//             </div>
+            
+//             <div className={`text-center p-3 rounded-lg ${maritalSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+//               <div className="flex justify-center mb-2">
+//                 {maritalSuccess ? <CheckCircle className="text-green-600" size={20} /> : <Heart className="text-gray-400" size={20} />}
+//               </div>
+//               <p className="text-sm font-medium text-gray-700">Marital Status</p>
+//               <p className="text-xs text-gray-500 mt-1">{maritalSuccess ? 'Completed' : 'Pending'}</p>
+//             </div>
+            
+//             <div className={`text-center p-3 rounded-lg ${familySuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+//               <div className="flex justify-center mb-2">
+//                 {familySuccess ? <CheckCircle className="text-green-600" size={20} /> : <Users className="text-gray-400" size={20} />}
+//               </div>
+//               <p className="text-sm font-medium text-gray-700">Family Details</p>
+//               <p className="text-xs text-gray-500 mt-1">{familySuccess ? 'Completed' : 'Pending'}</p>
+//             </div>
+            
+//             <div className={`text-center p-3 rounded-lg ${academicSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+//               <div className="flex justify-center mb-2">
+//                 {academicSuccess ? <CheckCircle className="text-green-600" size={20} /> : <GraduationCap className="text-gray-400" size={20} />}
+//               </div>
+//               <p className="text-sm font-medium text-gray-700">Academic Details</p>
+//               <p className="text-xs text-gray-500 mt-1">{academicSuccess ? 'Completed' : 'Pending'}</p>
+//             </div>
+//           </div>
 //         </Card>
 
 //         {/* Company Info Card */}
@@ -979,6 +1152,13 @@
 //             <p className="text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>
 //           </div>
 //         </Card>
+
+//         {/* Submit Error */}
+//         {errors.submit && (
+//           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+//             <p className="text-sm text-red-600 text-center">{errors.submit}</p>
+//           </div>
+//         )}
 
 //         {/* Action Buttons */}
 //         <div className="flex justify-between pt-6">
@@ -994,8 +1174,12 @@
           
 //           <Button
 //             onClick={handleSubmit}
-//             disabled={loading}
-//             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+//             disabled={loading || !allSectionsCompleted}
+//             className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+//               allSectionsCompleted 
+//                 ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+//                 : "bg-gray-400 text-white cursor-not-allowed"
+//             }`}
 //           >
 //             {loading ? (
 //               <div className="flex items-center gap-2">
@@ -1014,6 +1198,7 @@
 //     </div>
 //   );
 // }
+
 // BankAndFamilyForm.jsx
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
@@ -1036,9 +1221,10 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
+import { useToast } from "@/components/ui/use-toast";
+import { apiRequest } from "../api"; // Import API request function
 
-export default function BankAndFamilyForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+export default function BankAndFamilyForm({ initialData, generatedEmployeeId, onSubmit, onAcademicSubmit, onBack }) {
   const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
@@ -1062,6 +1248,9 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   
   // New state for bank suggestion dropdown
   const [bankSuggestion, setBankSuggestion] = useState("");
+  
+  // New state to track if all required sections are completed
+  const [allSectionsCompleted, setAllSectionsCompleted] = useState(false);
 
   // Set employee IDs from props when component mounts or when generatedEmployeeId changes
   useEffect(() => {
@@ -1072,6 +1261,13 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       setAcademicEmployeeId(generatedEmployeeId);
     }
   }, [generatedEmployeeId]);
+  
+  // Check if all required sections are completed
+  useEffect(() => {
+    // Check if all required sections are completed
+    const isCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+    setAllSectionsCompleted(isCompleted);
+  }, [bankSuccess, maritalSuccess, familySuccess, academicSuccess]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -1102,6 +1298,28 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       setFormData(prev => ({
         ...prev,
         bankName: ""
+      }));
+    }
+  };
+
+  // Handle marital status change with proper capitalization
+  const handleMaritalStatusChange = (e) => {
+    const value = e.target.value;
+    
+    // Capitalize the first letter for backend compatibility
+    const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    
+    setFormData(prev => ({
+      ...prev,
+      maritalStatus: capitalizedValue,
+      // Clear marriage date if status is Single
+      marriageDate: capitalizedValue === 'Single' ? '' : prev.marriageDate
+    }));
+    
+    if (errors.maritalStatus) {
+      setErrors(prev => ({
+        ...prev,
+        maritalStatus: ""
       }));
     }
   };
@@ -1193,37 +1411,36 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         account_type: formData.accountType || "Savings"
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/users/Bank_Account/${bankEmployeeId}`, {
+      // Use apiRequest function without assigning to unused variable
+      await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(apiData)
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setBankSuccess(true);
-        setErrors(prev => ({ ...prev, bankGeneral: "" }));
-        
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Bank Account Details Saved</span>
-            </div>
-          ),
-          description: "Your bank account information has been saved successfully.",
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
-      } else {
-        setErrors(prev => ({ ...prev, bankGeneral: result.detail || 'Failed to save bank details' }));
-      }
+      setBankSuccess(true);
+      setErrors(prev => ({ ...prev, bankGeneral: "" }));
+      
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Bank Account Details Saved</span>
+          </div>
+        ),
+        description: "Your bank account information has been saved successfully.",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
     } catch (error) {
       console.error('Bank API Error:', error);
-      setErrors(prev => ({ ...prev, bankGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save bank details. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setBankLoading(false);
     }
@@ -1246,40 +1463,39 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
     try {
       const apiData = {
         marital_status: formData.maritalStatus,
-        marriage_date: formData.marriageDate || null
+        marriage_date: formData.maritalStatus === 'Single' ? null : (formData.marriageDate || null)
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/users/MaritalStatus/${maritalEmployeeId}`, {
+      // Use apiRequest function without assigning to unused variable
+      await apiRequest(`/users/MaritalStatus/${maritalEmployeeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(apiData)
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setMaritalSuccess(true);
-        setErrors(prev => ({ ...prev, maritalGeneral: "" }));
-        
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Marital Status Saved</span>
-            </div>
-          ),
-          description: "Your marital status has been saved successfully.",
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
-      } else {
-        setErrors(prev => ({ ...prev, maritalGeneral: result.detail || 'Failed to save marital status' }));
-      }
+      setMaritalSuccess(true);
+      setErrors(prev => ({ ...prev, maritalGeneral: "" }));
+      
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Marital Status Saved</span>
+          </div>
+        ),
+        description: "Your marital status has been saved successfully.",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
     } catch (error) {
       console.error('Marital API Error:', error);
-      setErrors(prev => ({ ...prev, maritalGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, maritalGeneral: error.message || 'Failed to save marital status' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save marital status. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setMaritalLoading(false);
     }
@@ -1310,17 +1526,13 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             age: member.dateOfBirth ? parseInt(calculateAge(member.dateOfBirth)) : null
           };
 
-          const response = await fetch(`http://127.0.0.1:8000/users/FamilyBackground/${familyEmployeeId}`, {
+          // Use apiRequest function without assigning to unused variable
+          await apiRequest(`/users/FamilyBackground/${familyEmployeeId}`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             body: JSON.stringify(apiData)
           });
-
-          if (response.ok) {
-            successCount++;
-          }
+          
+          successCount++;
         }
       }
 
@@ -1328,7 +1540,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         setFamilySuccess(true);
         setErrors(prev => ({ ...prev, familyGeneral: "" }));
         
-        // Show success toast instead of alert
+        // Show success toast
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -1344,7 +1556,14 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       }
     } catch (error) {
       console.error('Family API Error:', error);
-      setErrors(prev => ({ ...prev, familyGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, familyGeneral: error.message || 'Failed to connect to server' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save family background. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setFamilyLoading(false);
     }
@@ -1382,24 +1601,20 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           rank_or_grade: qualification.rankGradePercentage ? parseFloat(qualification.rankGradePercentage) : null
         };
 
-        const response = await fetch(`http://127.0.0.1:8000/users/Academic_Background/${academicEmployeeId}`, {
+        // Use apiRequest function without assigning to unused variable
+        await apiRequest(`/users/Academic_Background/${academicEmployeeId}`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify(apiData)
         });
-
-        if (response.ok) {
-          successCount++;
-        }
+        
+        successCount++;
       }
 
       if (successCount > 0) {
         setAcademicSuccess(true);
         setErrors(prev => ({ ...prev, academicGeneral: "" }));
         
-        // Show success toast instead of alert
+        // Show success toast
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -1410,12 +1625,24 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           description: `${successCount} qualification(s) have been saved successfully.`,
           className: "bg-green-50 border-green-200 text-green-800",
         });
+        
+        // Call the onAcademicSubmit callback to unlock step 4
+        if (onAcademicSubmit) {
+          onAcademicSubmit();
+        }
       } else {
         setErrors(prev => ({ ...prev, academicGeneral: 'Failed to save academic qualifications' }));
       }
     } catch (error) {
       console.error('Academic API Error:', error);
-      setErrors(prev => ({ ...prev, academicGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, academicGeneral: error.message || 'Failed to connect to server' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save academic background. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setAcademicLoading(false);
     }
@@ -1443,6 +1670,16 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Directly check if all sections are completed instead of relying on state
+    const sectionsCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+    
+    // Check if all sections are completed
+    if (!sectionsCompleted) {
+      setErrors(prev => ({ ...prev, submit: "Please complete all sections before proceeding" }));
+      return;
+    }
+    
     if (validateForm()) {
       setLoading(true);
       // Calculate ages for family members
@@ -1493,7 +1730,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
 
       <div className="space-y-8">
         {/* Bank Account Details Section */}
-        <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className={`p-6 ${bankSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <CreditCard className="text-green-600" size={20} />
@@ -1629,13 +1866,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           <Button
             onClick={submitBankAccount}
             disabled={bankLoading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            className={`w-full ${bankSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
           >
             {bankLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Saving Bank Details...
               </div>
+            ) : bankSuccess ? (
+              <>
+                <CheckCircle size={16} className="mr-2" />
+                Bank Account Details Saved
+              </>
             ) : (
               <>
                 <Save size={16} className="mr-2" />
@@ -1646,7 +1888,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         </Card>
 
         {/* Family Background Section */}
-        <Card className="p-6 bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200">
+        <Card className={`p-6 ${maritalSuccess && familySuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Heart className="text-pink-600" size={20} />
@@ -1683,14 +1925,14 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
                 id="maritalStatus"
                 name="maritalStatus"
                 value={formData.maritalStatus}
-                onChange={handleChange}
+                onChange={handleMaritalStatusChange}
                 className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <option value="">Select marital status</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="divorced">Divorced</option>
-                <option value="widowed">Widowed</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Widowed">Widowed</option>
               </select>
             </div>
 
@@ -1698,6 +1940,9 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               <Label htmlFor="marriageDate" className="text-gray-700 font-medium flex items-center gap-2">
                 <Calendar size={16} className="text-gray-500" />
                 Marriage Date
+                {formData.maritalStatus === 'Single' && (
+                  <span className="text-xs text-gray-500 ml-1">(Not applicable for Single status)</span>
+                )}
               </Label>
               <Input
                 id="marriageDate"
@@ -1705,7 +1950,12 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
                 type="date"
                 value={formData.marriageDate}
                 onChange={handleChange}
+                disabled={formData.maritalStatus === 'Single'}
+                className={formData.maritalStatus === 'Single' ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed' : ''}
               />
+              {formData.maritalStatus === 'Single' && (
+                <p className="text-xs text-gray-500 mt-1">Marriage date is automatically disabled for Single status</p>
+              )}
             </div>
           </div>
 
@@ -1719,13 +1969,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           <Button
             onClick={submitMaritalStatus}
             disabled={maritalLoading}
-            className="w-full bg-pink-600 hover:bg-pink-700 text-white mb-6"
+            className={`w-full ${maritalSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-pink-600 hover:bg-pink-700'} text-white mb-6`}
           >
             {maritalLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Saving Marital Status...
               </div>
+            ) : maritalSuccess ? (
+              <>
+                <CheckCircle size={16} className="mr-2" />
+                Marital Status Saved
+              </>
             ) : (
               <>
                 <Save size={16} className="mr-2" />
@@ -1830,13 +2085,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           <Button
             onClick={submitFamilyBackground}
             disabled={familyLoading}
-            className="w-full bg-rose-600 hover:bg-rose-700 text-white"
+            className={`w-full ${familySuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-rose-600 hover:bg-rose-700'} text-white`}
           >
             {familyLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Saving Family Details...
               </div>
+            ) : familySuccess ? (
+              <>
+                <CheckCircle size={16} className="mr-2" />
+                Family Background Saved
+              </>
             ) : (
               <>
                 <Save size={16} className="mr-2" />
@@ -1847,7 +2107,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         </Card>
 
         {/* Academic Background Section */}
-        <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className={`p-6 ${academicSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <GraduationCap className="text-blue-600" size={20} />
@@ -2016,13 +2276,18 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           <Button
             onClick={submitAcademicBackground}
             disabled={academicLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className={`w-full ${academicSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
           >
             {academicLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Saving Academic Details...
               </div>
+            ) : academicSuccess ? (
+              <>
+                <CheckCircle size={16} className="mr-2" />
+                Academic Background Saved
+              </>
             ) : (
               <>
                 <Save size={16} className="mr-2" />
@@ -2030,6 +2295,58 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               </>
             )}
           </Button>
+        </Card>
+
+        {/* Progress Indicator */}
+        <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-6">
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold text-gray-800">Form Completion Status</h3>
+              <span className="text-sm font-medium text-gray-600">
+                {allSectionsCompleted ? 'All sections completed!' : `${[bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length}/4 sections completed`}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${([bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length / 4) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={`text-center p-3 rounded-lg ${bankSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+              <div className="flex justify-center mb-2">
+                {bankSuccess ? <CheckCircle className="text-green-600" size={20} /> : <CreditCard className="text-gray-400" size={20} />}
+              </div>
+              <p className="text-sm font-medium text-gray-700">Bank Details</p>
+              <p className="text-xs text-gray-500 mt-1">{bankSuccess ? 'Completed' : 'Pending'}</p>
+            </div>
+            
+            <div className={`text-center p-3 rounded-lg ${maritalSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+              <div className="flex justify-center mb-2">
+                {maritalSuccess ? <CheckCircle className="text-green-600" size={20} /> : <Heart className="text-gray-400" size={20} />}
+              </div>
+              <p className="text-sm font-medium text-gray-700">Marital Status</p>
+              <p className="text-xs text-gray-500 mt-1">{maritalSuccess ? 'Completed' : 'Pending'}</p>
+            </div>
+            
+            <div className={`text-center p-3 rounded-lg ${familySuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+              <div className="flex justify-center mb-2">
+                {familySuccess ? <CheckCircle className="text-green-600" size={20} /> : <Users className="text-gray-400" size={20} />}
+              </div>
+              <p className="text-sm font-medium text-gray-700">Family Details</p>
+              <p className="text-xs text-gray-500 mt-1">{familySuccess ? 'Completed' : 'Pending'}</p>
+            </div>
+            
+            <div className={`text-center p-3 rounded-lg ${academicSuccess ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+              <div className="flex justify-center mb-2">
+                {academicSuccess ? <CheckCircle className="text-green-600" size={20} /> : <GraduationCap className="text-gray-400" size={20} />}
+              </div>
+              <p className="text-sm font-medium text-gray-700">Academic Details</p>
+              <p className="text-xs text-gray-500 mt-1">{academicSuccess ? 'Completed' : 'Pending'}</p>
+            </div>
+          </div>
         </Card>
 
         {/* Company Info Card */}
@@ -2041,6 +2358,13 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             <p className="text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>
           </div>
         </Card>
+
+        {/* Submit Error */}
+        {errors.submit && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600 text-center">{errors.submit}</p>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-between pt-6">
@@ -2056,8 +2380,12 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           
           <Button
             onClick={handleSubmit}
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            disabled={loading || !allSectionsCompleted}
+            className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+              allSectionsCompleted 
+                ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                : "bg-gray-400 text-white cursor-not-allowed"
+            }`}
           >
             {loading ? (
               <div className="flex items-center gap-2">

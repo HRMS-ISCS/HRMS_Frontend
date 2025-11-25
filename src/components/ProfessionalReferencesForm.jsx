@@ -1,4 +1,4 @@
-// // //ProfessionalReferencesForm.jsx
+// // ProfessionalReferencesForm.jsx
 // import React, { useState, useEffect } from "react";
 // import { Label } from "@/components/ui/label";
 // import { Input } from "@/components/ui/input";
@@ -22,8 +22,11 @@
 //   AlertCircle,
 //   UserCheck
 // } from "lucide-react";
+// import { useToast } from "@/components/ui/use-toast";
+// import { apiRequest } from "../api"; // Import API request function
 
 // export default function ProfessionalReferencesForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+//   const { toast } = useToast(); // Initialize toast
 //   const [formData, setFormData] = useState(initialData);
 //   const [errors, setErrors] = useState({});
 //   const [loading, setLoading] = useState(false);
@@ -100,15 +103,11 @@
 //       return;
 //     }
 
+//     // Removed validation - allowing submission even if form is empty
 //     const validReferences = formData.professionalReferences.filter(ref => 
 //       ref.name?.trim() && ref.designation?.trim() && ref.company?.trim() && 
 //       ref.address?.trim() && ref.phoneNumber?.trim() && ref.email?.trim()
 //     );
-
-//     if (validReferences.length === 0) {
-//       setErrors(prev => ({ ...prev, referencesGeneral: "Please fill at least one complete reference" }));
-//       return;
-//     }
 
 //     setReferencesLoading(true);
 //     setReferencesSuccess(false);
@@ -130,20 +129,13 @@
 //           referred_by_employee_ISCS: formData.employeeReferral.isReferred === 'yes'
 //         };
 
-//         const response = await fetch(`http://127.0.0.1:8000/users/Professional_Reference/${referencesEmployeeId}`, {
+//         // Use apiRequest function instead of direct fetch
+//         await apiRequest(`/users/Professional_Reference/${referencesEmployeeId}`, {
 //           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
 //           body: JSON.stringify(apiData)
 //         });
-
-//         if (response.ok) {
-//           successCount++;
-//         } else {
-//           const errorData = await response.json();
-//           console.error('Reference API Error:', errorData);
-//         }
+        
+//         successCount++;
 //       }
 
 //       if (successCount > 0) {
@@ -155,13 +147,30 @@
 //           ? ` (Including employee referral by ${formData.employeeReferral.name || 'ISCS employee'})` 
 //           : '';
         
-//         alert(`Professional references saved successfully! (${successCount} references)${referralStatus}`);
+//         // Show success toast
+//         toast({
+//           title: (
+//             <div className="flex items-center gap-2">
+//               <CheckCircle className="h-5 w-5 text-green-500" />
+//               <span>Professional References Saved</span>
+//             </div>
+//           ),
+//           description: `${successCount} reference(s) have been saved successfully.${referralStatus}`,
+//           className: "bg-green-50 border-green-200 text-green-800",
+//         });
 //       } else {
 //         setErrors(prev => ({ ...prev, referencesGeneral: 'Failed to save references' }));
 //       }
 //     } catch (error) {
 //       console.error('References API Error:', error);
-//       setErrors(prev => ({ ...prev, referencesGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, referencesGeneral: error.message || 'Failed to connect to server' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save professional references. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setReferencesLoading(false);
 //     }
@@ -189,25 +198,36 @@
 //         weakness3: formData.weaknesses[2] || null
 //       };
 
-//       const response = await fetch(`http://127.0.0.1:8000/users/About_Self/${aboutSelfEmployeeId}`, {
+//       // Use apiRequest function instead of direct fetch
+//       await apiRequest(`/users/About_Self/${aboutSelfEmployeeId}`, {
 //         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
 //         body: JSON.stringify(apiData)
 //       });
 
-//       if (response.ok) {
-//         setAboutSelfSuccess(true);
-//         setErrors(prev => ({ ...prev, aboutSelfGeneral: "" }));
-//         alert('About Self details saved successfully!');
-//       } else {
-//         const errorData = await response.json();
-//         setErrors(prev => ({ ...prev, aboutSelfGeneral: errorData.detail || 'Failed to save about self details' }));
-//       }
+//       setAboutSelfSuccess(true);
+//       setErrors(prev => ({ ...prev, aboutSelfGeneral: "" }));
+      
+//       // Show success toast
+//       toast({
+//         title: (
+//           <div className="flex items-center gap-2">
+//             <CheckCircle className="h-5 w-5 text-green-500" />
+//             <span>About Self Details Saved</span>
+//           </div>
+//         ),
+//         description: "Your self-assessment information has been saved successfully.",
+//         className: "bg-green-50 border-green-200 text-green-800",
+//       });
 //     } catch (error) {
 //       console.error('About Self API Error:', error);
-//       setErrors(prev => ({ ...prev, aboutSelfGeneral: 'Failed to connect to server' }));
+//       setErrors(prev => ({ ...prev, aboutSelfGeneral: error.message || 'Failed to save about self details' }));
+      
+//       // Show error toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to save about self details. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setAboutSelfLoading(false);
 //     }
@@ -253,7 +273,7 @@
 //           {/* Employee ID Input for References */}
 //           <div className="mb-4">
 //             <Label htmlFor="referencesEmployeeId" className="text-gray-700 font-medium">
-//               Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
+//               Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
 //             </Label>
 //             <Input
 //               id="referencesEmployeeId"
@@ -269,7 +289,7 @@
 //             )}
 //           </div>
           
-//           <p className="text-sm text-gray-600 mb-6">Give name and contact details of the persons who know you professionally</p>
+//           <p className="text-sm text-gray-600 mb-6">Give name and contact details of persons who know you professionally</p>
 
 //           <div className="space-y-6 mb-6">
 //             {formData.professionalReferences.map((reference, index) => (
@@ -282,7 +302,7 @@
 //                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 //                   <div className="space-y-2">
 //                     <Label className="text-gray-700 font-medium text-sm">
-//                       Name *
+//                       Name
 //                     </Label>
 //                     <Input
 //                       value={reference.name}
@@ -294,7 +314,7 @@
 
 //                   <div className="space-y-2">
 //                     <Label className="text-gray-700 font-medium text-sm">
-//                       Designation *
+//                       Designation
 //                     </Label>
 //                     <Input
 //                       value={reference.designation}
@@ -307,7 +327,7 @@
 //                   <div className="space-y-2">
 //                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
 //                       <Building2 size={16} className="text-gray-500" />
-//                       Company *
+//                       Company
 //                     </Label>
 //                     <Input
 //                       value={reference.company}
@@ -319,7 +339,7 @@
 
 //                   <div className="space-y-2 md:col-span-2">
 //                     <Label className="text-gray-700 font-medium text-sm">
-//                       Address *
+//                       Address
 //                     </Label>
 //                     <Textarea
 //                       value={reference.address}
@@ -333,7 +353,7 @@
 //                   <div className="space-y-2">
 //                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
 //                       <Phone size={16} className="text-gray-500" />
-//                       Tel No to contact * (10 digits)
+//                       Tel No to contact (10 digits)
 //                     </Label>
 //                     <Input
 //                       value={reference.phoneNumber}
@@ -348,7 +368,7 @@
 //                   <div className="space-y-2">
 //                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
 //                       <Mail size={16} className="text-gray-500" />
-//                       Email ID *
+//                       Email ID
 //                     </Label>
 //                     <Input
 //                       type="email"
@@ -521,7 +541,7 @@
 //           {/* Employee ID Input for About Self */}
 //           <div className="mb-4">
 //             <Label htmlFor="aboutSelfEmployeeId" className="text-gray-700 font-medium">
-//               Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
+//               Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
 //             </Label>
 //             <Input
 //               id="aboutSelfEmployeeId"
@@ -711,9 +731,10 @@ import {
   AlertCircle,
   UserCheck
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
+import { useToast } from "@/components/ui/use-toast";
+import { apiRequest } from "../api"; // Import API request function
 
-export default function ProfessionalReferencesForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+export default function ProfessionalReferencesForm({ initialData, generatedEmployeeId, onSubmit, onBack, onAboutSelfSubmit }) {
   const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
@@ -791,15 +812,11 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
       return;
     }
 
+    // Removed validation - allowing submission even if form is empty
     const validReferences = formData.professionalReferences.filter(ref => 
       ref.name?.trim() && ref.designation?.trim() && ref.company?.trim() && 
       ref.address?.trim() && ref.phoneNumber?.trim() && ref.email?.trim()
     );
-
-    if (validReferences.length === 0) {
-      setErrors(prev => ({ ...prev, referencesGeneral: "Please fill at least one complete reference" }));
-      return;
-    }
 
     setReferencesLoading(true);
     setReferencesSuccess(false);
@@ -817,24 +834,17 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           email: reference.email,
           period_known: reference.knownPeriod || "Not specified",
           capacity_known: reference.capacity || "Not specified",
-          // Add the employee referral field
+          // Add employee referral field
           referred_by_employee_ISCS: formData.employeeReferral.isReferred === 'yes'
         };
 
-        const response = await fetch(`http://127.0.0.1:8000/users/Professional_Reference/${referencesEmployeeId}`, {
+        // Use apiRequest function instead of direct fetch
+        await apiRequest(`/users/Professional_Reference/${referencesEmployeeId}`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify(apiData)
         });
-
-        if (response.ok) {
-          successCount++;
-        } else {
-          const errorData = await response.json();
-          console.error('Reference API Error:', errorData);
-        }
+        
+        successCount++;
       }
 
       if (successCount > 0) {
@@ -846,7 +856,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           ? ` (Including employee referral by ${formData.employeeReferral.name || 'ISCS employee'})` 
           : '';
         
-        // Show success toast instead of alert
+        // Show success toast
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -862,7 +872,14 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
       }
     } catch (error) {
       console.error('References API Error:', error);
-      setErrors(prev => ({ ...prev, referencesGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, referencesGeneral: error.message || 'Failed to connect to server' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save professional references. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setReferencesLoading(false);
     }
@@ -871,6 +888,14 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
   const submitAboutSelf = async () => {
     if (!aboutSelfEmployeeId.trim()) {
       setErrors(prev => ({ ...prev, aboutSelfEmployeeId: "Employee ID is required" }));
+      return;
+    }
+
+    // Check if at least first 3 questions are filled
+    if (!formData.aboutSelf.careerAmbition?.trim() || 
+        !formData.aboutSelf.achievements?.trim() || 
+        !formData.aboutSelf.professionalFailures?.trim()) {
+      setErrors(prev => ({ ...prev, aboutSelfGeneral: "Please answer at least first 3 questions in About Self section" }));
       return;
     }
 
@@ -890,36 +915,41 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
         weakness3: formData.weaknesses[2] || null
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/users/About_Self/${aboutSelfEmployeeId}`, {
+      // Use apiRequest function instead of direct fetch
+      await apiRequest(`/users/About_Self/${aboutSelfEmployeeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(apiData)
       });
 
-      if (response.ok) {
-        setAboutSelfSuccess(true);
-        setErrors(prev => ({ ...prev, aboutSelfGeneral: "" }));
-        
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>About Self Details Saved</span>
-            </div>
-          ),
-          description: "Your self-assessment information has been saved successfully.",
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
-      } else {
-        const errorData = await response.json();
-        setErrors(prev => ({ ...prev, aboutSelfGeneral: errorData.detail || 'Failed to save about self details' }));
+      setAboutSelfSuccess(true);
+      setErrors(prev => ({ ...prev, aboutSelfGeneral: "" }));
+      
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>About Self Details Saved</span>
+          </div>
+        ),
+        description: "Your self-assessment information has been saved successfully.",
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+      
+      // Call callback to unlock step 6
+      if (onAboutSelfSubmit) {
+        onAboutSelfSubmit();
       }
     } catch (error) {
       console.error('About Self API Error:', error);
-      setErrors(prev => ({ ...prev, aboutSelfGeneral: 'Failed to connect to server' }));
+      setErrors(prev => ({ ...prev, aboutSelfGeneral: error.message || 'Failed to save about self details' }));
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save about self details. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setAboutSelfLoading(false);
     }
@@ -932,6 +962,9 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
     onSubmit(formData);
     setLoading(false);
   };
+
+  // Check if any section is completed to enable next button
+  const isAnySectionCompleted = referencesSuccess || aboutSelfSuccess;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -953,7 +986,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
 
       <div className="space-y-8">
         {/* Professional References Section */}
-        <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className={`p-6 ${referencesSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Users className="text-blue-600" size={20} />
@@ -965,7 +998,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           {/* Employee ID Input for References */}
           <div className="mb-4">
             <Label htmlFor="referencesEmployeeId" className="text-gray-700 font-medium">
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
+              Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
             </Label>
             <Input
               id="referencesEmployeeId"
@@ -994,7 +1027,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label className="text-gray-700 font-medium text-sm">
-                      Name *
+                      Name
                     </Label>
                     <Input
                       value={reference.name}
@@ -1006,7 +1039,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
 
                   <div className="space-y-2">
                     <Label className="text-gray-700 font-medium text-sm">
-                      Designation *
+                      Designation
                     </Label>
                     <Input
                       value={reference.designation}
@@ -1019,7 +1052,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
                   <div className="space-y-2">
                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
                       <Building2 size={16} className="text-gray-500" />
-                      Company *
+                      Company
                     </Label>
                     <Input
                       value={reference.company}
@@ -1031,7 +1064,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
 
                   <div className="space-y-2 md:col-span-2">
                     <Label className="text-gray-700 font-medium text-sm">
-                      Address *
+                      Address
                     </Label>
                     <Textarea
                       value={reference.address}
@@ -1045,7 +1078,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
                   <div className="space-y-2">
                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
                       <Phone size={16} className="text-gray-500" />
-                      Tel No to contact * (10 digits)
+                      Tel No to contact (10 digits)
                     </Label>
                     <Input
                       value={reference.phoneNumber}
@@ -1060,7 +1093,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
                   <div className="space-y-2">
                     <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
                       <Mail size={16} className="text-gray-500" />
-                      Email ID *
+                      Email ID
                     </Label>
                     <Input
                       type="email"
@@ -1221,7 +1254,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
         </Card>
 
         {/* About Self Section */}
-        <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <Card className={`p-6 ${aboutSelfSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Target className="text-purple-600" size={20} />
@@ -1233,7 +1266,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           {/* Employee ID Input for About Self */}
           <div className="mb-4">
             <Label htmlFor="aboutSelfEmployeeId" className="text-gray-700 font-medium">
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
+              Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
             </Label>
             <Input
               id="aboutSelfEmployeeId"
@@ -1251,7 +1284,8 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           
           <div className="space-y-6 mb-6">
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">
+              <Label className="text-gray-700 font-medium flex items-center gap-2">
+                <span className="text-red-500 mr-1">*</span>
                 1. What is your career ambition? How do you look at yourself in another 5 years from now?
               </Label>
               <Textarea
@@ -1265,7 +1299,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
 
             <div className="space-y-2">
               <Label className="text-gray-700 font-medium flex items-center gap-2">
-                <Trophy size={16} className="text-gray-500" />
+                <span className="text-red-500 mr-1">*</span>
                 2. Give details on significant achievements in your career/life if any
               </Label>
               <Textarea
@@ -1279,7 +1313,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
 
             <div className="space-y-2">
               <Label className="text-gray-700 font-medium flex items-center gap-2">
-                <AlertTriangle size={16} className="text-gray-500" />
+                <span className="text-red-500 mr-1">*</span>
                 3. Give details on professional failures if any? How do you plan to overcome them?
               </Label>
               <Textarea
@@ -1339,13 +1373,18 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           <Button
             onClick={submitAboutSelf}
             disabled={aboutSelfLoading}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            className={`w-full ${aboutSelfSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'} text-white`}
           >
             {aboutSelfLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Saving About Self Details...
               </div>
+            ) : aboutSelfSuccess ? (
+              <>
+                <CheckCircle size={16} className="mr-2" />
+                About Self Details Saved
+              </>
             ) : (
               <>
                 <Save size={16} className="mr-2" />
@@ -1379,13 +1418,17 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
           
           <Button
             onClick={handleSubmit}
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            disabled={loading || !isAnySectionCompleted}
+            className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+              isAnySectionCompleted 
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                : "bg-gray-400 text-white cursor-not-allowed"
+            }`}
           >
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Proceeding to Declaration...
+                Proceeding...
               </div>
             ) : (
               <>

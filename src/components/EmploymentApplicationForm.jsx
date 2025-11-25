@@ -1,4 +1,5 @@
-// EmploymentApplicationForm.jsx
+
+// src/components/EmploymentApplicationForm.jsx
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { User, Calendar, Briefcase, Building, Users, Code, ArrowRight, Mail, Phone, Save, CheckCircle } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
+import { useToast } from "@/components/ui/use-toast";
+import { apiRequest } from "../api"; // Import API request function
 
 export default function EmploymentApplicationForm({ initialData = {}, onSubmit }) {
   const { toast } = useToast(); // Initialize toast
@@ -121,48 +123,45 @@ export default function EmploymentApplicationForm({ initialData = {}, onSubmit }
 
       console.log('Sending data to API:', apiData);
 
-      const response = await fetch('http://127.0.0.1:8000/users/Basic_Employee_Details', {
+      // Use apiRequest function instead of direct fetch
+      const result = await apiRequest('/users/Basic_Employee_Details', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(apiData)
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        const generatedEmployeeId = result.id; // Extract the generated ID
+      const generatedEmployeeId = result.id; // Extract the generated ID
         
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Employee Created Successfully</span>
-            </div>
-          ),
-          description: `ID: ${generatedEmployeeId}`,
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Employee Created Successfully</span>
+          </div>
+        ),
+        description: `ID: ${generatedEmployeeId}`,
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
         
-        // Update form data with generated employee ID
-        const updatedFormData = {
-          ...formData,
-          generatedEmployeeId: generatedEmployeeId
-        };
-        
-        // Pass the updated data including generated employee ID to parent
-        if (onSubmit) {
-          onSubmit(updatedFormData);
-        }
-      } else {
-        // Handle API errors
-        setErrors({ submit: result.detail || 'An error occurred while creating employee' });
+      // Update form data with generated employee ID
+      const updatedFormData = {
+        ...formData,
+        generatedEmployeeId: generatedEmployeeId
+      };
+      
+      // Pass the updated data including generated employee ID to parent
+      if (onSubmit) {
+        onSubmit(updatedFormData);
       }
     } catch (error) {
       console.error('API Error:', error);
-      setErrors({ submit: 'Failed to connect to server. Please try again.' });
+      // Handle API errors with toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create employee. Please try again.",
+        variant: "destructive",
+      });
+      setErrors({ submit: error.message || "Failed to create employee. Please try again." });
     } finally {
       setSubmitLoading(false);
     }
@@ -354,7 +353,6 @@ export default function EmploymentApplicationForm({ initialData = {}, onSubmit }
                 <p className="text-xs sm:text-sm text-red-600 mt-1">{errors.clientName}</p>
               )}
             </div>
-            
           </div>
 
           {/* Skill Set Field - Full width */}
@@ -388,7 +386,7 @@ export default function EmploymentApplicationForm({ initialData = {}, onSubmit }
           {/* Company Info Card */}
           <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200 p-4 sm:p-6 mt-6 sm:mt-8">
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
                 ISCS Technologies Private Limited
               </h3>
               <p className="text-xs sm:text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>

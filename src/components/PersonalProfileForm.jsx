@@ -1,4 +1,4 @@
-// // PersonalProfileForm.jsx
+// // src/components/PersonalProfileForm.jsx
 // import React, { useState, useEffect } from "react";
 // import { Label } from "@/components/ui/label";
 // import { Input } from "@/components/ui/input";
@@ -11,8 +11,11 @@
 //   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud,
 //   X, AlertCircle
 // } from "lucide-react";
+// import { useToast } from "@/components/ui/use-toast";
+// import { apiRequest } from "../api"; // Import API request function
 
 // export default function PersonalProfileForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+//   const { toast } = useToast(); // Initialize toast
 //   const [formData, setFormData] = useState(initialData);
 //   const [employeeId, setEmployeeId] = useState("");
 //   const [errors, setErrors] = useState({});
@@ -20,6 +23,8 @@
 //   const [submitLoading, setSubmitLoading] = useState(false);
 //   const [uploadSuccess, setUploadSuccess] = useState("");
 //   const [uploadError, setUploadError] = useState("");
+//   const [profileSubmitted, setProfileSubmitted] = useState(false); // New state to track if profile is submitted
+//   const [isFormValid, setIsFormValid] = useState(false); // New state to track form validity
 
 //   // Document upload states
 //   const [aadharFile, setAadharFile] = useState(null);
@@ -36,6 +41,54 @@
 //       setUploadEmployeeId(generatedEmployeeId);
 //     }
 //   }, [generatedEmployeeId]);
+
+//   // Check form validity whenever formData changes
+//   useEffect(() => {
+//     checkFormValidity();
+//   }, [formData, employeeId]);
+
+//   const checkFormValidity = () => {
+//     const required = [
+//       'firstName', 'lastName', 'dateOfBirth', 'gender', 'nationality',
+//       'mobilePhone', 'email', 'aadharNumber', 'panNumber'
+//     ];
+    
+//     let isValid = true;
+    
+//     // Check if all required fields are filled
+//     required.forEach(field => {
+//       if (!formData[field]?.trim()) {
+//         isValid = false;
+//       }
+//     });
+    
+//     // Check if email is valid
+//     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+//       isValid = false;
+//     }
+    
+//     // Check if mobile phone is valid
+//     if (formData.mobilePhone && !/^\d{10}$/.test(formData.mobilePhone)) {
+//       isValid = false;
+//     }
+    
+//     // Check if aadhar number is valid
+//     if (formData.aadharNumber && !/^\d{12}$/.test(formData.aadharNumber)) {
+//       isValid = false;
+//     }
+    
+//     // Check if pan number is valid
+//     if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) {
+//       isValid = false;
+//     }
+    
+//     // Check if employee ID is filled
+//     if (!employeeId.trim()) {
+//       isValid = false;
+//     }
+    
+//     setIsFormValid(isValid);
+//   };
 
 //   const handleChange = (e) => {
 //     const { name, value } = e.target;
@@ -70,21 +123,31 @@
 
 //   const handleNext = async (e) => {
 //     e.preventDefault();
-//     const tempErrors = {};
-//     const required = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'nationality', 'mobilePhone', 'email'];
-//     required.forEach(field => {
-//       if (!formData[field]?.trim()) {
-//         tempErrors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
-//       }
-//     });
-//     if (Object.keys(tempErrors).length === 0) {
-//       setLoading(true);
-//       await new Promise(r => setTimeout(r, 1500));
-//       onSubmit(formData);
-//       setLoading(false);
-//     } else {
-//       setErrors(tempErrors);
+    
+//     // Validate form before proceeding
+//     if (!validateForm()) {
+//       return;
 //     }
+    
+//     // Check if profile is submitted
+//     if (!profileSubmitted) {
+//       setErrors({ submit: "Please submit your profile information before proceeding to the next step." });
+//       return;
+//     }
+    
+//     // Check if documents are uploaded
+//     if (!uploadSuccess) {
+//       setErrors({ submit: "Please upload your documents before proceeding to the next step." });
+//       return;
+//     }
+    
+//     setLoading(true);
+//     await new Promise(r => setTimeout(r, 1500));
+    
+//     // Call onSubmit to move to the next step
+//     onSubmit(formData);
+    
+//     setLoading(false);
 //   };
 
 //   const handleSubmitToAPI = async (e) => {
@@ -121,20 +184,41 @@
 //         uan_number: formData.uanNumber || null,
 //         esi_no: formData.esiNumber || null
 //       };
-//       const res = await fetch(`http://127.0.0.1:8000/users/Personal_Profile/${employeeId}`, {
+
+//       console.log('Sending data to API:', apiData);
+
+//       // Use apiRequest function instead of direct fetch
+//       const result = await apiRequest(`/users/Personal_Profile/${employeeId}`, {
 //         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify(apiData)
 //       });
-//       const result = await res.json();
-//       if (res.ok) {
-//         alert(`Profile created for Employee ID: ${result.employee_id}`);
-//       } else {
-//         setErrors({ submit: result.detail || 'Error occurred' });
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       setErrors({ submit: 'Failed to connect to server.' });
+
+//       // Set profileSubmitted to true after successful submission
+//       setProfileSubmitted(true);
+
+//       // Show success toast
+//       toast({
+//         title: (
+//           <div className="flex items-center gap-2">
+//             <CheckCircle className="h-5 w-5 text-green-500" />
+//             <span>Profile Created Successfully</span>
+//           </div>
+//         ),
+//         description: `Employee ID: ${result.employee_id}`,
+//         className: "bg-green-50 border-green-200 text-green-800",
+//       });
+      
+//       // Don't call onSubmit() here - wait for document upload
+//       // Pass to parent only when documents are also uploaded
+//     } catch (error) {
+//       console.error('API Error:', error);
+//       // Handle API errors with toast
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to create profile. Please try again.",
+//         variant: "destructive",
+//       });
+//       setErrors({ submit: error.message || "Failed to create profile. Please try again." });
 //     } finally {
 //       setSubmitLoading(false);
 //     }
@@ -165,19 +249,29 @@
 //     setUploadSuccess("");
     
 //     try {
-//       const res = await fetch(`http://127.0.0.1:8000/users/Personal_Documents/${uploadEmployeeId}/bulk`, {
+//       // Use apiRequest function for document upload
+//       const result = await apiRequest(`/users/Personal_Documents/${uploadEmployeeId}/bulk`, {
 //         method: 'PUT',
 //         body: form
 //       });
-//       const result = await res.json();
-//       if (res.ok) {
-//         setUploadSuccess("Documents uploaded successfully!");
-//         if (result.uploaded_files && Object.keys(result.uploaded_files).length > 0) {
-//           const uploadedDetails = Object.entries(result.uploaded_files)
-//             .map(([key, value]) => `${key}: ${value.file_name} (${value.size_MB}MB)`)
-//             .join(', ');
-//           setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
-//         }
+
+//       if (result.uploaded_files && Object.keys(result.uploaded_files).length > 0) {
+//         const uploadedDetails = Object.entries(result.uploaded_files)
+//           .map(([key, value]) => `${key}: ${value.file_name} (${value.size_MB}MB)`)
+//           .join(', ');
+//         setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
+        
+//         // Show success toast for document upload
+//         toast({
+//           title: (
+//             <div className="flex items-center gap-2">
+//               <CheckCircle className="h-5 w-5 text-green-500" />
+//               <span>Documents Uploaded Successfully</span>
+//             </div>
+//           ),
+//           description: "Your documents have been uploaded and saved.",
+//           className: "bg-green-50 border-green-200 text-green-800",
+//         });
         
 //         // Clear files after successful upload
 //         setAadharFile(null);
@@ -185,12 +279,27 @@
 //         setResumeFile(null);
 //         setPhotoFile(null);
 //         setPhotoPreview(null);
+        
+//         // Now call onSubmit to move to next page
+//         if (profileSubmitted) {
+//           onSubmit({
+//             ...formData,
+//             generatedEmployeeId: result.employee_id || employeeId
+//           });
+//         }
 //       } else {
 //         setUploadError("Upload failed: " + (result.detail || "Unknown error"));
 //       }
-//     } catch (err) {
-//       console.error(err);
+//     } catch (error) {
+//       console.error('API Error:', error);
 //       setUploadError("Failed to upload documents.");
+      
+//       // Show error toast for document upload
+//       toast({
+//         title: "Upload Error",
+//         description: "Failed to upload documents. Please try again.",
+//         variant: "destructive",
+//       });
 //     } finally {
 //       setUploadLoading(false);
 //     }
@@ -242,7 +351,7 @@
 //         <div className="flex items-center gap-4">
 //           <div className="flex items-center gap-2">
 //             {generatedEmployeeId ? <CheckCircle size={16} className="text-green-600" /> : <Building size={16} className="text-orange-600" />}
-//             <Label className="text-gray-700 font-medium">Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)'}:</Label>
+//             <Label className="text-gray-700 font-medium">Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)' }:</Label>
 //           </div>
 //           <Input
 //             value={employeeId}
@@ -313,17 +422,17 @@
 //           </div>
 //         </Card>
 
-//             {/* Address Information Section */}
+//         {/* Address Information Section */}
 //         <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
 //           <div className="flex items-center gap-2 mb-6">
 //             <MapPin className="text-green-600" size={20} />
 //             <h2 className="text-xl font-semibold text-gray-800">Address Information</h2>
 //           </div>
           
-//           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 //             {/* Current Address */}
 //             <div className="space-y-4">
-//               <h3 className="text-lg font-medium text-gray-700">Current Address</h3>
+//               <h3 className="text-lg font-medium text-gray-700 mb-4">Current Address</h3>
 //               <div className="space-y-2">
 //                 <Label htmlFor="currentAddress" className="text-gray-700 font-medium">
 //                   Address
@@ -393,7 +502,7 @@
 
 //             {/* Permanent Address */}
 //             <div className="space-y-4">
-//               <h3 className="text-lg font-medium text-gray-700">Permanent Address</h3>
+//               <h3 className="text-lg font-medium text-gray-700 mb-4">Permanent Address</h3>
 //               <div className="space-y-2">
 //                 <Label htmlFor="permanentAddress" className="text-gray-700 font-medium">
 //                   Address
@@ -470,10 +579,10 @@
 //             <h2 className="text-xl font-semibold text-gray-800">Contact Information</h2>
 //           </div>
           
-//           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 //             {/* Personal Contact */}
 //             <div className="space-y-4">
-//               <h3 className="text-lg font-medium text-gray-700">Personal Contact Details</h3>
+//               <h3 className="text-lg font-medium text-gray-700 mb-4">Personal Contact Details</h3>
 //               <div className="space-y-4">
 //                 <div className="space-y-2">
 //                   <Label htmlFor="mobilePhone" className="text-gray-700 font-medium">
@@ -524,7 +633,7 @@
 
 //             {/* Emergency Contact */}
 //             <div className="space-y-4">
-//               <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
+//               <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
 //                 <Users size={16} className="text-gray-500" />
 //                 Emergency Contact Details
 //               </h3>
@@ -659,15 +768,36 @@
 //         </Card>
 
 //         {/* Submit Button (Blue) */}
-// <div className="flex justify-center mt-4">
-//   <Button
-//     onClick={handleSubmitToAPI}
-//     disabled={submitLoading}
-//     className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg"
-//   >
-//     {submitLoading ? "Submitting..." : <><Save size={16} className="mr-2" />Submit</>}
-//   </Button>
-// </div>
+//         <div className="flex justify-center mt-4">
+//           <Button
+//             onClick={handleSubmitToAPI}
+//             disabled={submitLoading || profileSubmitted || !isFormValid}
+//             className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+//               profileSubmitted 
+//                 ? "bg-green-600 hover:bg-green-700 text-white" 
+//                 : isFormValid
+//                   ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+//                   : "bg-gray-400 text-white cursor-not-allowed"
+//             }`}
+//           >
+//             {submitLoading ? (
+//               <div className="flex items-center gap-2">
+//                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+//                 <span>Submitting...</span>
+//               </div>
+//             ) : profileSubmitted ? (
+//               <div className="flex items-center gap-2">
+//                 <CheckCircle size={16} />
+//                 <span>Profile Submitted</span>
+//               </div>
+//             ) : (
+//               <div className="flex items-center gap-2">
+//                 <Save size={16} />
+//                 <span>Submit Profile</span>
+//               </div>
+//             )}
+//           </Button>
+//         </div>
 
 //         {/* Upload Documents Card */}
 //         <Card className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
@@ -724,13 +854,19 @@
 //             />
 //           </div>
 
-//           <Button
-//             onClick={handleDocumentUpload}
-//             disabled={uploadLoading}
-//             className="px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow"
-//           >
-//             {uploadLoading ? "Uploading..." : "Submit Documents"}
-//           </Button>
+//           <div className="flex justify-center">
+//             <Button
+//               onClick={handleDocumentUpload}
+//               disabled={uploadLoading || !profileSubmitted}
+//               className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+//                 !profileSubmitted 
+//                   ? "bg-gray-400 text-white cursor-not-allowed" 
+//                   : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
+//               }`}
+//             >
+//               {uploadLoading ? "Uploading..." : "Submit Documents"}
+//             </Button>
+//           </div>
 
 //           {/* Upload Success/Error Messages */}
 //           {uploadSuccess && (
@@ -755,10 +891,12 @@
 //           </div>
 //         )}
 
-//         {/* Company Info */}
+//         {/* Company Info Card */}
 //         <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-6">
 //           <div className="text-center">
-//             <h3 className="text-lg font-semibold text-gray-800 mb-2">ISCS Technologies Private Limited</h3>
+//             <h3 className="text-lg font-semibold text-gray-800 mb-1">
+//               ISCS Technologies Private Limited
+//             </h3>
 //             <p className="text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>
 //           </div>
 //         </Card>
@@ -767,29 +905,33 @@
 //         <div className="flex justify-between pt-6">
 //           <div className="flex gap-4">
 //             <Button type="button" onClick={onBack} variant="outline" className="px-8 py-3 flex items-center gap-2">
-//               <ArrowLeft size={16} /> Back
+//               <ArrowLeft size={16} />
+//               Back
 //             </Button>
-//             {/* <Button
-//               onClick={handleSubmitToAPI}
-//               disabled={submitLoading}
-//               className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg"
-//             >
-//               {submitLoading ? "Submitting..." : <><Save size={16} className="mr-2" />Submit</>}
-//             </Button> */}
 //           </div>
 //           <Button
 //             onClick={handleNext}
-//             disabled={loading}
-//             className="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium rounded-lg shadow-lg"
+//             disabled={loading || !profileSubmitted || !uploadSuccess || !isFormValid}
+//             className="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
 //           >
-//             {loading ? "Proceeding..." : <><span>Next</span><ArrowRight size={16} className="ml-2" /></>}
+//             {loading ? (
+//               <div className="flex items-center gap-2">
+//                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+//                 <span>Proceeding...</span>
+//               </div>
+//             ) : (
+//               <div className="flex items-center gap-2">
+//                 <span>Next</span>
+//                 <ArrowRight size={16} />
+//               </div>
+//             )}
 //           </Button>
 //         </div>
 //       </form>
 //     </div>
 //   );
 // }
-// PersonalProfileForm.jsx
+// src/components/PersonalProfileForm.jsx
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -802,7 +944,8 @@ import {
   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud,
   X, AlertCircle
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast"; // Import useToast
+import { useToast } from "@/components/ui/use-toast";
+import { apiRequest } from "../api"; // Import API request function
 
 export default function PersonalProfileForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
   const { toast } = useToast(); // Initialize toast
@@ -813,6 +956,8 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
   const [submitLoading, setSubmitLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const [profileSubmitted, setProfileSubmitted] = useState(false); // New state to track if profile is submitted
+  const [isFormValid, setIsFormValid] = useState(false); // New state to track form validity
 
   // Document upload states
   const [aadharFile, setAadharFile] = useState(null);
@@ -829,6 +974,54 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
       setUploadEmployeeId(generatedEmployeeId);
     }
   }, [generatedEmployeeId]);
+
+  // Check form validity whenever formData changes
+  useEffect(() => {
+    checkFormValidity();
+  }, [formData, employeeId]);
+
+  const checkFormValidity = () => {
+    const required = [
+      'firstName', 'lastName', 'dateOfBirth', 'gender', 'nationality',
+      'mobilePhone', 'email', 'aadharNumber', 'panNumber'
+    ];
+    
+    let isValid = true;
+    
+    // Check if all required fields are filled
+    required.forEach(field => {
+      if (!formData[field]?.trim()) {
+        isValid = false;
+      }
+    });
+    
+    // Check if email is valid
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+      isValid = false;
+    }
+    
+    // Check if mobile phone is valid
+    if (formData.mobilePhone && !/^\d{10}$/.test(formData.mobilePhone)) {
+      isValid = false;
+    }
+    
+    // Check if aadhar number is valid
+    if (formData.aadharNumber && !/^\d{12}$/.test(formData.aadharNumber)) {
+      isValid = false;
+    }
+    
+    // Check if pan number is valid
+    if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) {
+      isValid = false;
+    }
+    
+    // Check if employee ID is filled
+    if (!employeeId.trim()) {
+      isValid = false;
+    }
+    
+    setIsFormValid(isValid);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -863,21 +1056,31 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
   const handleNext = async (e) => {
     e.preventDefault();
-    const tempErrors = {};
-    const required = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'nationality', 'mobilePhone', 'email'];
-    required.forEach(field => {
-      if (!formData[field]?.trim()) {
-        tempErrors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
-      }
-    });
-    if (Object.keys(tempErrors).length === 0) {
-      setLoading(true);
-      await new Promise(r => setTimeout(r, 1500));
-      onSubmit(formData);
-      setLoading(false);
-    } else {
-      setErrors(tempErrors);
+    
+    // Validate form before proceeding
+    if (!validateForm()) {
+      return;
     }
+    
+    // Check if profile is submitted
+    if (!profileSubmitted) {
+      setErrors({ submit: "Please submit your profile information before proceeding to the next step." });
+      return;
+    }
+    
+    // Check if documents are uploaded
+    if (!uploadSuccess) {
+      setErrors({ submit: "Please upload your documents before proceeding to the next step." });
+      return;
+    }
+    
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    
+    // Call onSubmit to move to the next step
+    onSubmit(formData);
+    
+    setLoading(false);
   };
 
   const handleSubmitToAPI = async (e) => {
@@ -914,30 +1117,41 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         uan_number: formData.uanNumber || null,
         esi_no: formData.esiNumber || null
       };
-      const res = await fetch(`http://127.0.0.1:8000/users/Personal_Profile/${employeeId}`, {
+
+      console.log('Sending data to API:', apiData);
+
+      // Use apiRequest function instead of direct fetch
+      const result = await apiRequest(`/users/Personal_Profile/${employeeId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(apiData)
       });
-      const result = await res.json();
-      if (res.ok) {
-        // Show success toast instead of alert
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Profile Created Successfully</span>
-            </div>
-          ),
-          description: `Employee ID: ${result.employee_id}`,
-          className: "bg-green-50 border-green-200 text-green-800",
-        });
-      } else {
-        setErrors({ submit: result.detail || 'Error occurred' });
-      }
-    } catch (err) {
-      console.error(err);
-      setErrors({ submit: 'Failed to connect to server.' });
+
+      // Set profileSubmitted to true after successful submission
+      setProfileSubmitted(true);
+
+      // Show success toast
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Profile Created Successfully</span>
+          </div>
+        ),
+        description: `Employee ID: ${result.employee_id}`,
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+      
+      // Don't call onSubmit() here - wait for document upload
+      // Pass to parent only when documents are also uploaded
+    } catch (error) {
+      console.error('API Error:', error);
+      // Handle API errors with toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create profile. Please try again.",
+        variant: "destructive",
+      });
+      setErrors({ submit: error.message || "Failed to create profile. Please try again." });
     } finally {
       setSubmitLoading(false);
     }
@@ -968,19 +1182,17 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     setUploadSuccess("");
     
     try {
-      const res = await fetch(`http://127.0.0.1:8000/users/Personal_Documents/${uploadEmployeeId}/bulk`, {
+      // Use apiRequest function for document upload
+      const result = await apiRequest(`/users/Personal_Documents/${uploadEmployeeId}/bulk`, {
         method: 'PUT',
         body: form
       });
-      const result = await res.json();
-      if (res.ok) {
-        setUploadSuccess("Documents uploaded successfully!");
-        if (result.uploaded_files && Object.keys(result.uploaded_files).length > 0) {
-          const uploadedDetails = Object.entries(result.uploaded_files)
-            .map(([key, value]) => `${key}: ${value.file_name} (${value.size_MB}MB)`)
-            .join(', ');
-          setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
-        }
+
+      if (result.uploaded_files && Object.keys(result.uploaded_files).length > 0) {
+        const uploadedDetails = Object.entries(result.uploaded_files)
+          .map(([key, value]) => `${key}: ${value.file_name} (${value.size_MB}MB)`)
+          .join(', ');
+        setUploadSuccess(prev => prev + ` - ${uploadedDetails}`);
         
         // Show success toast for document upload
         toast({
@@ -1000,12 +1212,27 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         setResumeFile(null);
         setPhotoFile(null);
         setPhotoPreview(null);
+        
+        // Now call onSubmit to move to next page
+        if (profileSubmitted) {
+          onSubmit({
+            ...formData,
+            generatedEmployeeId: result.employee_id || employeeId
+          });
+        }
       } else {
         setUploadError("Upload failed: " + (result.detail || "Unknown error"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error('API Error:', error);
       setUploadError("Failed to upload documents.");
+      
+      // Show error toast for document upload
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload documents. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setUploadLoading(false);
     }
@@ -1057,7 +1284,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             {generatedEmployeeId ? <CheckCircle size={16} className="text-green-600" /> : <Building size={16} className="text-orange-600" />}
-            <Label className="text-gray-700 font-medium">Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)'}:</Label>
+            <Label className="text-gray-700 font-medium">Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)' }:</Label>
           </div>
           <Input
             value={employeeId}
@@ -1102,8 +1329,10 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             <div className="space-y-2">
               <Label className="text-gray-700 font-medium">Gender *</Label>
               <Select value={formData.gender} onValueChange={(v) => handleSelectChange('gender', v)}>
-                <SelectTrigger className={errors.gender ? 'border-red-500' : ''}><SelectValue placeholder="Select gender" /></SelectTrigger>
-                <SelectContent>
+                <SelectTrigger className={`bg-white ${errors.gender ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
                   <SelectItem value="Male">Male</SelectItem>
                   <SelectItem value="Female">Female</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
@@ -1114,8 +1343,10 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             <div className="space-y-2">
               <Label className="text-gray-700 font-medium">Blood Group</Label>
               <Select value={formData.bloodGroup} onValueChange={(v) => handleSelectChange('bloodGroup', v)}>
-                <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
-                <SelectContent>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
                   {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -1128,17 +1359,17 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
           </div>
         </Card>
 
-            {/* Address Information Section */}
+        {/* Address Information Section */}
         <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="text-green-600" size={20} />
             <h2 className="text-xl font-semibold text-gray-800">Address Information</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Current Address */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700">Current Address</h3>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">Current Address</h3>
               <div className="space-y-2">
                 <Label htmlFor="currentAddress" className="text-gray-700 font-medium">
                   Address
@@ -1208,7 +1439,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
             {/* Permanent Address */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700">Permanent Address</h3>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">Permanent Address</h3>
               <div className="space-y-2">
                 <Label htmlFor="permanentAddress" className="text-gray-700 font-medium">
                   Address
@@ -1285,10 +1516,10 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             <h2 className="text-xl font-semibold text-gray-800">Contact Information</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Personal Contact */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700">Personal Contact Details</h3>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">Personal Contact Details</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="mobilePhone" className="text-gray-700 font-medium">
@@ -1339,7 +1570,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
             {/* Emergency Contact */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
+              <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
                 <Users size={16} className="text-gray-500" />
                 Emergency Contact Details
               </h3>
@@ -1474,15 +1705,34 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         </Card>
 
         {/* Submit Button (Blue) */}
-<div className="flex justify-center mt-4">
-  <Button
-    onClick={handleSubmitToAPI}
-    disabled={submitLoading}
-    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg"
-  >
-    {submitLoading ? "Submitting..." : <><Save size={16} className="mr-2" />Submit</>}
-  </Button>
-</div>
+        <div className="flex justify-center mt-4">
+          <Button
+            onClick={handleSubmitToAPI}
+            disabled={submitLoading || profileSubmitted}
+            className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+              profileSubmitted 
+                ? "bg-green-600 hover:bg-green-700 text-white" 
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            }`}
+          >
+            {submitLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Submitting...</span>
+              </div>
+            ) : profileSubmitted ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle size={16} />
+                <span>Profile Submitted</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Save size={16} />
+                <span>Submit Profile</span>
+              </div>
+            )}
+          </Button>
+        </div>
 
         {/* Upload Documents Card */}
         <Card className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
@@ -1539,13 +1789,19 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             />
           </div>
 
-          <Button
-            onClick={handleDocumentUpload}
-            disabled={uploadLoading}
-            className="px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow"
-          >
-            {uploadLoading ? "Uploading..." : "Submit Documents"}
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              onClick={handleDocumentUpload}
+              disabled={uploadLoading || !profileSubmitted}
+              className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+                !profileSubmitted 
+                  ? "bg-gray-400 text-white cursor-not-allowed" 
+                  : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
+              }`}
+            >
+              {uploadLoading ? "Uploading..." : "Submit Documents"}
+            </Button>
+          </div>
 
           {/* Upload Success/Error Messages */}
           {uploadSuccess && (
@@ -1570,10 +1826,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
           </div>
         )}
 
-        {/* Company Info */}
+        {/* Company Info Card */}
         <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-6">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">ISCS Technologies Private Limited</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">
+              ISCS Technologies Private Limited
+            </h3>
             <p className="text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>
           </div>
         </Card>
@@ -1582,22 +1840,26 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         <div className="flex justify-between pt-6">
           <div className="flex gap-4">
             <Button type="button" onClick={onBack} variant="outline" className="px-8 py-3 flex items-center gap-2">
-              <ArrowLeft size={16} /> Back
+              <ArrowLeft size={16} />
+              Back
             </Button>
-            {/* <Button
-              onClick={handleSubmitToAPI}
-              disabled={submitLoading}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-lg"
-            >
-              {submitLoading ? "Submitting..." : <><Save size={16} className="mr-2" />Submit</>}
-            </Button> */}
           </div>
           <Button
             onClick={handleNext}
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium rounded-lg shadow-lg"
+            disabled={loading || !profileSubmitted || !uploadSuccess || !isFormValid}
+            className="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
           >
-            {loading ? "Proceeding..." : <><span>Next</span><ArrowRight size={16} className="ml-2" /></>}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Proceeding...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span>Next</span>
+                <ArrowRight size={16} />
+              </div>
+            )}
           </Button>
         </div>
       </form>

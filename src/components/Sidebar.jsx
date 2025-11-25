@@ -1,11 +1,14 @@
 // // Sidebar.jsx
 // import React from "react"
 // import { Link, useLocation } from "react-router-dom"
-// import { LayoutDashboard, Users, FileText, ChevronRight } from "lucide-react"
+// import { LayoutDashboard, Users, FileText, UserPlus, ChevronRight } from "lucide-react"
 // import iscsLogo from "@/assets/iscs-logo.png"
 
-// export default function Sidebar() {
+// export default function Sidebar({ user }) {
 //   const location = useLocation()
+  
+//   // Check if user is superadmin
+//   const isSuperAdmin = user?.role === "superadmin"
  
 //   const menuItems = [
 //     {
@@ -22,6 +25,14 @@
 //       path: "/employees",
 //       active: location.pathname === "/employees"
 //     },
+//     // Only show Employee REG if user is not a superadmin
+//     ...(isSuperAdmin ? [] : [{
+//       id: "employee-reg",
+//       label: "Employee REG",
+//       icon: UserPlus,
+//       path: "/register",
+//       active: location.pathname === "/register"
+//     }]),
 //     {
 //       id: "documents",
 //       label: "Documents",
@@ -85,28 +96,40 @@
 //           <p className="text-xs text-gray-500 text-center mt-1">
 //             Human Resource Management
 //           </p>
+//           {user && (
+//             <p className="text-xs text-gray-500 text-center mt-1">
+//               Role: <span className="font-medium">{user.role}</span>
+//             </p>
+//           )}
 //         </div>
 //       </div>
 //     </div>
 //   )
 // }
-// Sidebar.jsx
+
+// Sidebar.jsx(Dr-emp)
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { LayoutDashboard, Users, FileText, UserPlus, ChevronRight } from "lucide-react"
 import iscsLogo from "@/assets/iscs-logo.png"
 
-export default function Sidebar() {
+export default function Sidebar({ user }) {
   const location = useLocation()
+  
+  // Check user role
+  const isSuperAdmin = user?.role === "superadmin"
+  const isEmployee = user?.role === "employee"
+  const isHR = user?.role === "hr"
  
   const menuItems = [
-    {
+    // Only show Dashboard if user is not an Employee
+    ...(isEmployee ? [] : [{
       id: "dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
       path: "/dashboard",
       active: location.pathname === "/dashboard"
-    },
+    }]),
     {
       id: "employees",
       label: "Employees",
@@ -114,13 +137,14 @@ export default function Sidebar() {
       path: "/employees",
       active: location.pathname === "/employees"
     },
-    {
+    // Only show Employee REG if user is not a superadmin
+    ...(isSuperAdmin ? [] : [{
       id: "employee-reg",
       label: "Employee REG",
       icon: UserPlus,
       path: "/register",
       active: location.pathname === "/register"
-    },
+    }]),
     {
       id: "documents",
       label: "Documents",
@@ -130,6 +154,7 @@ export default function Sidebar() {
     }
   ]
 
+  // Rest of the component remains the same...
   return (
     <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg border-r border-gray-200 z-40">
       {/* Logo Section */}
@@ -184,6 +209,11 @@ export default function Sidebar() {
           <p className="text-xs text-gray-500 text-center mt-1">
             Human Resource Management
           </p>
+          {user && (
+            <p className="text-xs text-gray-500 text-center mt-1">
+              Role: <span className="font-medium">{user.role}</span>
+            </p>
+          )}
         </div>
       </div>
     </div>
