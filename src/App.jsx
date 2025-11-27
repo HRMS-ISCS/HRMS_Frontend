@@ -1,9 +1,10 @@
-// // src/App.jsx ( superadmin restricted to emp reg route)
+// // src/App.jsx
 // import React, { useState, useEffect } from "react"
 // import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom"
 // import LoginPage from "./auth/LoginPage"
 // import RegisterPage from "./components/RegisterPage"
 // import LoadingScreen from "./auth/LoadingScreen"
+// import AboutISCS from "./components/AboutISCS"
 // import Sidebar from "./components/Sidebar"
 // import Navbar from "./components/Navbar"
 // import Dashboard from "./components/Dashboard"
@@ -28,7 +29,7 @@
 // }
 
 // // Main App Content Component
-// function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingComplete }) {
+// function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingComplete, isCheckingToken }) {
 //   const navigate = useNavigate()
 
 //   const handleLogout = () => {
@@ -37,9 +38,9 @@
 //     navigate("/")
 //   }
 
-//   // Show loading screen after login
-//   if (isLoading) {
-//     return <LoadingScreen onLoadingComplete={onLoadingComplete} />
+//   // Show loading screen while checking token
+//   if (isCheckingToken) {
+//     return <LoadingScreen onLoadingComplete={() => {}} />
 //   }
 
 //   return (
@@ -49,10 +50,29 @@
 //           path="/" 
 //           element={
 //             isLoggedIn ? (
-//               <Navigate to="/dashboard" replace />
+//               // Redirect to AboutISCS page after login
+//               <Navigate to="/about-iscs" replace />
 //             ) : (
 //               <LoginPage onLogin={onLogin} />
 //             )
+//           } 
+//         />
+        
+//         {/* Protected About ISCS Route - Only accessible after login */}
+//         <Route 
+//           path="/about-iscs" 
+//           element={
+//             <ProtectedRoute isLoggedIn={isLoggedIn}>
+//               <AboutISCS />
+//             </ProtectedRoute>
+//           } 
+//         />
+        
+//         {/* Loading Route */}
+//         <Route 
+//           path="/loading" 
+//           element={
+//             <LoadingScreen onLoadingComplete={onLoadingComplete} />
 //           } 
 //         />
          
@@ -116,7 +136,7 @@
 //               </div>
 //             </ProtectedRoute>
 //           }
-// />
+//         />
         
 //         <Route
 //           path="/employees"
@@ -155,6 +175,18 @@
 //               </div>
 //             </ProtectedRoute>
 //           }
+//         />
+
+//         {/* Catch-all route for any undefined paths */}
+//         <Route 
+//           path="*" 
+//           element={
+//             isLoggedIn ? (
+//               <Navigate to="/dashboard" replace />
+//             ) : (
+//               <Navigate to="/" replace />
+//             )
+//           } 
 //         />
 //       </Routes>
 //       {typeof Toaster !== 'undefined' && <Toaster />}
@@ -222,7 +254,6 @@
 //   }, []);
 
 //   const handleLogin = async () => {
-//     setIsLoading(true)
 //     setIsLoggedIn(true)
     
 //     // Fetch user data after login
@@ -236,17 +267,13 @@
 
 //   const handleLoadingComplete = () => {
 //     setIsLoading(false)
+//     // Navigation will be handled by the LoadingScreen component
 //   }
 
 //   const handleLogout = () => {
 //     setIsLoggedIn(false)
 //     setIsLoading(false)
 //     setUser(null)
-//   }
-
-//   // Show loading screen while checking token
-//   if (isCheckingToken) {
-//     return <LoadingScreen onLoadingComplete={() => setIsCheckingToken(false)} />
 //   }
 
 //   return (
@@ -258,11 +285,11 @@
 //         onLogin={handleLogin}
 //         onLogout={handleLogout}
 //         onLoadingComplete={handleLoadingComplete}
+//         isCheckingToken={isCheckingToken}
 //       />
 //     </Router>
 //   )
 // }
-
 
 // src/App.jsx
 import React, { useState, useEffect } from "react"
@@ -270,6 +297,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "r
 import LoginPage from "./auth/LoginPage"
 import RegisterPage from "./components/RegisterPage"
 import LoadingScreen from "./auth/LoadingScreen"
+import AboutISCS from "./components/AboutISCS"
 import Sidebar from "./components/Sidebar"
 import Navbar from "./components/Navbar"
 import Dashboard from "./components/Dashboard"
@@ -285,7 +313,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
     return <Navigate to="/" replace />
   }
   
-  // If a specific role is required and the user doesn't have it, redirect to dashboard
+  // If a specific role is required and user doesn't have it, redirect to dashboard
   if (requiredRole && userRole === requiredRole) {
     return <Navigate to="/dashboard" replace />
   }
@@ -294,7 +322,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 }
 
 // Main App Content Component
-function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingComplete }) {
+function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingComplete, isCheckingToken }) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -303,9 +331,9 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
     navigate("/")
   }
 
-  // Show loading screen after login
-  if (isLoading) {
-    return <LoadingScreen onLoadingComplete={onLoadingComplete} />
+  // Show loading screen while checking token
+  if (isCheckingToken) {
+    return <LoadingScreen onLoadingComplete={() => {}} />
   }
 
   return (
@@ -316,14 +344,34 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
           element={
             isLoggedIn ? (
               // Redirect based on user role after login
-              user?.role === "employee" ? (
-                <Navigate to="/employees" replace />
+              user?.role === "superadmin" ? (
+                <Navigate to="/loading" replace />
               ) : (
-                <Navigate to="/dashboard" replace />
+                <Navigate to="/about-iscs" replace />
               )
             ) : (
               <LoginPage onLogin={onLogin} />
             )
+          } 
+        />
+        
+        {/* Protected About ISCS Route - Only accessible after login and not for superadmin */}
+        <Route 
+          path="/about-iscs" 
+          element={
+            isLoggedIn && user?.role !== "superadmin" ? (
+              <AboutISCS />
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
+          } 
+        />
+        
+        {/* Loading Route - Only for superadmin */}
+        <Route 
+          path="/loading" 
+          element={
+            <LoadingScreen onLoadingComplete={onLoadingComplete} />
           } 
         />
          
@@ -361,7 +409,7 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
                   <div className="flex-1 ml-64">
                     <Navbar onLogout={handleLogout} />
                     <main className="min-h-screen pt-16">
-                      <Dashboard />
+                      <Dashboard user={user} />
                     </main>
                   </div>
                 </div>
@@ -380,14 +428,14 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
                   <div className="flex-1 ml-64">
                     <Navbar onLogout={handleLogout} />
                     <main className="min-h-screen pt-16">
-                      <Profile />
+                      <Profile user={user} />
                     </main>
                   </div>
                 </div>
               </div>
             </ProtectedRoute>
           }
-/>
+        />
         
         <Route
           path="/employees"
@@ -399,7 +447,7 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
                   <div className="flex-1 ml-64">
                     <Navbar onLogout={handleLogout} />
                     <main className="min-h-screen pt-16">
-                      <Employees />
+                      <Employees user={user} />
                     </main>
                   </div>
                 </div>
@@ -419,13 +467,25 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
                   <div className="flex-1 ml-64">
                     <Navbar onLogout={handleLogout} />
                     <main className="min-h-screen pt-16">
-                      <Documents />
+                      <Documents user={user} />
                     </main>
                   </div>
                 </div>
               </div>
             </ProtectedRoute>
           }
+        />
+
+        {/* Catch-all route for any undefined paths */}
+        <Route 
+          path="*" 
+          element={
+            isLoggedIn ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } 
         />
       </Routes>
       {typeof Toaster !== 'undefined' && <Toaster />}
@@ -493,31 +553,32 @@ export default function App() {
   }, []);
 
   const handleLogin = async () => {
-    setIsLoading(true)
-    setIsLoggedIn(true)
-    
-    // Fetch user data after login
     try {
+      // Fetch user data first, then set login state
       const userData = await getCurrentUser();
       setUser(userData);
+      
+      // Only set loading state for superadmin
+      if (userData.role === "superadmin") {
+        setIsLoading(true);
+      }
+      
+      setIsLoggedIn(true);
     } catch (error) {
       console.error("Error fetching user data after login:", error);
+      // If there's an error, don't set login state
     }
   }
 
   const handleLoadingComplete = () => {
     setIsLoading(false)
+    // Navigation will be handled by route redirects
   }
 
   const handleLogout = () => {
     setIsLoggedIn(false)
     setIsLoading(false)
     setUser(null)
-  }
-
-  // Show loading screen while checking token
-  if (isCheckingToken) {
-    return <LoadingScreen onLoadingComplete={() => setIsCheckingToken(false)} />
   }
 
   return (
@@ -529,6 +590,7 @@ export default function App() {
         onLogin={handleLogin}
         onLogout={handleLogout}
         onLoadingComplete={handleLoadingComplete}
+        isCheckingToken={isCheckingToken}
       />
     </Router>
   )

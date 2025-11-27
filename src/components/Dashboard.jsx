@@ -1,13 +1,14 @@
 // // Dashboard.jsx
 // import React, { useState, useEffect } from "react"
 // import { Card } from "@/components/ui/card"
-// import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, ChevronDown, ChevronUp, Building, ChevronLeft, ChevronRight, X } from "lucide-react"
+// import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, ChevronDown, ChevronUp, Building, ChevronLeft, ChevronRight, X, CheckCircle } from "lucide-react"
 // import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 // import { apiRequest } from "../api" // Import our API request function
 // import { Button } from "@/components/ui/button"
 // import { Input } from "@/components/ui/input"
 // import { Label } from "@/components/ui/label"
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { useToast } from "@/components/ui/use-toast" // Import the useToast hook
 
 // export default function Dashboard() {
 //   // Existing states
@@ -61,6 +62,9 @@
   
 //   const [formErrors, setFormErrors] = useState({})
 //   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+//   // Initialize toast
+//   const { toast } = useToast()
 
 //   useEffect(() => {
 //     // Existing API calls
@@ -247,12 +251,26 @@
 //         setUsersList(data.admin_data)
 //       }
       
-//       // Show success message (you can use a toast notification here)
-//       alert("User created successfully!")
+//       // Show success toast notification
+//       toast({
+//         title: (
+//           <div className="flex items-center gap-2">
+//             <CheckCircle className="h-5 w-5 text-green-500" />
+//             <span>User Created Successfully</span>
+//           </div>
+//         ),
+//         description: `${formData.first_name} ${formData.last_name} has been added as ${formData.role}`,
+//         className: "bg-green-50 border-green-200 text-green-800",
+//       })
       
 //     } catch (error) {
 //       console.error("Error creating user:", error)
-//       alert(`Error creating user: ${error.message}`)
+//       // Show error toast notification
+//       toast({
+//         title: "Error",
+//         description: error.message || "Failed to create user. Please try again.",
+//         variant: "destructive",
+//       })
 //     } finally {
 //       setIsSubmitting(false)
 //     }
@@ -956,249 +974,244 @@
 //       </Card>
 
 //       {/* Create User Dialog - MODIFIED */}
-//   {showCreateUserDialog && (
-//   <div 
-//     className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto pointer-events-none"
-//   >
-//     <div 
-//       className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 my-8 relative animate-in fade-in zoom-in duration-200 pointer-events-auto"
-//       onClick={(e) => e.stopPropagation()}
-//     >
-//       <div className="flex items-center justify-between mb-6">
-//         <h3 className="text-xl font-bold text-gray-800">Create New User</h3>
-//         <button
-//           onClick={() => setShowCreateUserDialog(false)}
-//           className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
-//           type="button"
+//       {showCreateUserDialog && (
+//         <div 
+//           className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto pointer-events-none"
 //         >
-//           <X size={24} />
-//         </button>
-//       </div>
-      
-//       <form onSubmit={handleSubmit} className="space-y-5">
-//         {/* First Row: First Name, Last Name, Mobile Number */}
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//           <div>
-//             <Label htmlFor="first_name" className="text-sm font-medium text-gray-700 mb-1 block">
-//               First Name <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="first_name"
-//               name="first_name"
-//               type="text"
-//               placeholder="Enter first name"
-//               value={formData.first_name}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.first_name ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.first_name && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.first_name}
-//               </p>
-//             )}
-//           </div>
-          
-//           <div>
-//             <Label htmlFor="last_name" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Last Name <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="last_name"
-//               name="last_name"
-//               type="text"
-//               placeholder="Enter last name"
-//               value={formData.last_name}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.last_name ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.last_name && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.last_name}
-//               </p>
-//             )}
-//           </div>
-          
-//           <div>
-//             <Label htmlFor="mobile_number" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Mobile Number <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="mobile_number"
-//               name="mobile_number"
-//               type="text"
-//               placeholder="10-digit number"
-//               value={formData.mobile_number}
-//               onChange={handleInputChange}
-//               maxLength={10}
-//               className={`w-full ${formErrors.mobile_number ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.mobile_number && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.mobile_number}
-//               </p>
-//             )}
-//           </div>
-//         </div>
-        
-//         {/* Second Row: Username, Email, Role */}
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//           <div>
-//             <Label htmlFor="username" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Username <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="username"
-//               name="username"
-//               type="text"
-//               placeholder="Enter username"
-//               value={formData.username}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.username ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.username && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.username}
-//               </p>
-//             )}
-//           </div>
-          
-//           <div>
-//             <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Email <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="email"
-//               name="email"
-//               type="email"
-//               placeholder="email@example.com"
-//               value={formData.email}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.email && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.email}
-//               </p>
-//             )}
-//           </div>
-          
-//           <div>
-//             <Label htmlFor="role" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Role <span className="text-red-500">*</span>
-//             </Label>
-//             <Select 
-//               value={formData.role} 
-//               onValueChange={handleRoleChange}
-//               disabled={isSubmitting}
-//             >
-//               <SelectTrigger className={`w-full ${formErrors.role ? 'border-red-500 focus:ring-red-500' : ''}`}>
-//                 <SelectValue placeholder="Select role" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="superadmin">Superadmin</SelectItem>
-//                 <SelectItem value="hr">HR</SelectItem>
-//                 <SelectItem value="employee">Employee</SelectItem>
-//               </SelectContent>
-//             </Select>
-//             {formErrors.role && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.role}
-//               </p>
-//             )}
-//           </div>
-//         </div>
-        
-//         {/* Third Row: Password, Confirm Password */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//           <div>
-//             <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Password <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="password"
-//               name="password"
-//               type="password"
-//               placeholder="Min. 6 characters"
-//               value={formData.password}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.password && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.password}
-//               </p>
-//             )}
-//           </div>
-          
-//           <div>
-//             <Label htmlFor="confirm_password" className="text-sm font-medium text-gray-700 mb-1 block">
-//               Confirm Password <span className="text-red-500">*</span>
-//             </Label>
-//             <Input
-//               id="confirm_password"
-//               name="confirm_password"
-//               type="password"
-//               placeholder="Re-enter password"
-//               value={formData.confirm_password}
-//               onChange={handleInputChange}
-//               className={`w-full ${formErrors.confirm_password ? 'border-red-500 focus:ring-red-500' : ''}`}
-//               disabled={isSubmitting}
-//             />
-//             {formErrors.confirm_password && (
-//               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-//                 <span>⚠</span> {formErrors.confirm_password}
-//               </p>
-//             )}
-//           </div>
-//         </div>
-        
-//         {/* Action Buttons */}
-//         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-//           <Button
-//             type="button"
-//             variant="outline"
-//             onClick={() => setShowCreateUserDialog(false)}
-//             disabled={isSubmitting}
-//             className="px-6"
+//           <div 
+//             className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 my-8 relative animate-in fade-in zoom-in duration-200 pointer-events-auto"
+//             onClick={(e) => e.stopPropagation()}
 //           >
-//             Cancel
-//           </Button>
-//           <Button
-//             type="submit"
-//             disabled={isSubmitting}
-//             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6"
-//           >
-//             {isSubmitting ? (
-//               <div className="flex items-center gap-2">
-//                 <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
-//                 <span>Creating...</span>
+//             <div className="flex items-center justify-between mb-6">
+//               <h3 className="text-xl font-bold text-gray-800">Create New User</h3>
+//               <button
+//                 onClick={() => setShowCreateUserDialog(false)}
+//                 className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+//                 type="button"
+//               >
+//                 <X size={24} />
+//               </button>
+//             </div>
+            
+//             <form onSubmit={handleSubmit} className="space-y-5">
+//               {/* First Row: First Name, Last Name, Mobile Number */}
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//                 <div>
+//                   <Label htmlFor="first_name" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     First Name <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="first_name"
+//                     name="first_name"
+//                     type="text"
+//                     placeholder="Enter first name"
+//                     value={formData.first_name}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.first_name ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.first_name && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.first_name}
+//                     </p>
+//                   )}
+//                 </div>
+                
+//                 <div>
+//                   <Label htmlFor="last_name" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Last Name <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="last_name"
+//                     name="last_name"
+//                     type="text"
+//                     placeholder="Enter last name"
+//                     value={formData.last_name}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.last_name ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.last_name && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.last_name}
+//                     </p>
+//                   )}
+//                 </div>
+                
+//                 <div>
+//                   <Label htmlFor="mobile_number" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Mobile Number <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="mobile_number"
+//                     name="mobile_number"
+//                     type="text"
+//                     placeholder="10-digit number"
+//                     value={formData.mobile_number}
+//                     onChange={handleInputChange}
+//                     maxLength={10}
+//                     className={`w-full ${formErrors.mobile_number ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.mobile_number && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.mobile_number}
+//                     </p>
+//                   )}
+//                 </div>
 //               </div>
-//             ) : (
-//               <div className="flex items-center gap-2">
-//                 <UserPlus size={16} />
-//                 <span>Create User</span>
+              
+//               {/* Second Row: Username, Email, Role */}
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//                 <div>
+//                   <Label htmlFor="username" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Username <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="username"
+//                     name="username"
+//                     type="text"
+//                     placeholder="Enter username"
+//                     value={formData.username}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.username ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.username && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.username}
+//                     </p>
+//                   )}
+//                 </div>
+                
+//                 <div>
+//                   <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Email <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="email"
+//                     name="email"
+//                     type="email"
+//                     placeholder="email@example.com"
+//                     value={formData.email}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.email && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.email}
+//                     </p>
+//                   )}
+//                 </div>
+                
+//                 <div>
+//                   <Label htmlFor="role" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Role <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Select 
+//                     value={formData.role} 
+//                     onValueChange={handleRoleChange}
+//                     disabled={isSubmitting}
+//                   >
+//                     <SelectTrigger className={`w-full bg-white border-gray-300 ${formErrors.role ? 'border-red-500 focus:ring-red-500' : ''}`}>
+//                       <SelectValue placeholder="Select role" />
+//                     </SelectTrigger>
+//                     <SelectContent className="bg-white border-gray-300">
+//                       <SelectItem value="superadmin">Superadmin</SelectItem>
+//                       <SelectItem value="hr">HR</SelectItem>
+//                       <SelectItem value="employee">Employee</SelectItem>
+//                     </SelectContent>
+//                   </Select>
+//                   {formErrors.role && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.role}
+//                     </p>
+//                   )}
+//                 </div>
 //               </div>
-//             )}
-//           </Button>
+              
+//               {/* Third Row: Password, Confirm Password */}
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <div>
+//                   <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Password <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="password"
+//                     name="password"
+//                     type="password"
+//                     placeholder="Min. 6 characters"
+//                     value={formData.password}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.password && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.password}
+//                     </p>
+//                   )}
+//                 </div>
+                
+//                 <div>
+//                   <Label htmlFor="confirm_password" className="text-sm font-medium text-gray-700 mb-1 block">
+//                     Confirm Password <span className="text-red-500">*</span>
+//                   </Label>
+//                   <Input
+//                     id="confirm_password"
+//                     name="confirm_password"
+//                     type="password"
+//                     placeholder="Re-enter password"
+//                     value={formData.confirm_password}
+//                     onChange={handleInputChange}
+//                     className={`w-full ${formErrors.confirm_password ? 'border-red-500 focus:ring-red-500' : ''}`}
+//                     disabled={isSubmitting}
+//                   />
+//                   {formErrors.confirm_password && (
+//                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+//                       <span>⚠</span> {formErrors.confirm_password}
+//                     </p>
+//                   )}
+//                 </div>
+//               </div>
+              
+//               {/* Action Buttons */}
+//               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+//                 <Button
+//                   type="button"
+//                   variant="outline"
+//                   onClick={() => setShowCreateUserDialog(false)}
+//                   disabled={isSubmitting}
+//                   className="px-6"
+//                 >
+//                   Cancel
+//                 </Button>
+//                 <Button
+//                   type="submit"
+//                   disabled={isSubmitting}
+//                   className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6"
+//                 >
+//                   {isSubmitting ? (
+//                     <div className="flex items-center gap-2">
+//                       <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+//                       <span>Creating...</span>
+//                     </div>
+//                   ) : (
+//                     <div className="flex items-center gap-2">
+//                       <UserPlus size={16} />
+//                       <span>Create User</span>
+//                     </div>
+//                   )}
+//                 </Button>
+//               </div>
+//             </form>
+//           </div>
 //         </div>
-//       </form>
-//     </div>
-//   </div>
-// )}
-
-
-
-      
+//       )}
 //     </div>
 //   )
 // }
-    
 // Dashboard.jsx
 import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
@@ -1508,11 +1521,11 @@ export default function Dashboard() {
     { name: "Female", value: genderCounts.Female, color: "#d6ad3a" } // mustard
   ]
 
-  // User role pie chart data
+  // User role pie chart data - Using Employee Distribution colors with green for superadmin and orange for employee
   const userRolePieData = [
-    { name: "Superadmin", value: userRoleData.superadmin, color: "#8b5cf6" }, // purple
-    { name: "HR", value: userRoleData.hr, color: "#10b981" }, // green
-    { name: "Employee", value: userRoleData.employee, color: "#3b82f6" } // blue
+    { name: "Superadmin", value: userRoleData.superadmin, color: "#10b981" }, // green
+    { name: "HR", value: userRoleData.hr, color: "#53c9cf" }, // teal/cyan (same as External Employees)
+    { name: "Employee", value: userRoleData.employee, color: "#f8a688" } // peach/orange
   ]
 
   // Bank account data for charts with pale colors
@@ -1566,12 +1579,6 @@ export default function Dashboard() {
     )
   }
 
-  const pendingTasks = [
-    { id: 1, task: "Review performance evaluations", deadline: "Today", priority: "high" },
-    { id: 2, task: "Approve leave requests", deadline: "Tomorrow", priority: "medium" },
-    { id: 3, task: "Update employee handbook", deadline: "This week", priority: "low" }
-  ]
-
   // Pagination logic for bank accounts
   const totalPages = Math.ceil(bankAccountData.non_axis_bank_employees.length / rowsPerPage)
   const startIndex = (currentPage - 1) * rowsPerPage
@@ -1606,9 +1613,9 @@ export default function Dashboard() {
 }, [showCreateUserDialog])
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
@@ -1624,7 +1631,7 @@ export default function Dashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.title} className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <Card key={stat.title} className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -1642,24 +1649,24 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Employee Distribution Pie Chart */}
-      <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-1">Employee Distribution</h3>
-            <p className="text-sm text-gray-500">Internal vs External workforce breakdown</p>
+      {/* Employee Distribution and Gender Distribution Charts Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Employee Distribution Pie Chart */}
+        <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-1">Employee Distribution</h3>
+              <p className="text-sm text-gray-500">Internal vs External workforce breakdown</p>
+            </div>
+            <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">{totalEmployees}</p>
+            </div>
           </div>
-          <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">{totalEmployees}</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-          {/* Pie Chart */}
-          <div className="lg:col-span-2 flex justify-center">
+          
+          <div className="flex justify-center">
             <div className="relative">
-              <div className="h-72 w-72">
+              <div className="h-64 w-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -1668,8 +1675,8 @@ export default function Dashboard() {
                       cy="50%"
                       labelLine={false}
                       label={renderLabel}
-                      outerRadius={90}
-                      innerRadius={45}
+                      outerRadius={80}
+                      innerRadius={40}
                       fill="#8884d8"
                       dataKey="value"
                       stroke="#ffffff"
@@ -1694,9 +1701,9 @@ export default function Dashboard() {
               </div>
               {/* Center Label */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center bg-white rounded-full p-4 shadow-sm border border-gray-100">
+                <div className="text-center bg-white rounded-full p-3 shadow-sm border border-gray-100">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</p>
-                  <p className="text-2xl font-bold text-gray-800">{totalEmployees}</p>
+                  <p className="text-xl font-bold text-gray-800">{totalEmployees}</p>
                   <p className="text-xs text-gray-500">Employees</p>
                 </div>
               </div>
@@ -1704,102 +1711,102 @@ export default function Dashboard() {
           </div>
 
           {/* Statistics Summary */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="mt-6 space-y-3">
             {pieChartData.map((item, index) => (
               <div key={index} className="group hover:shadow-md transition-all duration-300">
-                <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-6 h-6 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
+                      <div className="w-5 h-5 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-800 text-base">{item.name}</span>
-                      <p className="text-xs text-gray-500 mt-1">Active employees</p>
+                      <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
+                      <p className="text-xs text-gray-500">Active employees</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-gray-800">{item.value}</p>
+                      <p className="text-lg font-bold text-gray-800">{item.value}</p>
                       <div className="px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: item.color }}>
                         {item.percentage}%
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">of workforce</p>
+                    <p className="text-xs text-gray-500">of workforce</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* Gender Distribution Chart (Full Pie) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Gender Distribution</h3>
-              <span className="text-sm text-gray-500">Total: {genderCounts.Total_Employees}</span>
+        {/* Gender Distribution Chart (Full Pie) */}
+        <Card className="p-6 bg-white">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-1">Gender Distribution</h3>
+              <p className="text-sm text-gray-500">Employee gender breakdown</p>
             </div>
-            <div className="flex justify-center">
-              <div className="h-72 w-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={genderPieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={renderLabel}
-                      outerRadius={100}
-                      innerRadius={0}
-                      dataKey="value"
-                      stroke="#ffffff"
-                      strokeWidth={3}
-                    >
-                      {genderPieData.map((entry, index) => (
-                        <Cell key={`cell-gender-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+            <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
+              <p className="text-2xl font-bold text-blue-600 mt-1">{genderCounts.Total_Employees}</p>
             </div>
-          </Card>
-        </div>
+          </div>
+          
+          <div className="flex justify-center">
+            <div className="h-64 w-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={genderPieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderLabel}
+                    outerRadius={80}
+                    innerRadius={0}
+                    dataKey="value"
+                    stroke="#ffffff"
+                    strokeWidth={3}
+                  >
+                    {genderPieData.map((entry, index) => (
+                      <Cell key={`cell-gender-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-        {/* Pending Tasks */}
-        <div>
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Pending Tasks</h3>
-              <span className="text-sm text-gray-500">{pendingTasks.length} tasks</span>
-            </div>
-            <div className="space-y-3">
-              {pendingTasks.map((task) => (
-                <div key={task.id} className="p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-300">
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        task.priority === "high"
-                          ? "bg-red-100 text-red-700"
-                          : task.priority === "medium"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {task.priority.toUpperCase()}
-                    </span>
-                    <span className="text-xs text-gray-500">{task.deadline}</span>
+          {/* Statistics Summary */}
+          <div className="mt-6 space-y-3">
+            {genderPieData.map((item, index) => (
+              <div key={index} className="group hover:shadow-md transition-all duration-300">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-5 h-5 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
+                      <p className="text-xs text-gray-500">Employees</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium text-gray-800">{task.task}</p>
+                  <div className="text-right">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-lg font-bold text-gray-800">{item.value}</p>
+                      <div className="px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: item.color }}>
+                        {genderCounts.Total_Employees > 0 ? ((item.value / genderCounts.Total_Employees) * 100).toFixed(1) : 0}%
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">of total</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {/* Bank Account Distribution - Replacing Quick Actions */}
@@ -2002,7 +2009,7 @@ export default function Dashboard() {
             </div>
             <Button 
               onClick={() => setShowCreateUserDialog(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
             >
               <UserPlus size={16} />
               Create User
@@ -2097,7 +2104,6 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200/50">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">ID</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Username</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
@@ -2109,16 +2115,15 @@ export default function Dashboard() {
               <tbody>
                 {currentUsers.map((user, index) => (
                   <tr key={index} className="border-b border-gray-100/50 hover:bg-gray-50/50 transition-all duration-200">
-                    <td className="py-3 px-4 text-gray-800">{user.id}</td>
                     <td className="py-3 px-4 text-gray-800">{user.first_name} {user.last_name}</td>
                     <td className="py-3 px-4 text-gray-800">{user.username}</td>
                     <td className="py-3 px-4 text-gray-800">{user.email}</td>
                     <td className="py-3 px-4 text-gray-800">{user.mobile_number}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.role === 'superadmin' ? 'bg-purple-100 text-purple-700' :
-                        user.role === 'hr' ? 'bg-green-100 text-green-700' :
-                        'bg-blue-100 text-blue-700'
+                        user.role === 'superadmin' ? 'bg-green-100 text-green-700' :
+                        user.role === 'hr' ? 'bg-teal-100 text-teal-700' :
+                        'bg-orange-100 text-orange-700'
                       }`}>
                         {user.role}
                       </span>
@@ -2391,7 +2396,7 @@ export default function Dashboard() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
