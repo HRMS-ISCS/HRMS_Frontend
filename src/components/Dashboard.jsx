@@ -1,4 +1,4 @@
-// Dashboard.jsx
+// src/components/Dashboard.jsx
 import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Users, UserPlus, Calendar, TrendingUp, Clock, Award, ChevronDown, ChevronUp, Building, ChevronLeft, ChevronRight, X, CheckCircle } from "lucide-react"
@@ -9,8 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast" // Import the useToast hook
+import { useDarkMode } from "@/context/DarkModeContext"
 
 export default function Dashboard() {
+  const { darkMode } = useDarkMode()
+  
   // Existing states
   const [employeeCounts, setEmployeeCounts] = useState({
     internal_employees: 0,
@@ -260,7 +263,7 @@ export default function Dashboard() {
           </div>
         ),
         description: `${formData.first_name} ${formData.last_name} has been added as ${formData.role}`,
-        className: "bg-green-50 border-green-200 text-green-800",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
       })
       
     } catch (error) {
@@ -336,10 +339,12 @@ export default function Dashboard() {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-          <p className="font-medium text-gray-800">{data.name}</p>
+        <div className={`p-3 shadow-lg rounded-lg border ${
+          darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
+          <p className={`font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{data.name}</p>
           <p className="text-blue-600">Count: {data.value}</p>
-          {data.percentage && <p className="text-gray-600">Percentage: {data.percentage}%</p>}
+          {data.percentage && <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Percentage: {data.percentage}%</p>}
         </div>
       )
     }
@@ -355,7 +360,7 @@ export default function Dashboard() {
       <text
         x={x}
         y={y}
-        fill="#374151"
+        fill={darkMode ? "#D1D5DB" : "#374151"}
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         className="font-semibold text-sm"
@@ -385,28 +390,27 @@ export default function Dashboard() {
     setUserPage(page)
   }
 
-
   useEffect(() => {
-  if (showCreateUserDialog) {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = 'unset'
-  }
-  
-  return () => {
-    document.body.style.overflow = 'unset'
-  }
-}, [showCreateUserDialog])
+    if (showCreateUserDialog) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showCreateUserDialog])
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className={`p-6 space-y-6 min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+      <div className={`flex items-center justify-between p-4 rounded-lg shadow-sm ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
+          <h1 className={`text-2xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Dashboard</h1>
+          <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Welcome back! Here's what's happening today.</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className={`flex items-center gap-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           <Clock size={16} />
           <span>Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
@@ -417,11 +421,11 @@ export default function Dashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.title} className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-white">
+            <Card key={stat.title} className={`p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</p>
+                  <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stat.title}</p>
+                  <p className={`text-2xl font-bold mt-1 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{stat.value}</p>
                   <p className={`text-sm mt-1 ${stat.changeType === "increase" ? "text-green-600" : "text-red-600"}`}>
                     {stat.change} from last month
                   </p>
@@ -438,15 +442,23 @@ export default function Dashboard() {
       {/* Employee Distribution and Gender Distribution Charts Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Employee Distribution Pie Chart */}
-        <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-lg">
+        <Card className={`p-6 shadow-lg border-0 ${
+          darkMode 
+            ? 'bg-gradient-to-br from-gray-800 to-gray-700' 
+            : 'bg-gradient-to-br from-white to-blue-50/30'
+        }`}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-1">Employee Distribution</h3>
-              <p className="text-sm text-gray-500">Internal vs External workforce breakdown</p>
+              <h3 className={`text-xl font-bold mb-1 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Employee Distribution</h3>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Internal vs External workforce breakdown</p>
             </div>
-            <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">{totalEmployees}</p>
+            <div className={`text-right rounded-xl p-3 shadow-sm border ${
+              darkMode 
+                ? 'bg-gray-700 border-gray-600' 
+                : 'bg-white border-gray-100'
+            }`}>
+              <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Employees</p>
+              <p className={`text-2xl font-bold mt-1 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{totalEmployees}</p>
             </div>
           </div>
           
@@ -465,7 +477,7 @@ export default function Dashboard() {
                       innerRadius={40}
                       fill="#8884d8"
                       dataKey="value"
-                      stroke="#ffffff"
+                      stroke={darkMode ? "#1F2937" : "#ffffff"}
                       strokeWidth={3}
                       paddingAngle={0}
                       isAnimationActive={true}
@@ -487,10 +499,14 @@ export default function Dashboard() {
               </div>
               {/* Center Label */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center bg-white rounded-full p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</p>
-                  <p className="text-xl font-bold text-gray-800">{totalEmployees}</p>
-                  <p className="text-xs text-gray-500">Employees</p>
+                <div className={`text-center rounded-full p-3 shadow-sm border ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600' 
+                    : 'bg-white border-gray-100'
+                }`}>
+                  <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total</p>
+                  <p className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{totalEmployees}</p>
+                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Employees</p>
                 </div>
               </div>
             </div>
@@ -500,24 +516,31 @@ export default function Dashboard() {
           <div className="mt-6 space-y-3">
             {pieChartData.map((item, index) => (
               <div key={index} className="group hover:shadow-md transition-all duration-300">
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div className={`flex items-center justify-between p-3 rounded-lg border shadow-sm ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600' 
+                    : 'bg-white border-gray-100'
+                }`}>
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-5 h-5 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
+                      <div className="w-5 h-5 rounded-full shadow-sm border-2" style={{ 
+                        backgroundColor: item.color,
+                        borderColor: darkMode ? '#1F2937' : '#ffffff'
+                      }}></div>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
-                      <p className="text-xs text-gray-500">Active employees</p>
+                      <span className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.name}</span>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Active employees</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-lg font-bold text-gray-800">{item.value}</p>
+                      <p className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.value}</p>
                       <div className="px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: item.color }}>
                         {item.percentage}%
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500">of workforce</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of workforce</p>
                   </div>
                 </div>
               </div>
@@ -526,15 +549,19 @@ export default function Dashboard() {
         </Card>
 
         {/* Gender Distribution Chart (Full Pie) */}
-        <Card className="p-6 bg-white">
+        <Card className={`p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-1">Gender Distribution</h3>
-              <p className="text-sm text-gray-500">Employee gender breakdown</p>
+              <h3 className={`text-xl font-bold mb-1 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Gender Distribution</h3>
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Employee gender breakdown</p>
             </div>
-            <div className="text-right bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Employees</p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">{genderCounts.Total_Employees}</p>
+            <div className={`text-right rounded-xl p-3 shadow-sm border ${
+              darkMode 
+                ? 'bg-gray-700 border-gray-600' 
+                : 'bg-white border-gray-100'
+            }`}>
+              <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Employees</p>
+              <p className={`text-2xl font-bold mt-1 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{genderCounts.Total_Employees}</p>
             </div>
           </div>
           
@@ -551,7 +578,7 @@ export default function Dashboard() {
                     outerRadius={80}
                     innerRadius={0}
                     dataKey="value"
-                    stroke="#ffffff"
+                    stroke={darkMode ? "#1F2937" : "#ffffff"}
                     strokeWidth={3}
                   >
                     {genderPieData.map((entry, index) => (
@@ -569,24 +596,31 @@ export default function Dashboard() {
           <div className="mt-6 space-y-3">
             {genderPieData.map((item, index) => (
               <div key={index} className="group hover:shadow-md transition-all duration-300">
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                <div className={`flex items-center justify-between p-3 rounded-lg border shadow-sm ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600' 
+                    : 'bg-white border-gray-100'
+                }`}>
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-5 h-5 rounded-full shadow-sm border-2 border-white" style={{ backgroundColor: item.color }}></div>
+                      <div className="w-5 h-5 rounded-full shadow-sm border-2" style={{ 
+                        backgroundColor: item.color,
+                        borderColor: darkMode ? '#1F2937' : '#ffffff'
+                      }}></div>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
-                      <p className="text-xs text-gray-500">Employees</p>
+                      <span className={`font-semibold text-sm ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.name}</span>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Employees</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-lg font-bold text-gray-800">{item.value}</p>
+                      <p className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.value}</p>
                       <div className="px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: item.color }}>
                         {genderCounts.Total_Employees > 0 ? ((item.value / genderCounts.Total_Employees) * 100).toFixed(1) : 0}%
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500">of total</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of total</p>
                   </div>
                 </div>
               </div>
@@ -596,15 +630,23 @@ export default function Dashboard() {
       </div>
 
       {/* Bank Account Distribution - Replacing Quick Actions */}
-      <Card className="p-6 bg-gradient-to-br from-white via-blue-50/20 to-indigo-50/30 border-0 shadow-lg">
+      <Card className={`p-6 shadow-lg border-0 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800' 
+          : 'bg-gradient-to-br from-white via-blue-50/20 to-indigo-50/30'
+      }`}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-1">Bank Account Distribution</h3>
-            <p className="text-sm text-gray-500">Axis Bank vs Non-Axis Bank accounts</p>
+            <h3 className={`text-xl font-bold mb-1 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Bank Account Distribution</h3>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Axis Bank vs Non-Axis Bank accounts</p>
           </div>
-          <div className="text-right bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-gray-100">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Accounts</p>
-            <p className="text-2xl font-bold text-indigo-600 mt-1">{bankAccountData.summary.Total_Accounts}</p>
+          <div className={`text-right rounded-xl p-3 shadow-sm border ${
+            darkMode 
+              ? 'bg-gray-700/80 border-gray-600' 
+              : 'bg-white/80 border-gray-100'
+          }`}>
+            <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Accounts</p>
+            <p className={`text-2xl font-bold mt-1 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{bankAccountData.summary.Total_Accounts}</p>
           </div>
         </div>
         
@@ -625,7 +667,7 @@ export default function Dashboard() {
                       innerRadius={65} // Larger inner radius for a thinner ring
                       fill="#8884d8"
                       dataKey="value"
-                      stroke="#ffffff"
+                      stroke={darkMode ? "#1F2937" : "#ffffff"}
                       strokeWidth={4}
                       paddingAngle={2}
                       isAnimationActive={true}
@@ -636,7 +678,7 @@ export default function Dashboard() {
                         <Cell 
                           key={`cell-${index}`} 
                           fill={entry.color}
-                          stroke="#ffffff"
+                          stroke={darkMode ? "#1F2937" : "#ffffff"}
                           strokeWidth={2}
                         />
                       ))}
@@ -651,10 +693,14 @@ export default function Dashboard() {
               </div>
               {/* Center Label */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total</p>
-                  <p className="text-xl font-bold text-gray-800">{bankAccountData.summary.Total_Accounts}</p>
-                  <p className="text-xs text-gray-500">Accounts</p>
+                <div className={`text-center rounded-full p-3 shadow-sm border ${
+                  darkMode 
+                    ? 'bg-gray-700/90 border-gray-600' 
+                    : 'bg-white/90 border-gray-100'
+                }`}>
+                  <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total</p>
+                  <p className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{bankAccountData.summary.Total_Accounts}</p>
+                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Accounts</p>
                 </div>
               </div>
             </div>
@@ -665,33 +711,40 @@ export default function Dashboard() {
             {bankAccountChartData.map((item, index) => (
               <div key={index} className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
                 <div 
-                  className="flex items-center justify-between p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-100/50 shadow-sm cursor-pointer"
+                  className={`flex items-center justify-between p-4 rounded-xl border shadow-sm cursor-pointer ${
+                    darkMode 
+                      ? 'bg-gray-700/70 border-gray-600/50' 
+                      : 'bg-white/70 border-gray-100/50'
+                  }`}
                   onClick={() => item.name === "Non-Axis Bank" && setShowNonAxisTable(!showNonAxisTable)}
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div className="w-6 h-6 rounded-full shadow-sm border-2 border-white/80" style={{ backgroundColor: item.color }}></div>
+                      <div className="w-6 h-6 rounded-full shadow-sm border-2" style={{ 
+                        backgroundColor: item.color,
+                        borderColor: darkMode ? '#1F2937' : '#ffffff'
+                      }}></div>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-800 text-base flex items-center gap-2">
+                      <span className={`font-semibold text-base flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                         {item.name}
                         {item.name === "Non-Axis Bank" && (
                           showNonAxisTable ? <ChevronUp size={16} /> : <ChevronDown size={16} />
                         )}
                       </span>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                         {item.name === "Non-Axis Bank" ? "Click to view details" : "Bank accounts"}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-gray-800">{item.value}</p>
+                      <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.value}</p>
                       <div className="px-2 py-1 rounded-full text-xs font-medium text-gray-700" style={{ backgroundColor: item.color }}>
                         {item.percentage}%
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">of total accounts</p>
+                    <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of total accounts</p>
                   </div>
                 </div>
               </div>
@@ -701,35 +754,43 @@ export default function Dashboard() {
 
         {/* Non-Axis Bank Employees Table with Pagination */}
         {showNonAxisTable && bankAccountData.non_axis_bank_employees.length > 0 && (
-          <div className="mt-6 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100/50 shadow-sm transition-all duration-500">
+          <div className={`mt-6 p-4 rounded-xl border shadow-sm transition-all duration-500 ${
+            darkMode 
+              ? 'bg-gray-700/80 border-gray-600/50' 
+              : 'bg-white/80 border-gray-100/50'
+          }`}>
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <h4 className={`text-lg font-semibold flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                 <Building size={20} className="text-orange-500" />
                 Non-Axis Bank Employees
               </h4>
-              <span className="text-sm text-gray-500">{bankAccountData.non_axis_bank_employees.length} employees</span>
+              <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{bankAccountData.non_axis_bank_employees.length} employees</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200/50">
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Employee ID</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Bank Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Account Number</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">IFSC Code</th>
+                  <tr className={`border-b ${darkMode ? 'border-gray-600' : 'border-gray-200/50'}`}>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Employee ID</th>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</th>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</th>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bank Name</th>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account Number</th>
+                    <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>IFSC Code</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentEmployees.map((employee, index) => (
-                    <tr key={index} className="border-b border-gray-100/50 hover:bg-gray-50/50 transition-all duration-200">
-                      <td className="py-3 px-4 text-gray-800">{employee.employee_id}</td>
-                      <td className="py-3 px-4 text-gray-800">{employee.name}</td>
-                      <td className="py-3 px-4 text-gray-800">{employee.mail_id}</td>
-                      <td className="py-3 px-4 text-gray-800">{employee.bank_name}</td>
-                      <td className="py-3 px-4 text-gray-800">{employee.account_number}</td>
-                      <td className="py-3 px-4 text-gray-800">{employee.ifsc_code}</td>
+                    <tr key={index} className={`border-b hover:transition-all duration-200 ${
+                      darkMode 
+                        ? 'border-gray-700/50 hover:bg-gray-700/50' 
+                        : 'border-gray-100/50 hover:bg-gray-50/50'
+                    }`}>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.employee_id}</td>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.name}</td>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.mail_id}</td>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.bank_name}</td>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.account_number}</td>
+                      <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{employee.ifsc_code}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -738,15 +799,19 @@ export default function Dashboard() {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200/50">
-                <div className="text-sm text-gray-600">
+              <div className={`flex items-center justify-between mt-4 pt-4 border-t ${darkMode ? 'border-gray-600' : 'border-gray-200/50'}`}>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   Showing {startIndex + 1} to {Math.min(endIndex, bankAccountData.non_axis_bank_employees.length)} of {bankAccountData.non_axis_bank_employees.length} entries
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className={`p-2 rounded-lg border transition-all duration-200 ${
+                      darkMode 
+                        ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 disabled:opacity-50' 
+                        : 'border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50'
+                    }`}
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -758,7 +823,9 @@ export default function Dashboard() {
                       className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
                         currentPage === page
                           ? 'bg-indigo-500 text-white'
-                          : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                          : darkMode 
+                            ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-300'
+                            : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
                       }`}
                     >
                       {page}
@@ -768,7 +835,11 @@ export default function Dashboard() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className={`p-2 rounded-lg border transition-all duration-200 ${
+                      darkMode 
+                        ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 disabled:opacity-50' 
+                        : 'border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50'
+                    }`}
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -780,16 +851,24 @@ export default function Dashboard() {
       </Card>
 
       {/* User Role Distribution - NEW SECTION */}
-      <Card className="p-6 bg-gradient-to-br from-white via-purple-50/20 to-indigo-50/30 border-0 shadow-lg">
+      <Card className={`p-6 shadow-lg border-0 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800' 
+          : 'bg-gradient-to-br from-white via-purple-50/20 to-indigo-50/30'
+      }`}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-1">User Role Distribution</h3>
-            <p className="text-sm text-gray-500">Distribution of users by role</p>
+            <h3 className={`text-xl font-bold mb-1 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>User Role Distribution</h3>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Distribution of users by role</p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-sm border border-gray-100">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Users</p>
-              <p className="text-2xl font-bold text-indigo-600 mt-1">
+            <div className={`text-right rounded-xl p-3 shadow-sm border ${
+              darkMode 
+                ? 'bg-gray-700/80 border-gray-600' 
+                : 'bg-white/80 border-gray-100'
+            }`}>
+              <p className={`text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Users</p>
+              <p className={`text-2xl font-bold mt-1 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>
                 {userRoleData.superadmin + userRoleData.hr + userRoleData.employee}
               </p>
             </div>
@@ -820,7 +899,7 @@ export default function Dashboard() {
                       innerRadius={0}
                       fill="#8884d8"
                       dataKey="value"
-                      stroke="#ffffff"
+                      stroke={darkMode ? "#1F2937" : "#ffffff"}
                       strokeWidth={3}
                       paddingAngle={2}
                       isAnimationActive={true}
@@ -831,7 +910,7 @@ export default function Dashboard() {
                         <Cell 
                           key={`cell-user-role-${index}`} 
                           fill={entry.color}
-                          stroke="#ffffff"
+                          stroke={darkMode ? "#1F2937" : "#ffffff"}
                           strokeWidth={2}
                         />
                       ))}
@@ -852,24 +931,31 @@ export default function Dashboard() {
           <div className="space-y-4">
             {userRolePieData.map((item, index) => (
               <div key={index} className="group hover:shadow-md transition-all duration-300 hover:scale-[1.02]">
-                <div className="flex items-center justify-between p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-100/50 shadow-sm">
+                <div className={`flex items-center justify-between p-4 rounded-xl border shadow-sm ${
+                  darkMode 
+                    ? 'bg-gray-700/70 border-gray-600/50' 
+                    : 'bg-white/70 border-gray-100/50'
+                }`}>
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div className="w-6 h-6 rounded-full shadow-sm border-2 border-white/80" style={{ backgroundColor: item.color }}></div>
+                      <div className="w-6 h-6 rounded-full shadow-sm border-2" style={{ 
+                        backgroundColor: item.color,
+                        borderColor: darkMode ? '#1F2937' : '#ffffff'
+                      }}></div>
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-800 text-base">{item.name}</span>
-                      <p className="text-xs text-gray-500 mt-1">Users with this role</p>
+                      <span className={`font-semibold text-base ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.name}</span>
+                      <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Users with this role</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-gray-800">{item.value}</p>
+                      <p className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.value}</p>
                       <div className="px-2 py-1 rounded-full text-xs font-medium text-gray-700" style={{ backgroundColor: item.color }}>
                         {item.value > 0 ? ((item.value / (userRoleData.superadmin + userRoleData.hr + userRoleData.employee)) * 100).toFixed(1) : 0}%
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">of total users</p>
+                    <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of total users</p>
                   </div>
                 </div>
               </div>
@@ -878,33 +964,41 @@ export default function Dashboard() {
         </div>
 
         {/* Users Table */}
-        <div className="mt-6 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100/50 shadow-sm">
+        <div className={`mt-6 p-4 rounded-xl border shadow-sm ${
+          darkMode 
+            ? 'bg-gray-700/80 border-gray-600/50' 
+            : 'bg-white/80 border-gray-100/50'
+        }`}>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <h4 className={`text-lg font-semibold flex items-center gap-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
               <Users size={20} className="text-indigo-500" />
               Users List
             </h4>
-            <span className="text-sm text-gray-500">{usersList.length} users</span>
+            <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{usersList.length} users</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200/50">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Username</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Mobile</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Role</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Created At</th>
+                <tr className={`border-b ${darkMode ? 'border-gray-600' : 'border-gray-200/50'}`}>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</th>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Username</th>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</th>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Mobile</th>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Role</th>
+                  <th className={`text-left py-3 px-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Created At</th>
                 </tr>
               </thead>
               <tbody>
                 {currentUsers.map((user, index) => (
-                  <tr key={index} className="border-b border-gray-100/50 hover:bg-gray-50/50 transition-all duration-200">
-                    <td className="py-3 px-4 text-gray-800">{user.first_name} {user.last_name}</td>
-                    <td className="py-3 px-4 text-gray-800">{user.username}</td>
-                    <td className="py-3 px-4 text-gray-800">{user.email}</td>
-                    <td className="py-3 px-4 text-gray-800">{user.mobile_number}</td>
+                  <tr key={index} className={`border-b hover:transition-all duration-200 ${
+                    darkMode 
+                      ? 'border-gray-700/50 hover:bg-gray-700/50' 
+                      : 'border-gray-100/50 hover:bg-gray-50/50'
+                  }`}>
+                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{user.first_name} {user.last_name}</td>
+                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{user.username}</td>
+                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{user.email}</td>
+                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{user.mobile_number}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         user.role === 'superadmin' ? 'bg-green-100 text-green-700' :
@@ -914,7 +1008,7 @@ export default function Dashboard() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-800">
+                    <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                       {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                     </td>
                   </tr>
@@ -925,15 +1019,19 @@ export default function Dashboard() {
           
           {/* Pagination Controls */}
           {totalUserPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200/50">
-              <div className="text-sm text-gray-600">
+            <div className={`flex items-center justify-between mt-4 pt-4 border-t ${darkMode ? 'border-gray-600' : 'border-gray-200/50'}`}>
+              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Showing {userStartIndex + 1} to {Math.min(userEndIndex, usersList.length)} of {usersList.length} entries
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleUserPageChange(userPage - 1)}
                   disabled={userPage === 1}
-                  className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className={`p-2 rounded-lg border transition-all duration-200 ${
+                    darkMode 
+                      ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 disabled:opacity-50' 
+                      : 'border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50'
+                  }`}
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -945,7 +1043,9 @@ export default function Dashboard() {
                     className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
                       userPage === page
                         ? 'bg-indigo-500 text-white'
-                        : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+                        : darkMode 
+                          ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 text-gray-300'
+                          : 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
                     }`}
                   >
                     {page}
@@ -955,7 +1055,11 @@ export default function Dashboard() {
                 <button
                   onClick={() => handleUserPageChange(userPage + 1)}
                   disabled={userPage === totalUserPages}
-                  className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className={`p-2 rounded-lg border transition-all duration-200 ${
+                    darkMode 
+                      ? 'border-gray-600 bg-gray-700 hover:bg-gray-600 disabled:opacity-50' 
+                      : 'border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50'
+                  }`}
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -971,14 +1075,20 @@ export default function Dashboard() {
           className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto pointer-events-none"
         >
           <div 
-            className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 my-8 relative animate-in fade-in zoom-in duration-200 pointer-events-auto"
+            className={`w-full max-w-2xl p-6 my-8 relative animate-in fade-in zoom-in duration-200 pointer-events-auto rounded-xl shadow-2xl ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Create New User</h3>
+              <h3 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Create New User</h3>
               <button
                 onClick={() => setShowCreateUserDialog(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode 
+                    ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                }`}
                 type="button"
               >
                 <X size={24} />
@@ -989,7 +1099,7 @@ export default function Dashboard() {
               {/* First Row: First Name, Last Name, Mobile Number */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="first_name" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="first_name" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     First Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -999,7 +1109,9 @@ export default function Dashboard() {
                     placeholder="Enter first name"
                     value={formData.first_name}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.first_name ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.first_name ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.first_name && (
@@ -1010,7 +1122,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="last_name" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="last_name" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Last Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1020,7 +1132,9 @@ export default function Dashboard() {
                     placeholder="Enter last name"
                     value={formData.last_name}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.last_name ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.last_name ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.last_name && (
@@ -1031,7 +1145,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="mobile_number" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="mobile_number" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Mobile Number <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1042,7 +1156,9 @@ export default function Dashboard() {
                     value={formData.mobile_number}
                     onChange={handleInputChange}
                     maxLength={10}
-                    className={`w-full ${formErrors.mobile_number ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.mobile_number ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.mobile_number && (
@@ -1056,7 +1172,7 @@ export default function Dashboard() {
               {/* Second Row: Username, Email, Role */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="username" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="username" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Username <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1066,7 +1182,9 @@ export default function Dashboard() {
                     placeholder="Enter username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.username ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.username ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.username && (
@@ -1077,7 +1195,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="email" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Email <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1087,7 +1205,9 @@ export default function Dashboard() {
                     placeholder="email@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.email ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.email && (
@@ -1098,7 +1218,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="role" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="role" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Role <span className="text-red-500">*</span>
                   </Label>
                   <Select 
@@ -1106,10 +1226,12 @@ export default function Dashboard() {
                     onValueChange={handleRoleChange}
                     disabled={isSubmitting}
                   >
-                    <SelectTrigger className={`w-full bg-white border-gray-300 ${formErrors.role ? 'border-red-500 focus:ring-red-500' : ''}`}>
+                    <SelectTrigger className={`w-full ${formErrors.role ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}>
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-300">
+                    <SelectContent className={darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}>
                       <SelectItem value="superadmin">Superadmin</SelectItem>
                       <SelectItem value="hr">HR</SelectItem>
                       <SelectItem value="employee">Employee</SelectItem>
@@ -1126,7 +1248,7 @@ export default function Dashboard() {
               {/* Third Row: Password, Confirm Password */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="password" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Password <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1136,7 +1258,9 @@ export default function Dashboard() {
                     placeholder="Min. 6 characters"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.password ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.password && (
@@ -1147,7 +1271,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="confirm_password" className="text-sm font-medium text-gray-700 mb-1 block">
+                  <Label htmlFor="confirm_password" className={`text-sm font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Confirm Password <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -1157,7 +1281,9 @@ export default function Dashboard() {
                     placeholder="Re-enter password"
                     value={formData.confirm_password}
                     onChange={handleInputChange}
-                    className={`w-full ${formErrors.confirm_password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    className={`w-full ${formErrors.confirm_password ? 'border-red-500 focus:ring-red-500' : ''} ${
+                      darkMode ? 'text-white bg-gray-700 border-gray-600' : 'text-gray-900 bg-white border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   />
                   {formErrors.confirm_password && (
@@ -1169,7 +1295,7 @@ export default function Dashboard() {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <div className={`flex justify-end gap-3 pt-4 border-t ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
                 <Button
                   type="button"
                   variant="outline"
