@@ -1005,7 +1005,8 @@ export default function Dashboard() {
                         user.role === 'hr' ? 'bg-teal-100 text-teal-700' :
                         'bg-orange-100 text-orange-700'
                       }`}>
-                        {user.role}
+                        {/* {user.role} */}
+                         {user.role.toUpperCase()}
                       </span>
                     </td>
                     <td className={`py-3 px-4 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>

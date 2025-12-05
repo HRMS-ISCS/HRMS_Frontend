@@ -1,585 +1,4 @@
-// // src/components/Documents.jsx
-// import React, { useState, useEffect, useRef } from "react";
-// import { Card } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Button } from "@/components/ui/button";
-// import {
-//   FileText,
-//   CreditCard,
-//   User,
-//   Search,
-//   Eye,
-//   Download, 
-//   RefreshCw,
-//   CheckCircle,
-//   XCircle,
-//   Clock,
-//   AlertCircle,
-//   ExternalLink,
-//   ChevronDown,
-//   Users
-// } from "lucide-react";
-// import { apiRequest, getCurrentUser } from "../api"; // Import the API request function and getCurrentUser
-
-// export default function Documents() {
-//   const [documents, setDocuments] = useState({
-//     aadhar_card: null,
-//     pan_card: null,
-//     resume: null,
-//     profile_photo: null
-//   });
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-//   const [selectedDoc, setSelectedDoc] = useState(null);
-//   const [fetchedEmployeeId, setFetchedEmployeeId] = useState("");
-//   const [currentUser, setCurrentUser] = useState(null);
-//   const [userRole, setUserRole] = useState("");
-  
-//   // New states for employee dropdown
-//   const [employees, setEmployees] = useState([]);
-//   const [employeeSearch, setEmployeeSearch] = useState("");
-//   const [selectedEmployee, setSelectedEmployee] = useState(null);
-//   const [dropdownOpen, setDropdownOpen] = useState(false);
-//   const [loadingEmployees, setLoadingEmployees] = useState(false);
-//   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-//   const dropdownRef = useRef(null);
-
-//   const documentConfig = [
-//     {
-//       type: "profile_photo",
-//       label: "Profile Photo",
-//       icon: User,
-//       color: "from-purple-50 to-pink-50",
-//       iconColor: "text-purple-600",
-//       borderColor: "border-purple-200"
-//     },
-//     {
-//       type: "aadhar_card",
-//       label: "Aadhar Card",
-//       icon: CreditCard,
-//       color: "from-blue-50 to-indigo-50",
-//       iconColor: "text-blue-600",
-//       borderColor: "border-blue-200"
-//     },
-//     {
-//       type: "pan_card",
-//       label: "PAN Card",
-//       icon: CreditCard,
-//       color: "from-green-50 to-emerald-50",
-//       iconColor: "text-green-600",
-//       borderColor: "border-green-200"
-//     },
-//     {
-//       type: "resume",
-//       label: "Resume",
-//       icon: FileText,
-//       color: "from-orange-50 to-red-50",
-//       iconColor: "text-orange-600",
-//       borderColor: "border-orange-200"
-//     }
-//   ];
-
-//   // Fetch current user on component mount
-//   useEffect(() => {
-//     const fetchCurrentUser = async () => {
-//       try {
-//         const userData = await getCurrentUser();
-//         setCurrentUser(userData);
-//         setUserRole(userData.role?.toLowerCase());
-        
-//         // If user is an employee, fetch their own documents
-//         if (userData.role?.toLowerCase() === 'employee') {
-//           setFetchedEmployeeId(userData.employee_id || userData.username);
-//           fetchEmployeeDocuments(userData.employee_id || userData.username);
-//         }
-//       } catch (err) {
-//         console.error("Error fetching current user:", err);
-//         setError("Failed to authenticate user");
-//       }
-//     };
-
-//     fetchCurrentUser();
-//   }, []);
-
-//   // Fetch employees on component mount (only for admin/hr)
-//   useEffect(() => {
-//     if (userRole === 'superadmin' || userRole === 'hr') {
-//       fetchEmployees();
-//     }
-//   }, [userRole]);
-
-//   // Close dropdown when clicking outside
-//   useEffect(() => {
-//     const handleClickOutside = (event) => {
-//       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-//         setDropdownOpen(false);
-//       }
-//     };
-
-//     document.addEventListener('mousedown', handleClickOutside);
-//     return () => {
-//       document.removeEventListener('mousedown', handleClickOutside);
-//     };
-//   }, []);
-
-//   const fetchEmployees = async () => {
-//     setLoadingEmployees(true);
-//     try {
-//       // Use apiRequest function instead of direct fetch
-//       const data = await apiRequest("/db/employment-applications");
-//       setEmployees(data || []);
-//     } catch (err) {
-//       console.error("Error fetching employees:", err);
-//     } finally {
-//       setLoadingEmployees(false);
-//     }
-//   };
-
-//   // Fetch documents for a specific employee
-//   const fetchEmployeeDocuments = async (employeeId) => {
-//     setLoading(true);
-//     setError("");
-//     setSelectedDoc(null);
-    
-//     try {
-//       // Use apiRequest function instead of direct fetch
-//       const data = await apiRequest(`/db/generate-sas/${employeeId}`);
-      
-//       // Extract document data from response
-//       const newDocs = {
-//         aadhar_card: data.documents.aadhar_card,
-//         pan_card: data.documents.pan_card,
-//         resume: data.documents.resume,
-//         profile_photo: data.documents.profile_photo
-//       };
-      
-//       setDocuments(newDocs);
-      
-//       // Check if any documents were found
-//       const hasAnyDoc = Object.values(newDocs).some(doc => doc && doc.sas_url);
-//       if (!hasAnyDoc) {
-//         setError("No documents found for this Employee");
-//       }
-//     } catch (err) {
-//       console.error("Error fetching documents:", err);
-//       setError(err.message || "Failed to fetch documents. Please try again.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Filter employees based on search
-//   const filteredEmployees = employees.filter(emp => {
-//     const searchLower = employeeSearch.toLowerCase();
-//     return (
-//       emp.name?.toLowerCase().includes(searchLower) ||
-//       emp.employee_id?.toLowerCase().includes(searchLower)
-//     );
-//   });
-
-//   const fetchDocuments = async () => {
-//     if (!selectedEmployee) {
-//       setError("Please select an employee");
-//       return;
-//     }
-
-//     setFetchedEmployeeId(selectedEmployee.employee_id);
-//     fetchEmployeeDocuments(selectedEmployee.employee_id);
-//   };
-
-//   const handleViewDocument = (doc) => {
-//     if (doc && doc.sas_url) {
-//       setSelectedDoc(doc);
-//       // Scroll to the preview section
-//       setTimeout(() => {
-//         const previewElement = document.getElementById('document-preview');
-//         if (previewElement) {
-//           previewElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-//         }
-//       }, 100);
-//     }
-//   };
-
-//   const handleOpenInNewTab = (doc) => {
-//     if (doc && doc.sas_url) {
-//       window.open(doc.sas_url, '_blank');
-//     }
-//   };
-
-//   const formatExpiryTime = (minutes) => {
-//     if (minutes >= 60) {
-//       const hours = Math.floor(minutes / 60);
-//       return `${hours} hour${hours > 1 ? 's' : ''}`;
-//     }
-//     return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-//   };
-
-//   const getFileType = (doc) => {
-//     if (doc && doc.content_type) {
-//       if (doc.content_type.includes('pdf')) return 'pdf';
-//       if (doc.content_type.includes('image')) return 'image';
-//     }
-//     return 'unknown';
-//   };
-
-//   const handleSelectEmployee = (employee) => {
-//     setSelectedEmployee(employee);
-//     setDropdownOpen(false);
-//     setEmployeeSearch(`${employee.name} (${employee.employee_id})`);
-//     setError("");
-//     setHighlightedIndex(-1);
-//   };
-
-//   const handleClear = () => {
-//     setSelectedEmployee(null);
-//     setEmployeeSearch("");
-//     setDocuments({
-//       aadhar_card: null,
-//       pan_card: null,
-//       resume: null,
-//       profile_photo: null
-//     });
-//     setFetchedEmployeeId("");
-//     setError("");
-//     setSelectedDoc(null);
-//     setHighlightedIndex(-1);
-//   };
-
-//   const handleKeyDown = (e) => {
-//     if (!dropdownOpen) return;
-    
-//     switch (e.key) {
-//       case 'ArrowDown':
-//         e.preventDefault();
-//         setHighlightedIndex(prev => 
-//           prev < filteredEmployees.length - 1 ? prev + 1 : prev
-//         );
-//         break;
-//       case 'ArrowUp':
-//         e.preventDefault();
-//         setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1);
-//         break;
-//       case 'Enter':
-//         e.preventDefault();
-//         if (highlightedIndex >= 0 && filteredEmployees[highlightedIndex]) {
-//           handleSelectEmployee(filteredEmployees[highlightedIndex]);
-//         }
-//         break;
-//       case 'Escape':
-//         setDropdownOpen(false);
-//         setHighlightedIndex(-1);
-//         break;
-//     }
-//   };
-
-//   return (
-//     <div className="p-6 max-w-7xl mx-auto">
-//       {/* Header */}
-//       <div className="mb-6">
-//         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-//           {userRole === 'employee' ? 'My Documents' : 'Employee Documents'}
-//         </h1>
-//         <p className="text-gray-600">
-//           {userRole === 'employee' 
-//             ? 'View and download your documents securely' 
-//             : 'View and download employee documents securely'
-//           }
-//         </p>
-//       </div>
-
-//       {/* Search Section - Only for Admin/HR */}
-//       {(userRole === 'superadmin' || userRole === 'hr') && (
-//         <Card className="p-5 mb-6 bg-white border border-gray-200 shadow-sm">
-//           <div className="flex items-center gap-2 mb-4">
-//             <Users className="text-blue-600" size={18} />
-//             <h2 className="text-lg font-semibold text-gray-800">Select Employee</h2>
-//           </div>
-          
-//           <div className="space-y-4">
-//             <div className="relative" ref={dropdownRef}>
-//               <Label className="text-sm font-medium text-gray-700 mb-1 block">Search Employee *</Label>
-//               <div className="relative">
-//                 <Input
-//                   value={employeeSearch}
-//                   onChange={(e) => {
-//                     setEmployeeSearch(e.target.value);
-//                     setDropdownOpen(true);
-//                     setHighlightedIndex(-1);
-//                   }}
-//                   onFocus={() => setDropdownOpen(true)}
-//                   onKeyDown={handleKeyDown}
-//                   placeholder="Type to search by name or ID..."
-//                   className="pr-10 h-10 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-//                 />
-//                 <ChevronDown 
-//                   className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${dropdownOpen ? 'rotate-180' : ''}`}
-//                   size={18}
-//                 />
-//               </div>
-              
-//               {/* Compact Dropdown */}
-//               {dropdownOpen && (
-//                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
-//                   <div className="max-h-36 overflow-y-auto">
-//                     {loadingEmployees ? (
-//                       <div className="px-3 py-2 text-center text-gray-500 text-sm">
-//                         <RefreshCw className="animate-spin inline-block mr-2" size={14} />
-//                         Loading...
-//                       </div>
-//                     ) : filteredEmployees.length > 0 ? (
-//                       filteredEmployees.map((employee, index) => (
-//                         <div
-//                           key={employee.employee_id}
-//                           onClick={() => handleSelectEmployee(employee)}
-//                           className={`px-3 py-2 cursor-pointer transition-colors text-sm ${
-//                             index === highlightedIndex 
-//                               ? 'bg-blue-50 text-blue-700' 
-//                               : 'hover:bg-gray-50 text-gray-700'
-//                           } ${index !== filteredEmployees.length - 1 ? 'border-b border-gray-100' : ''}`}
-//                         >
-//                           <div className="flex items-center justify-between">
-//                             <div className="flex-1 min-w-0">
-//                               <p className="font-medium truncate">{employee.name}</p>
-//                               <p className="text-xs text-gray-500">ID: {employee.employee_id}</p>
-//                             </div>
-//                             <User size={14} className="text-gray-400 ml-2 flex-shrink-0" />
-//                           </div>
-//                         </div>
-//                       ))
-//                     ) : (
-//                       <div className="px-3 py-2 text-center text-gray-500 text-sm">
-//                         {employeeSearch ? "No employees found" : "No employees available"}
-//                       </div>
-//                     )}
-//                   </div>
-//                   {filteredEmployees.length > 3 && (
-//                     <div className="px-3 py-1 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
-//                       Scroll for more employees
-//                     </div>
-//                   )}
-//                 </div>
-//               )}
-//             </div>
-            
-//             <div className="flex gap-2">
-//               <Button
-//                 onClick={fetchDocuments}
-//                 disabled={loading || !selectedEmployee}
-//                 className="px-4 py-2 h-10 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-//               >
-//                 {loading ? (
-//                   <>
-//                     <RefreshCw size={14} className="mr-2 animate-spin" />
-//                     Loading...
-//                   </>
-//                 ) : (
-//                   <>
-//                     <Search size={14} className="mr-2" />
-//                     Get Documents
-//                   </>
-//                 )}
-//               </Button>
-              
-//               {selectedEmployee && (
-//                 <Button
-//                   onClick={handleClear}
-//                   variant="outline"
-//                   className="px-4 py-2 h-10 text-sm font-medium border-gray-300 hover:bg-gray-50 transition-colors"
-//                 >
-//                   Clear
-//                 </Button>
-//               )}
-//             </div>
-            
-//             {selectedEmployee && (
-//               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-//                 <p className="text-sm text-green-800">
-//                   <strong>Selected:</strong> {selectedEmployee.name} ({selectedEmployee.employee_id})
-//                 </p>
-//               </div>
-//             )}
-//           </div>
-//         </Card>
-//       )}
-
-//       {/* Error Message */}
-//       {error && (
-//         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-//           <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-//           <p className="text-red-800 text-sm">{error}</p>
-//         </div>
-//       )}
-
-//       {/* Documents Grid */}
-//       {fetchedEmployeeId && !error && (
-//         <>
-//           <div className="mb-6">
-//             <h3 className="text-lg font-semibold text-gray-800">
-//               Documents for Employee: 
-//               <span className="text-blue-600 ml-2">
-//                 {userRole === 'employee' 
-//                   ? `${currentUser?.first_name} ${currentUser?.last_name} (${fetchedEmployeeId})`
-//                   : `${selectedEmployee?.name} (${fetchedEmployeeId})`
-//                 }
-//               </span>
-//             </h3>
-//           </div>
-
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-//             {documentConfig.map((config) => {
-//               const doc = documents[config.type];
-//               const Icon = config.icon;
-//               const isAvailable = doc && doc.sas_url;
-
-//               return (
-//                 <Card
-//                   key={config.type}
-//                   className={`p-5 bg-white border ${config.borderColor} transition-all hover:shadow-md hover:-translate-y-1`}
-//                 >
-//                   <div className="flex flex-col items-center text-center space-y-3">
-//                     <div className={`p-3 rounded-full bg-gradient-to-r ${config.color} shadow-sm`}>
-//                       <Icon className={config.iconColor} size={28} />
-//                     </div>
-                    
-//                     <div>
-//                       <h3 className="font-semibold text-gray-800 text-sm mb-1">{config.label}</h3>
-//                       <div className="flex items-center justify-center gap-2 text-xs">
-//                         {isAvailable ? (
-//                           <>
-//                             <CheckCircle size={12} className="text-green-600" />
-//                             <span className="text-green-600 font-medium">Available</span>
-//                           </>
-//                         ) : (
-//                           <>
-//                             <XCircle size={12} className="text-gray-400" />
-//                             <span className="text-gray-500">Not Found</span>
-//                           </>
-//                         )}
-//                       </div>
-//                     </div>
-
-//                     {isAvailable && (
-//                       <>
-//                         <div className="flex items-center gap-1 text-xs text-gray-500">
-//                           <Clock size={10} />
-//                           <span>Expires in {formatExpiryTime(doc.expires_in_minutes)}</span>
-//                         </div>
-
-//                         <div className="flex gap-2 w-full">
-//                           <Button
-//                             onClick={() => handleViewDocument(doc)}
-//                             className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs py-1.5 px-2 h-8"
-//                             size="sm"
-//                           >
-//                             <Eye size={12} className="mr-1" />
-//                             View
-//                           </Button>
-//                           <Button
-//                             onClick={() => handleOpenInNewTab(doc)}
-//                             className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs py-1.5 px-2 h-8"
-//                             size="sm"
-//                           >
-//                             <ExternalLink size={12} className="mr-1" />
-//                             Open
-//                           </Button>
-//                         </div>
-//                       </>
-//                     )}
-//                   </div>
-//                 </Card>
-//               );
-//             })}
-//           </div>
-//         </>
-//       )}
-
-//       {/* Document Preview Section */}
-//       {selectedDoc && (
-//         <Card id="document-preview" className="p-5 bg-white border border-gray-200 shadow-sm mb-6">
-//           <div className="flex items-center justify-between mb-4">
-//             <div>
-//               <h3 className="text-lg font-semibold text-gray-800">Document Preview</h3>
-//               <p className="text-sm text-gray-600 mt-1">
-//                 {selectedDoc.document_type ? selectedDoc.document_type.replace(/_/g, ' ').toUpperCase() : 'Document'} - 
-//                 {getFileType(selectedDoc) === 'pdf' ? ' PDF Document' : 
-//                  getFileType(selectedDoc) === 'image' ? ' Image' : ' File'}
-//               </p>
-//             </div>
-//             <div className="flex gap-2">
-//               <Button
-//                 onClick={() => handleOpenInNewTab(selectedDoc)}
-//                 className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2"
-//               >
-//                 <ExternalLink size={14} className="mr-2" />
-//                 Open in New Tab
-//               </Button>
-//               <Button
-//                 onClick={() => setSelectedDoc(null)}
-//                 variant="outline"
-//                 className="text-sm px-4 py-2 border-gray-300 hover:bg-gray-50"
-//               >
-//                 Close Preview
-//               </Button>
-//             </div>
-//           </div>
-
-//           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-//             {getFileType(selectedDoc) === 'pdf' ? (
-//               <iframe
-//                 src={selectedDoc.sas_url}
-//                 className="w-full h-[500px] rounded border border-gray-300"
-//                 title={`${selectedDoc.document_type || 'Document'} preview`}
-//               />
-//             ) : getFileType(selectedDoc) === 'image' ? (
-//               <div className="flex justify-center">
-//                 <img
-//                   src={selectedDoc.sas_url}
-//                   alt={selectedDoc.document_type || 'Document'}
-//                   className="max-w-full max-h-[500px] rounded shadow-lg"
-//                 />
-//               </div>
-//             ) : (
-//               <div className="flex items-center justify-center h-[500px]">
-//                 <div className="text-center">
-//                   <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-//                   <p className="text-gray-600">Preview not available for this file type</p>
-//                   <Button
-//                     onClick={() => handleOpenInNewTab(selectedDoc)}
-//                     className="mt-4"
-//                   >
-//                     <ExternalLink size={16} className="mr-2" />
-//                     Open in New Tab
-//                   </Button>
-//                 </div>
-//               </div>
-//             )}
-//           </div>
-
-//           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-//             <Clock className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-//             <p className="text-blue-800 text-sm">
-//               This secure link will expire in {formatExpiryTime(selectedDoc.expires_in_minutes)}. 
-//               Please download the document if you need to keep it.
-//             </p>
-//           </div>
-//         </Card>
-//       )}
-
-//       {/* Company Info Footer */}
-//       <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-5">
-//         <div className="text-center">
-//           <h3 className="text-base font-semibold text-gray-800 mb-1">
-//             ISCS Technologies Private Limited
-//           </h3>
-//           <p className="text-xs text-gray-600">SECURE DOCUMENT MANAGEMENT SYSTEM</p>
-//         </div>
-//       </Card>
-//     </div>
-//   );
-// }
-
-// src/components/Documents.jsx
+// // // src/components/Documents.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -591,7 +10,7 @@ import {
   User,
   Search,
   Eye,
-  Download, 
+  Download,
   RefreshCw,
   CheckCircle,
   XCircle,
@@ -743,10 +162,10 @@ export default function Documents() {
       
       // Extract document data from response
       const newDocs = {
-        aadhar_card: data.documents.aadhar_card,
-        pan_card: data.documents.pan_card,
-        resume: data.documents.resume,
-        profile_photo: data.documents.profile_photo
+        aadhar_card: data.documents?.aadhar_card || null,
+        pan_card: data.documents?.pan_card || null,
+        resume: data.documents?.resume || null,
+        profile_photo: data.documents?.profile_photo || null
       };
       
       setDocuments(newDocs);
@@ -869,13 +288,14 @@ export default function Documents() {
   };
 
   return (
-    <div className={`p-6 max-w-7xl mx-auto ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    // IMPORTANT: use full width + min-h-screen so the page background fills entirely
+    <div className={`w-full min-h-screen p-3 sm:p-4 md:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className={`text-3xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>
+      <div className="mb-4 sm:mb-6">
+        <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>
           {userRole === 'employee' ? 'My Documents' : 'Employee Documents'}
         </h1>
-        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
+        <p className={`text-sm sm:text-base ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           {userRole === 'employee' 
             ? 'View and download your documents securely' 
             : 'View and download employee documents securely'
@@ -885,13 +305,13 @@ export default function Documents() {
 
       {/* Search Section - Only for Admin/HR */}
       {(userRole === 'superadmin' || userRole === 'hr') && (
-        <Card className={`p-5 mb-6 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'} shadow-sm`}>
-          <div className="flex items-center gap-2 mb-4">
-            <Users className={darkMode ? "text-blue-400" : "text-blue-600"} size={18} />
-            <h2 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Select Employee</h2>
+        <Card className={`p-4 sm:p-5 mb-4 sm:mb-6 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'} shadow-sm`}>
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <Users className={darkMode ? "text-blue-400" : "text-blue-600"} size={16} />
+            <h2 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Select Employee</h2>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="relative" ref={dropdownRef}>
               <Label className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 block`}>Search Employee *</Label>
               <div className="relative">
@@ -916,7 +336,7 @@ export default function Documents() {
               {/* Compact Dropdown */}
               {dropdownOpen && (
                 <div className={`absolute z-50 w-full mt-1 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'} rounded-lg shadow-xl overflow-hidden`}>
-                  <div className="max-h-36 overflow-y-auto">
+                  <div className="max-h-36 sm:max-h-48 overflow-y-auto">
                     {loadingEmployees ? (
                       <div className={`px-3 py-2 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
                         <RefreshCw className="animate-spin inline-block mr-2" size={14} />
@@ -957,7 +377,7 @@ export default function Documents() {
               )}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={fetchDocuments}
                 disabled={loading || !selectedEmployee}
@@ -1000,19 +420,19 @@ export default function Documents() {
 
       {/* Error Message */}
       {error && (
-        <div className={`mb-6 p-4 ${darkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} rounded-lg flex items-start gap-3`}>
+        <div className={`mb-4 sm:mb-6 p-3 sm:p-4 ${darkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} rounded-lg flex items-start gap-3`}>
           <AlertCircle className={`h-5 w-5 ${darkMode ? 'text-red-400' : 'text-red-600'} flex-shrink-0 mt-0.5`} />
-          <p className={darkMode ? 'text-red-300' : 'text-red-800'}>{error}</p>
+          <p className={`text-sm ${darkMode ? 'text-red-300' : 'text-red-800'}`}>{error}</p>
         </div>
       )}
 
       {/* Documents Grid */}
       {fetchedEmployeeId && !error && (
         <>
-          <div className="mb-6">
-            <h3 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+          <div className="mb-4 sm:mb-6">
+            <h3 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
               Documents for Employee: 
-              <span className="text-blue-600 ml-2">
+              <span className="text-blue-600 ml-2 text-sm sm:text-base">
                 {userRole === 'employee' 
                   ? `${currentUser?.first_name} ${currentUser?.last_name} (${fetchedEmployeeId})`
                   : `${selectedEmployee?.name} (${fetchedEmployeeId})`
@@ -1021,7 +441,7 @@ export default function Documents() {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8">
             {documentConfig.map((config) => {
               const doc = documents[config.type];
               const Icon = config.icon;
@@ -1030,15 +450,15 @@ export default function Documents() {
               return (
                 <Card
                   key={config.type}
-                  className={`p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} ${darkMode ? config.darkBorderColor : config.borderColor} border transition-all hover:shadow-md hover:-translate-y-1`}
+                  className={`p-3 sm:p-4 md:p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} ${darkMode ? config.darkBorderColor : config.borderColor} border transition-all hover:shadow-md hover:-translate-y-1`}
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
                     <div className={`p-3 rounded-full bg-gradient-to-r ${darkMode ? config.darkColor : config.color} shadow-sm`}>
-                      <Icon className={darkMode ? config.darkIconColor : config.iconColor} size={28} />
+                      <Icon className={darkMode ? config.darkIconColor : config.iconColor} size={24} />
                     </div>
                     
                     <div>
-                      <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} text-sm mb-1`}>{config.label}</h3>
+                      <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} text-xs sm:text-sm mb-1`}>{config.label}</h3>
                       <div className="flex items-center justify-center gap-2 text-xs">
                         {isAvailable ? (
                           <>
@@ -1058,7 +478,7 @@ export default function Documents() {
                       <>
                         <div className={`flex items-center gap-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                           <Clock size={10} />
-                          <span>Expires in {formatExpiryTime(doc.expires_in_minutes)}</span>
+                          <span className="text-xs">Expires in {formatExpiryTime(doc.expires_in_minutes)}</span>
                         </div>
 
                         <div className="flex gap-2 w-full">
@@ -1068,7 +488,7 @@ export default function Documents() {
                             size="sm"
                           >
                             <Eye size={12} className="mr-1" />
-                            View
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                           <Button
                             onClick={() => handleOpenInNewTab(doc)}
@@ -1076,7 +496,7 @@ export default function Documents() {
                             size="sm"
                           >
                             <ExternalLink size={12} className="mr-1" />
-                            Open
+                            <span className="hidden sm:inline">Open</span>
                           </Button>
                         </div>
                       </>
@@ -1091,11 +511,11 @@ export default function Documents() {
 
       {/* Document Preview Section */}
       {selectedDoc && (
-        <Card id="document-preview" className={`p-5 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'} shadow-sm mb-6`}>
-          <div className="flex items-center justify-between mb-4">
+        <Card id="document-preview" className={`p-3 sm:p-4 md:p-5 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'} shadow-sm mb-4 sm:mb-6`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Document Preview</h3>
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+              <h3 className={`text-base sm:text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Document Preview</h3>
+              <p className={`text-xs sm:text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
                 {selectedDoc.document_type ? selectedDoc.document_type.replace(/_/g, ' ').toUpperCase() : 'Document'} - 
                 {getFileType(selectedDoc) === 'pdf' ? ' PDF Document' : 
                  getFileType(selectedDoc) === 'image' ? ' Image' : ' File'}
@@ -1104,26 +524,27 @@ export default function Documents() {
             <div className="flex gap-2">
               <Button
                 onClick={() => handleOpenInNewTab(selectedDoc)}
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2"
+                className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2"
               >
-                <ExternalLink size={14} className="mr-2" />
-                Open in New Tab
+                <ExternalLink size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Open in New Tab</span>
+                <span className="sm:hidden">Open</span>
               </Button>
               <Button
                 onClick={() => setSelectedDoc(null)}
                 variant="outline"
-                className={`text-sm px-4 py-2 ${darkMode ? 'border-gray-600 hover:bg-gray-700 text-gray-300' : 'border-gray-300 hover:bg-gray-50'}`}
+                className={`text-xs sm:text-sm px-3 sm:px-4 py-2 ${darkMode ? 'border-gray-600 hover:bg-gray-700 text-gray-300' : 'border-gray-300 hover:bg-gray-50'}`}
               >
-                Close Preview
+                Close
               </Button>
             </div>
           </div>
 
-          <div className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-lg p-4 border`}>
+          <div className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-lg p-3 sm:p-4 border`}>
             {getFileType(selectedDoc) === 'pdf' ? (
               <iframe
                 src={selectedDoc.sas_url}
-                className="w-full h-[500px] rounded border border-gray-300"
+                className="w-full h-[300px] sm:h-[400px] md:h-[500px] rounded border border-gray-300"
                 title={`${selectedDoc.document_type || 'Document'} preview`}
               />
             ) : getFileType(selectedDoc) === 'image' ? (
@@ -1131,17 +552,17 @@ export default function Documents() {
                 <img
                   src={selectedDoc.sas_url}
                   alt={selectedDoc.document_type || 'Document'}
-                  className="max-w-full max-h-[500px] rounded shadow-lg"
+                  className="max-w-full max-h-[300px] sm:max-h-[400px] md:max-h-[500px] rounded shadow-lg"
                 />
               </div>
             ) : (
-              <div className="flex items-center justify-center h-[500px]">
+              <div className="flex items-center justify-center h-[300px] sm:h-[400px] md:h-[500px]">
                 <div className="text-center">
                   <FileText size={48} className={`mx-auto ${darkMode ? 'text-gray-500' : 'text-gray-400'} mb-4`} />
-                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Preview not available for this file type</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Preview not available for this file type</p>
                   <Button
                     onClick={() => handleOpenInNewTab(selectedDoc)}
-                    className="mt-4"
+                    className="mt-4 text-sm"
                   >
                     <ExternalLink size={16} className="mr-2" />
                     Open in New Tab
@@ -1153,7 +574,7 @@ export default function Documents() {
 
           <div className={`mt-4 p-3 ${darkMode ? 'bg-blue-900/50 border-blue-700' : 'bg-blue-50 border-blue-200'} rounded-lg flex items-start gap-3`}>
             <Clock className={`h-4 w-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
-            <p className={darkMode ? 'text-blue-300' : 'text-blue-800'}>
+            <p className={`text-xs sm:text-sm ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
               This secure link will expire in {formatExpiryTime(selectedDoc.expires_in_minutes)}. 
               Please download document if you need to keep it.
             </p>
@@ -1162,9 +583,9 @@ export default function Documents() {
       )}
 
       {/* Company Info Footer */}
-      <Card className={`bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-gray-50 to-slate-50 border-gray-200'} p-5`}>
+      <Card className={`bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-gray-50 to-slate-50 border-gray-200'} p-3 sm:p-4 md:p-5`}>
         <div className="text-center">
-          <h3 className={`text-base font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-1`}>
+          <h3 className={`text-sm sm:text-base font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-1`}>
             ISCS Technologies Private Limited
           </h3>
           <p className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>SECURE DOCUMENT MANAGEMENT SYSTEM</p>
