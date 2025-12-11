@@ -396,8 +396,10 @@
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">Gender *</Label>
 //               <Select value={formData.gender} onValueChange={(v) => handleSelectChange('gender', v)}>
-//                 <SelectTrigger className={errors.gender ? 'border-red-500' : ''}><SelectValue placeholder="Select gender" /></SelectTrigger>
-//                 <SelectContent>
+//                 <SelectTrigger className={`bg-white ${errors.gender ? 'border-red-500' : ''}`}>
+//                   <SelectValue placeholder="Select gender" />
+//                 </SelectTrigger>
+//                 <SelectContent className="bg-white">
 //                   <SelectItem value="Male">Male</SelectItem>
 //                   <SelectItem value="Female">Female</SelectItem>
 //                   <SelectItem value="Other">Other</SelectItem>
@@ -408,8 +410,10 @@
 //             <div className="space-y-2">
 //               <Label className="text-gray-700 font-medium">Blood Group</Label>
 //               <Select value={formData.bloodGroup} onValueChange={(v) => handleSelectChange('bloodGroup', v)}>
-//                 <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
-//                 <SelectContent>
+//                 <SelectTrigger className="bg-white">
+//                   <SelectValue placeholder="Select blood group" />
+//                 </SelectTrigger>
+//                 <SelectContent className="bg-white">
 //                   {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
 //                 </SelectContent>
 //               </Select>
@@ -771,13 +775,11 @@
 //         <div className="flex justify-center mt-4">
 //           <Button
 //             onClick={handleSubmitToAPI}
-//             disabled={submitLoading || profileSubmitted || !isFormValid}
+//             disabled={submitLoading || profileSubmitted}
 //             className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
 //               profileSubmitted 
 //                 ? "bg-green-600 hover:bg-green-700 text-white" 
-//                 : isFormValid
-//                   ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-//                   : "bg-gray-400 text-white cursor-not-allowed"
+//                 : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
 //             }`}
 //           >
 //             {submitLoading ? (
@@ -931,7 +933,8 @@
 //     </div>
 //   );
 // }
-// src/components/PersonalProfileForm.jsx
+
+// src/components/PersonalProfileForm.jsx (dark mode )
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -945,9 +948,11 @@ import {
   X, AlertCircle
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useDarkMode } from "@/context/DarkModeContext"; // Import dark mode context
 import { apiRequest } from "../api"; // Import API request function
 
 export default function PersonalProfileForm({ initialData, generatedEmployeeId, onSubmit, onBack }) {
+  const { darkMode } = useDarkMode(); // Get dark mode state
   const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [employeeId, setEmployeeId] = useState("");
@@ -1064,20 +1069,20 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     
     // Check if profile is submitted
     if (!profileSubmitted) {
-      setErrors({ submit: "Please submit your profile information before proceeding to the next step." });
+      setErrors({ submit: "Please submit your profile information before proceeding to next step." });
       return;
     }
     
     // Check if documents are uploaded
     if (!uploadSuccess) {
-      setErrors({ submit: "Please upload your documents before proceeding to the next step." });
+      setErrors({ submit: "Please upload your documents before proceeding to next step." });
       return;
     }
     
     setLoading(true);
     await new Promise(r => setTimeout(r, 1500));
     
-    // Call onSubmit to move to the next step
+    // Call onSubmit to move to next step
     onSubmit(formData);
     
     setLoading(false);
@@ -1138,7 +1143,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
           </div>
         ),
         description: `Employee ID: ${result.employee_id}`,
-        className: "bg-green-50 border-green-200 text-green-800",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
       });
       
       // Don't call onSubmit() here - wait for document upload
@@ -1203,7 +1208,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
             </div>
           ),
           description: "Your documents have been uploaded and saved.",
-          className: "bg-green-50 border-green-200 text-green-800",
+          className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
         });
         
         // Clear files after successful upload
@@ -1275,103 +1280,121 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Personal Profile</h1>
-        <p className="text-gray-600">Complete your personal information and document details</p>
+        <h1 className={`text-3xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>Personal Profile</h1>
+        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Complete your personal information and document details</p>
       </div>
 
       {/* Employee ID Card */}
-      <Card className={`p-4 mb-6 bg-gradient-to-r ${generatedEmployeeId ? 'from-green-50 to-emerald-50 border-green-200' : 'from-yellow-50 to-orange-50 border-yellow-200'}`}>
+      <Card className={`p-4 mb-6 bg-gradient-to-r ${
+        generatedEmployeeId 
+          ? darkMode ? 'from-green-900/50 to-emerald-900/50 border-green-700' : 'from-green-50 to-emerald-50 border-green-200'
+          : darkMode ? 'from-yellow-900/50 to-orange-900/50 border-yellow-700' : 'from-yellow-50 to-orange-50 border-yellow-200'
+      }`}>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {generatedEmployeeId ? <CheckCircle size={16} className="text-green-600" /> : <Building size={16} className="text-orange-600" />}
-            <Label className="text-gray-700 font-medium">Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)' }:</Label>
+            {generatedEmployeeId ? 
+              <CheckCircle size={16} className={darkMode ? "text-green-400" : "text-green-600"} /> : 
+              <Building size={16} className={darkMode ? "text-yellow-400" : "text-yellow-600"} />
+            }
+            <Label className={`${darkMode ? 'text-gray-200' : 'text-gray-700'} font-medium`}>
+              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '(for submission)'}:
+            </Label>
           </div>
           <Input
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             placeholder="Enter Employee ID (e.g., ISCSI001)"
-            className={`max-w-xs ${generatedEmployeeId ? 'bg-green-50 border-green-300' : ''}`}
+            className={`max-w-xs ${generatedEmployeeId ? 
+              darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-300'
+              : ''
+            } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
             readOnly={!!generatedEmployeeId}
           />
-          {errors.employeeId && <p className="text-sm text-red-600">{errors.employeeId}</p>}
+          {errors.employeeId && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.employeeId}</p>}
         </div>
-        {generatedEmployeeId && <p className="text-xs text-green-600 mt-2">✓ Employee ID automatically filled from previous step</p>}
+        {generatedEmployeeId && <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-2`}>✓ Employee ID automatically filled from previous step</p>}
       </Card>
 
       <form className="space-y-8">
         {/* Personal Information */}
-        <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className={`p-6 bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-blue-50 to-indigo-50 border-blue-200'}`}>
           <div className="flex items-center gap-2 mb-6">
-            <User className="text-blue-600" size={20} />
-            <h2 className="text-xl font-semibold text-gray-800">Personal Information</h2>
+            <User className={darkMode ? "text-blue-400" : "text-blue-600"} size={20} />
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Personal Information</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Removed Photograph Upload */}
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">First Name *</Label>
-              <Input name="firstName" value={formData.firstName} onChange={handleChange} className={errors.firstName ? 'border-red-500' : ''} />
-              {errors.firstName && <p className="text-sm text-red-600">{errors.firstName}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>First Name *</Label>
+              <Input name="firstName" value={formData.firstName} onChange={handleChange} className={`${errors.firstName ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {errors.firstName && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Middle Name</Label>
-              <Input name="middleName" value={formData.middleName} onChange={handleChange} />
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Middle Name</Label>
+              <Input name="middleName" value={formData.middleName} onChange={handleChange} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Last Name *</Label>
-              <Input name="lastName" value={formData.lastName} onChange={handleChange} className={errors.lastName ? 'border-red-500' : ''} />
-              {errors.lastName && <p className="text-sm text-red-600">{errors.lastName}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Last Name *</Label>
+              <Input name="lastName" value={formData.lastName} onChange={handleChange} className={`${errors.lastName ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {errors.lastName && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.lastName}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium flex items-center gap-2"><Calendar size={16} />Date of Birth *</Label>
-              <Input name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} className={errors.dateOfBirth ? 'border-red-500' : ''} />
-              {errors.dateOfBirth && <p className="text-sm text-red-600">{errors.dateOfBirth}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium flex items-center gap-2`}>
+                <Calendar size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
+                Date of Birth *
+              </Label>
+              <Input name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} className={`${errors.dateOfBirth ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {errors.dateOfBirth && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.dateOfBirth}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Gender *</Label>
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Gender *</Label>
               <Select value={formData.gender} onValueChange={(v) => handleSelectChange('gender', v)}>
-                <SelectTrigger className={`bg-white ${errors.gender ? 'border-red-500' : ''}`}>
+                <SelectTrigger className={`${errors.gender ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className={darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}>
                   <SelectItem value="Male">Male</SelectItem>
                   <SelectItem value="Female">Female</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.gender && <p className="text-sm text-red-600">{errors.gender}</p>}
+              {errors.gender && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.gender}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Blood Group</Label>
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Blood Group</Label>
               <Select value={formData.bloodGroup} onValueChange={(v) => handleSelectChange('bloodGroup', v)}>
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}>
                   <SelectValue placeholder="Select blood group" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className={darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}>
                   {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium flex items-center gap-2"><Globe size={16} />Nationality *</Label>
-              <Input name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Indian" className={errors.nationality ? 'border-red-500' : ''} />
-              {errors.nationality && <p className="text-sm text-red-600">{errors.nationality}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium flex items-center gap-2`}>
+                <Globe size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
+                Nationality *
+              </Label>
+              <Input name="nationality" value={formData.nationality} onChange={handleChange} placeholder="e.g., Indian" className={`${errors.nationality ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {errors.nationality && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.nationality}</p>}
             </div>
           </div>
         </Card>
 
         {/* Address Information Section */}
-        <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className={`p-6 bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-green-50 to-emerald-50 border-green-200'}`}>
           <div className="flex items-center gap-2 mb-6">
-            <MapPin className="text-green-600" size={20} />
-            <h2 className="text-xl font-semibold text-gray-800">Address Information</h2>
+            <MapPin className={darkMode ? "text-green-400" : "text-green-600"} size={20} />
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Address Information</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Current Address */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 mb-4">Current Address</h3>
+              <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-4`}>Current Address</h3>
               <div className="space-y-2">
-                <Label htmlFor="currentAddress" className="text-gray-700 font-medium">
+                <Label htmlFor="currentAddress" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                   Address
                 </Label>
                 <Textarea
@@ -1380,14 +1403,14 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                   value={formData.currentAddress}
                   onChange={handleChange}
                   placeholder="Enter current address"
-                  className={errors.currentAddress ? 'border-red-500' : ''}
+                  className={`${errors.currentAddress ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                 />
-                {errors.currentAddress && <p className="text-sm text-red-600">{errors.currentAddress}</p>}
+                {errors.currentAddress && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.currentAddress}</p>}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentDistrict" className="text-gray-700 font-medium">
+                  <Label htmlFor="currentDistrict" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     District
                   </Label>
                   <Input
@@ -1395,10 +1418,11 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="currentDistrict"
                     value={formData.currentDistrict}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currentCity" className="text-gray-700 font-medium">
+                  <Label htmlFor="currentCity" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     City
                   </Label>
                   <Input
@@ -1406,13 +1430,14 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="currentCity"
                     value={formData.currentCity}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentState" className="text-gray-700 font-medium">
+                  <Label htmlFor="currentState" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     State
                   </Label>
                   <Input
@@ -1420,10 +1445,11 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="currentState"
                     value={formData.currentState}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currentPinCode" className="text-gray-700 font-medium">
+                  <Label htmlFor="currentPinCode" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Pin Code
                   </Label>
                   <Input
@@ -1432,6 +1458,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.currentPinCode}
                     onChange={handleChange}
                     maxLength={6}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
@@ -1439,9 +1466,9 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
             {/* Permanent Address */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 mb-4">Permanent Address</h3>
+              <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-4`}>Permanent Address</h3>
               <div className="space-y-2">
-                <Label htmlFor="permanentAddress" className="text-gray-700 font-medium">
+                <Label htmlFor="permanentAddress" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                   Address
                 </Label>
                 <Textarea
@@ -1450,14 +1477,14 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                   value={formData.permanentAddress}
                   onChange={handleChange}
                   placeholder="Enter permanent address"
-                  className={errors.permanentAddress ? 'border-red-500' : ''}
+                  className={`${errors.permanentAddress ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                 />
-                {errors.permanentAddress && <p className="text-sm text-red-600">{errors.permanentAddress}</p>}
+                {errors.permanentAddress && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.permanentAddress}</p>}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="permanentDistrict" className="text-gray-700 font-medium">
+                  <Label htmlFor="permanentDistrict" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     District
                   </Label>
                   <Input
@@ -1465,10 +1492,11 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentDistrict"
                     value={formData.permanentDistrict}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="permanentCity" className="text-gray-700 font-medium">
+                  <Label htmlFor="permanentCity" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     City
                   </Label>
                   <Input
@@ -1476,13 +1504,14 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentCity"
                     value={formData.permanentCity}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="permanentState" className="text-gray-700 font-medium">
+                  <Label htmlFor="permanentState" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     State
                   </Label>
                   <Input
@@ -1490,10 +1519,11 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentState"
                     value={formData.permanentState}
                     onChange={handleChange}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="permanentPinCode" className="text-gray-700 font-medium">
+                  <Label htmlFor="permanentPinCode" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Pin Code
                   </Label>
                   <Input
@@ -1502,6 +1532,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.permanentPinCode}
                     onChange={handleChange}
                     maxLength={6}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
@@ -1510,19 +1541,19 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         </Card>
 
         {/* Contact Information Section */}
-        <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+        <Card className={`p-6 bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-purple-50 to-pink-50 border-purple-200'}`}>
           <div className="flex items-center gap-2 mb-6">
-            <Phone className="text-purple-600" size={20} />
-            <h2 className="text-xl font-semibold text-gray-800">Contact Information</h2>
+            <Phone className={darkMode ? "text-purple-400" : "text-purple-600"} size={20} />
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Contact Information</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Personal Contact */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 mb-4">Personal Contact Details</h3>
+              <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-4`}>Personal Contact Details</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="mobilePhone" className="text-gray-700 font-medium">
+                  <Label htmlFor="mobilePhone" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Mobile Phone *
                   </Label>
                   <Input
@@ -1532,13 +1563,13 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     onChange={handleChange}
                     placeholder="Enter 10-digit mobile number"
                     maxLength={10}
-                    className={errors.mobilePhone ? 'border-red-500' : ''}
+                    className={`${errors.mobilePhone ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
-                  {errors.mobilePhone && <p className="text-sm text-red-600">{errors.mobilePhone}</p>}
+                  {errors.mobilePhone && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.mobilePhone}</p>}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 font-medium">
+                  <Label htmlFor="email" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Email *
                   </Label>
                   <Input
@@ -1548,13 +1579,13 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter email address"
-                    className={errors.email ? 'border-red-500' : ''}
+                    className={`${errors.email ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
-                  {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                  {errors.email && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.email}</p>}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="telephone" className="text-gray-700 font-medium">
+                  <Label htmlFor="telephone" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Telephone
                   </Label>
                   <Input
@@ -1563,6 +1594,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.telephone}
                     onChange={handleChange}
                     placeholder="Enter telephone number"
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
@@ -1570,13 +1602,13 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
             {/* Emergency Contact */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
-                <Users size={16} className="text-gray-500" />
+              <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-4 flex items-center gap-2`}>
+                <Users size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
                 Emergency Contact Details
               </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyName" className="text-gray-700 font-medium">
+                  <Label htmlFor="emergencyName" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Name
                   </Label>
                   <Input
@@ -1585,11 +1617,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.emergencyName}
                     onChange={handleChange}
                     placeholder="Enter emergency contact name"
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyMobile" className="text-gray-700 font-medium">
+                  <Label htmlFor="emergencyMobile" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Mobile Phone
                   </Label>
                   <Input
@@ -1599,11 +1632,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     onChange={handleChange}
                     placeholder="Enter emergency contact mobile"
                     maxLength={10}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="emergencyEmail" className="text-gray-700 font-medium">
+                  <Label htmlFor="emergencyEmail" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                     Email
                   </Label>
                   <Input
@@ -1613,6 +1647,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     value={formData.emergencyEmail}
                     onChange={handleChange}
                     placeholder="Enter emergency contact email"
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                   />
                 </div>
               </div>
@@ -1621,15 +1656,15 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         </Card>
 
         {/* Document Information Section */}
-        <Card className="p-6 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+        <Card className={`p-6 bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-orange-50 to-red-50 border-orange-200'}`}>
           <div className="flex items-center gap-2 mb-6">
-            <Shield className="text-orange-600" size={20} />
-            <h2 className="text-xl font-semibold text-gray-800">Document Information</h2>
+            <Shield className={darkMode ? "text-orange-400" : "text-orange-600"} size={20} />
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Document Information</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="aadharNumber" className="text-gray-700 font-medium">
+              <Label htmlFor="aadharNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 Aadhar Number *
               </Label>
               <Input
@@ -1639,13 +1674,13 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 onChange={handleChange}
                 placeholder="Enter 12-digit Aadhar number"
                 maxLength={12}
-                className={errors.aadharNumber ? 'border-red-500' : ''}
+                className={`${errors.aadharNumber ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
-              {errors.aadharNumber && <p className="text-sm text-red-600">{errors.aadharNumber}</p>}
+              {errors.aadharNumber && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.aadharNumber}</p>}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="panNumber" className="text-gray-700 font-medium">
+              <Label htmlFor="panNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 PAN Card Number *
               </Label>
               <Input
@@ -1655,13 +1690,13 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 onChange={handleChange}
                 placeholder="Enter PAN number (e.g., ABCDE1234F)"
                 maxLength={10}
-                className={errors.panNumber ? 'border-red-500' : ''}
+                className={`${errors.panNumber ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
-              {errors.panNumber && <p className="text-sm text-red-600">{errors.panNumber}</p>}
+              {errors.panNumber && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.panNumber}</p>}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="passportNumber" className="text-gray-700 font-medium">
+              <Label htmlFor="passportNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 Passport Number
               </Label>
               <Input
@@ -1671,11 +1706,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 onChange={handleChange}
                 placeholder="Enter passport number"
                 maxLength={8}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="uanNumber" className="text-gray-700 font-medium">
+              <Label htmlFor="uanNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 UAN Number
               </Label>
               <Input
@@ -1685,11 +1721,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 onChange={handleChange}
                 placeholder="Enter 12-digit UAN number"
                 maxLength={12}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="esiNumber" className="text-gray-700 font-medium">
+              <Label htmlFor="esiNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 ESI Number
               </Label>
               <Input
@@ -1699,6 +1736,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 onChange={handleChange}
                 placeholder="Enter 17-digit ESI number"
                 maxLength={17}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
             </div>
           </div>
@@ -1735,32 +1773,32 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
         </div>
 
         {/* Upload Documents Card */}
-        <Card className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
+        <Card className={`p-6 bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-teal-50 to-cyan-50 border-teal-200'}`}>
           <div className="flex items-center gap-2 mb-6">
-            <UploadCloud className="text-teal-600" size={20} />
-            <h2 className="text-xl font-semibold text-gray-800">Upload Documents</h2>
+            <UploadCloud className={darkMode ? "text-teal-400" : "text-teal-600"} size={20} />
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Upload Documents</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Aadhar Card (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setAadharFile(e.target.files[0])} />
-              {aadharFile && <p className="text-sm text-green-600">Selected: {aadharFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Aadhar Card (PDF only)</Label>
+              <Input type="file" accept=".pdf" onChange={(e) => setAadharFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {aadharFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {aadharFile.name}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">PAN Card (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setPanFile(e.target.files[0])} />
-              {panFile && <p className="text-sm text-green-600">Selected: {panFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>PAN Card (PDF only)</Label>
+              <Input type="file" accept=".pdf" onChange={(e) => setPanFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {panFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {panFile.name}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Resume (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setResumeFile(e.target.files[0])} />
-              {resumeFile && <p className="text-sm text-green-600">Selected: {resumeFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Resume (PDF only)</Label>
+              <Input type="file" accept=".pdf" onChange={(e) => setResumeFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+              {resumeFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {resumeFile.name}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Profile Photo (Image only)</Label>
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Profile Photo (Image only)</Label>
               <div className="flex items-center gap-2">
-                <Input type="file" accept="image/*" onChange={handlePhotoChange} />
+                <Input type="file" accept="image/*" onChange={handlePhotoChange} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
                 {photoFile && (
                   <Button type="button" variant="outline" size="sm" onClick={removePhoto}>
                     <X size={14} />
@@ -1780,12 +1818,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
           </div>
 
           <div className="mb-4">
-            <Label className="text-gray-700 font-medium">Employee ID for Upload *</Label>
+            <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Employee ID for Upload *</Label>
             <Input
               value={uploadEmployeeId}
               onChange={(e) => setUploadEmployeeId(e.target.value)}
               placeholder="Enter Employee ID for document upload"
-              className="max-w-md"
+              className={`max-w-md ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
             />
           </div>
 
@@ -1805,41 +1843,41 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
           {/* Upload Success/Error Messages */}
           {uploadSuccess && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <p className="text-green-800 text-sm">{uploadSuccess}</p>
+            <div className={`mt-4 p-3 ${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-lg flex items-start gap-3`}>
+              <CheckCircle className={`h-5 w-5 ${darkMode ? 'text-green-400' : 'text-green-600'} flex-shrink-0 mt-0.5`} />
+              <p className={darkMode ? 'text-green-300' : 'text-green-800'}>{uploadSuccess}</p>
             </div>
           )}
 
           {uploadError && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-red-800 text-sm">{uploadError}</p>
+            <div className={`mt-4 p-3 ${darkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} rounded-lg flex items-start gap-3`}>
+              <AlertCircle className={`h-5 w-5 ${darkMode ? 'text-red-400' : 'text-red-600'} flex-shrink-0 mt-0.5`} />
+              <p className={darkMode ? 'text-red-300' : 'text-red-800'}>{uploadError}</p>
             </div>
           )}
         </Card>
 
         {/* Submit Error */}
         {errors.submit && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600 text-center">{errors.submit}</p>
+          <div className={`p-3 ${darkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} rounded-lg`}>
+            <p className={`text-sm ${darkMode ? 'text-red-300' : 'text-red-600'} text-center`}>{errors.submit}</p>
           </div>
         )}
 
         {/* Company Info Card */}
-        <Card className="bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 p-6">
+        <Card className={`bg-gradient-to-r ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : 'from-gray-50 to-slate-50 border-gray-200'} p-6`}>
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">
+            <h3 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-1`}>
               ISCS Technologies Private Limited
             </h3>
-            <p className="text-sm text-gray-600">TRUSTED IT CONSULTING PARTNER</p>
+            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>TRUSTED IT CONSULTING PARTNER</p>
           </div>
         </Card>
 
         {/* Action Buttons */}
         <div className="flex justify-between pt-6">
           <div className="flex gap-4">
-            <Button type="button" onClick={onBack} variant="outline" className="px-8 py-3 flex items-center gap-2">
+            <Button type="button" onClick={onBack} variant="outline" className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
               <ArrowLeft size={16} />
               Back
             </Button>
