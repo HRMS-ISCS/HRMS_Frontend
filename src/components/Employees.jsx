@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   Users, Search, Loader2, RefreshCw, User, Mail, Phone, Briefcase, Calendar, 
-  Building2, Code, AlertCircle, CheckCircle2, Eye, Filter, Download, MapPin, 
+  Building2, Code, AlertCircle, CheckCircle2, Eye, Filter, MapPin, 
   CreditCard, GraduationCap, Award, Heart, FileText, Contact, Building, 
   Banknote, ChevronDown, ChevronRight, UserCheck, Shield, Home, Flag, Globe, 
   BookOpen, Target, TrendingUp, AlertTriangle, Zap, Grid, List, MoreVertical, 
@@ -815,7 +815,7 @@ export default function Employees() {
                       <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{employee.position || "N/A"}</span>
                     </td>
                     <td className="px-3 py-2">
-                      <span className={`text-sm ${darkMode ? 'text-gray-303' : 'text-gray-600'}`}>{employee.client || employee.department || "N/A"}</span>
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{employee.client || employee.department || "N/A"}</span>
                     </td>
                     <td className="px-3 py-2">
                       <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{formatDate(employee.date_of_joining || personalProfile.date_of_joining)}</span>
@@ -915,11 +915,6 @@ export default function Employees() {
 
             <Button variant="outline" size="sm" className={`h-8 px-3 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} disabled={loading} onClick={fetchAllEmployees}>
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            </Button>
-
-            <Button size="sm" className={`h-8 px-3 ${darkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-600 hover:bg-green-700'} text-white`}>
-              <Download size={14} className="mr-1" />
-              Export
             </Button>
           </div>
         </div>
