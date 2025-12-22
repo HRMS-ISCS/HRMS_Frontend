@@ -1,4 +1,4 @@
-// // src/components/Employees.jsx
+// src/components/Employees.jsx
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ export default function Employees() {
 
   const fetchAllEmployees = async () => {
     setLoading(true);
-    setError("");
+    setError("");   
     try {
       // Use the apiRequest function instead of direct fetch
       const data = await apiRequest("/db/employment-applications");
@@ -77,10 +77,11 @@ export default function Employees() {
         try {
           // Use the apiRequest function for profile pictures
           const data = await apiRequest(`/db/generate-sas/${employee.employee_id}`);
-          if (data.documents?.profile_photo?.sas_url) {
+          // FIX: Changed 'data.documents' to 'data.personal_documents'
+          if (data.personal_documents?.profile_photo?.sas_url) {
             return {
               employeeId: employee.employee_id,
-              profilePicture: data.documents.profile_photo.sas_url
+              profilePicture: data.personal_documents.profile_photo.sas_url
             };
           }
           return null;
@@ -105,12 +106,13 @@ export default function Employees() {
     try {
       // Use the apiRequest function for individual profile picture
       const data = await apiRequest(`/db/generate-sas/${employeeId}`);
-      if (data.documents?.profile_photo?.sas_url) {
+      // FIX: Changed 'data.documents' to 'data.personal_documents'
+      if (data.personal_documents?.profile_photo?.sas_url) {
         setProfilePictures(prev => ({
           ...prev,
-          [employeeId]: data.documents.profile_photo.sas_url
+          [employeeId]: data.personal_documents.profile_photo.sas_url
         }));
-        return data.documents.profile_photo.sas_url;
+        return data.personal_documents.profile_photo.sas_url;
       }
       return null;
     } catch (error) {
