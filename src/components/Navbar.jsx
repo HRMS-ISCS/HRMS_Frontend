@@ -40,6 +40,10 @@ export default function Navbar({ onLogout }) {
     setShowUserMenu(false);
   };
 
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
   return (
     <nav className={`fixed top-0 left-64 right-0 h-16 z-30 shadow-sm border-b ${
       darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -90,8 +94,24 @@ export default function Navbar({ onLogout }) {
                 darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
               }`}
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center">
-                <User size={16} className="text-white" />
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                {userData?.profile_photo_url ? (
+                  <img 
+                    src={userData.profile_photo_url} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center ${userData?.profile_photo_url ? 'hidden' : ''}`}>
+                  <span className="text-white text-sm font-medium">
+                    {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
+                  </span>
+                </div>
               </div>
               <div className="text-left">
                 <p className={`text-sm font-medium ${

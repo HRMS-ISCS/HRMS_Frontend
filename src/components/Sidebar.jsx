@@ -1,7 +1,7 @@
 // src/components/Sidebar.jsx
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, Users, FileText, UserPlus, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Users, FileText, UserPlus, Calendar, ChevronRight } from "lucide-react" // Added Calendar icon
 import { useDarkMode } from "@/context/DarkModeContext"
 import iscsLogo from "@/assets/iscslogo.png"
 
@@ -44,6 +44,14 @@ export default function Sidebar({ user }) {
       icon: FileText,
       path: "/documents",
       active: location.pathname === "/documents"
+    },
+    // Add Calendar menu item
+    {
+      id: "calendar",
+      label: "Calendar",
+      icon: Calendar,
+      path: "/calendar",
+      active: location.pathname === "/calendar"
     }
   ]
 

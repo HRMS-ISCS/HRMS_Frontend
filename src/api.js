@@ -1,5 +1,4 @@
 // src/api.js
-///const API_BASE_URL = "http://127.0.0.1:8000";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 // Get stored token
@@ -87,19 +86,6 @@ export const login = async (username, password) => {
   return data;
 };
 
-// // Get current user - using the correct endpoint
-// export const getCurrentUser = async () => {
-//   try {
-//     return await apiRequest("/db/Current_user/Profile");
-//   } catch (error) {
-//     // Only remove token if it's a 401 error (invalid token)
-//     // Don't remove token for network errors or other issues
-//     if (error.message && error.message.includes("401")) {
-//       removeToken();
-//     }
-//     throw error;
-//   }
-// };
 // Get current user - using the correct endpoint
 export const getCurrentUser = async () => {
   try {

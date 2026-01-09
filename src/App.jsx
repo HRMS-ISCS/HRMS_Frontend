@@ -1,4 +1,4 @@
-// // // src/App.jsx
+// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
@@ -11,6 +11,7 @@ import Dashboard from "./components/Dashboard";
 import Profile from "./components/Profile";
 import Employees from "./components/Employees";
 import Documents from "./components/Documents";
+import CalendarComponent from "./components/Calendar"; // Import Calendar component
 import { Toaster } from "@/components/ui/toaster";
 import { getToken, removeToken, getCurrentUser, hasValidToken, isTokenExpired } from "./api";
 import { DarkModeProvider, useDarkMode } from "@/context/DarkModeContext";
@@ -162,6 +163,26 @@ function AppContent({ isLoggedIn, isLoading, user, onLogin, onLogout, onLoadingC
                     <Navbar onLogout={handleLogout} />
                     <main className="min-h-screen pt-16">
                       <Documents user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Add Calendar Route */}
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar user={user} />
+                  <div className="flex-1 ml-64">
+                    <Navbar onLogout={handleLogout} />
+                    <main className="min-h-screen pt-16">
+                      <CalendarComponent user={user} />
                     </main>
                   </div>
                 </div>

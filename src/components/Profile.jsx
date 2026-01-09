@@ -1,9 +1,9 @@
-// // src/components/Profile.jsx
+// src/components/Profile.jsx
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  User, Mail, Phone, Calendar, Shield, Building
+  User, Mail, Phone, Calendar, Shield, Building, Briefcase
 } from "lucide-react";
 import { getCurrentUser } from "../api";
 import { useDarkMode } from "@/context/DarkModeContext";
@@ -94,7 +94,19 @@ export default function Profile() {
           <div className={`bg-gradient-to-r ${darkMode ? 'from-gray-700 to-gray-600' : 'from-blue-400 to-indigo-400'} h-32 relative`}>
             <div className="absolute -bottom-12 left-8">
               <div className="w-24 h-24 bg-white rounded-full p-1 shadow-lg border-2 border-white">
-                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                {userData.profile_photo_url ? (
+                  <img 
+                    src={userData.profile_photo_url} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center ${userData.profile_photo_url ? 'hidden' : ''}`}>
                   <span className="text-2xl font-bold text-blue-600">
                     {getInitials(userData.first_name, userData.last_name)}
                   </span>
@@ -115,6 +127,11 @@ export default function Profile() {
                     {userData.role?.toUpperCase()}
                   </span>
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-2`}>@{userData.username}</span>
+                  {userData.employee_id && (
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                      ID: {userData.employee_id}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -185,6 +202,30 @@ export default function Profile() {
                 </div>
               </Card>
 
+              {/* Employee Information - Only show for employees */}
+              {userData.role?.toLowerCase() === "employee" && (
+                <Card className={`p-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} border-0`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 ${darkMode ? 'bg-indigo-900' : 'bg-indigo-100'} rounded-lg flex items-center justify-center`}>
+                      <Briefcase className={`w-5 h-5 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                    </div>
+                    <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Employee Information</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Employee ID</p>
+                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'} mt-1`}>{userData.employee_id || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Profile Photo</p>
+                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'} mt-1`}>
+                        {userData.profile_photo_url ? "Available" : "Not uploaded"}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
               {/* Account Info */}
               <Card className={`p-6 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} border-0`}>
                 <div className="flex items-center gap-3 mb-4">
@@ -207,8 +248,10 @@ export default function Profile() {
                   <div>
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Account Status</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Active</p>
+                      <div className={`w-2 h-2 ${userData.is_active ? 'bg-green-500' : 'bg-red-500'} rounded-full`}></div>
+                      <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                        {userData.is_active ? 'Active' : 'Inactive'}
+                      </p>
                     </div>
                   </div>
                 </div>
