@@ -50,7 +50,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   // New state for bank suggestion dropdown
   const [bankSuggestion, setBankSuggestion] = useState("");
   
-  // New state to track if all required sections are completed
+  // New state to track if all required sections are completed 
   const [allSectionsCompleted, setAllSectionsCompleted] = useState(false);
 
   // Set employee IDs from props when component mounts or when generatedEmployeeId changes

@@ -1,107 +1,102 @@
-// src/components/Sidebar.jsx
+// // src/components/Sidebar.jsx
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, Users, FileText, UserPlus, Calendar, ChevronRight } from "lucide-react" // Added Calendar icon
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  UserPlus,
+  Calendar,
+  ChevronRight,
+  ChevronLeft
+} from "lucide-react"
 import { useDarkMode } from "@/context/DarkModeContext"
 import iscsLogo from "@/assets/iscslogo.png"
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, collapsed, setCollapsed }) {
   const location = useLocation()
   const { darkMode } = useDarkMode()
-  
-  // Check user role
+
   const isSuperAdmin = user?.role === "superadmin"
   const isEmployee = user?.role === "employee"
-  const isHR = user?.role === "hr"
- 
+
   const menuItems = [
-    // Only show Dashboard if user is not an Employee
     ...(isEmployee ? [] : [{
       id: "dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
-      path: "/dashboard",
-      active: location.pathname === "/dashboard"
+      path: "/dashboard"
     }]),
     {
       id: "employees",
       label: "Employees",
       icon: Users,
-      path: "/employees",
-      active: location.pathname === "/employees"
+      path: "/employees"
     },
-    // Only show Employee REG if user is not a superadmin
     ...(isSuperAdmin ? [] : [{
       id: "employee-reg",
       label: "Employee REG",
       icon: UserPlus,
-      path: "/register",
-      active: location.pathname === "/register"
+      path: "/register"
     }]),
     {
       id: "documents",
       label: "Documents",
       icon: FileText,
-      path: "/documents",
-      active: location.pathname === "/documents"
+      path: "/documents"
     },
-    // Add Calendar menu item
     {
       id: "calendar",
       label: "Calendar",
       icon: Calendar,
-      path: "/calendar",
-      active: location.pathname === "/calendar"
+      path: "/calendar"
     }
   ]
 
   return (
-    <div className={`fixed left-0 top-0 h-full w-64 z-40 shadow-lg border-r ${
-      darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
-      {/* Logo Section */}
-      <div className={`p-6 ${darkMode ? 'border-gray-700' : 'border-gray-200'} border-b`}>
-        <div className="flex items-center justify-center">
-          <img
-            src={iscsLogo}
-            alt="ISCS Logo"
-            className="h-12 object-contain"
-          />
-        </div>
+    <div
+      className={`fixed left-0 top-0 h-full z-40 border-r shadow-lg
+      transition-all duration-300
+      ${collapsed ? "w-20" : "w-56"}
+      ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+    >
+
+      {/* LOGO */}
+      <div className="p-4 border-b flex justify-center">
+        <img
+          src={iscsLogo}
+          alt="logo"
+          className={`transition-all ${collapsed ? "h-8" : "h-10"}`}
+        />
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="mt-6 px-4">
+      {/* MENU */}
+      <nav className="mt-4 px-2">
         <ul className="space-y-2">
-          {menuItems.map((item) => {
+          {menuItems.map(item => {
             const Icon = item.icon
+            const active = location.pathname === item.path
+
             return (
               <li key={item.id}>
                 <Link
                   to={item.path}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                    item.active
-                      ? darkMode 
-                        ? "bg-gradient-to-r from-green-900/20 to-blue-900/20 text-green-400 border border-green-700/50" 
-                        : "bg-gradient-to-r from-green-50 to-blue-50 text-green-700 border border-green-200"
-                      : darkMode 
-                        ? "text-gray-300 hover:bg-gray-700 hover:text-gray-100" 
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg
+                  ${active
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <Icon 
-                    size={20} 
-                    className={`transition-colors ${
-                      item.active 
-                        ? "text-green-500" 
-                        : darkMode 
-                          ? "text-gray-400 group-hover:text-gray-300" 
-                          : "text-gray-400 group-hover:text-gray-600"
-                    }`}
-                  />
-                  <span className="font-medium flex-1 text-left">{item.label}</span>
-                  {item.active && (
-                    <ChevronRight size={16} className={darkMode ? "text-green-500" : "text-green-600"} />
+                  <Icon size={20} />
+
+                  {!collapsed && (
+                    <span className="text-sm font-medium">
+                      {item.label}
+                    </span>
+                  )}
+
+                  {active && !collapsed && (
+                    <ChevronRight size={14} className="ml-auto" />
                   )}
                 </Link>
               </li>
@@ -110,32 +105,26 @@ export default function Sidebar({ user }) {
         </ul>
       </nav>
 
-      {/* Footer */}
-      <div className={`absolute bottom-0 left-0 right-0 p-4 ${darkMode ? 'border-gray-700' : 'border-gray-200'} border-t`}>
-        <div className={`rounded-lg p-3 ${
-          darkMode 
-            ? "bg-gradient-to-r from-green-900/20 to-blue-900/20" 
-            : "bg-gradient-to-r from-green-50 to-blue-50"
-        }`}>
-          <p className={`text-sm text-center ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}>
-            <span className="font-medium">HRMS v1.0</span>
-          </p>
-          <p className={`text-xs text-center mt-1 ${
-            darkMode ? "text-gray-400" : "text-gray-500"
-          }`}>
-            Human Resource Management
-          </p>
-          {user && (
-            <p className={`text-xs text-center mt-1 ${
-              darkMode ? "text-gray-400" : "text-gray-500"
-            }`}>
-              Role: <span className="font-medium">{user.role}</span>
-            </p>
-          )}
-        </div>
+      {/* FOOTER */}
+      <div className="absolute bottom-14 left-0 right-0 px-3">
+        {!collapsed && (
+          <div className="text-center text-xs text-gray-500">
+            HRMS v1.0  
+            <br />
+            Role: {user?.role}
+          </div>
+        )}
       </div>
+
+      {/* TOGGLE */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className={`absolute bottom-3 left-1/2 -translate-x-1/2
+        p-2 rounded-full shadow transition
+        ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100"}`}
+      >
+        {collapsed ? <ChevronRight /> : <ChevronLeft />}
+      </button>
     </div>
   )
 }

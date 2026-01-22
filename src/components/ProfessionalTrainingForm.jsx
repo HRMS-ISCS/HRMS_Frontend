@@ -60,7 +60,7 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
         i === index ? { ...training, [field]: value } : training
       )
     }));
-  };
+  }; 
 
   const addProfessionalTraining = () => {
     setFormData(prev => ({

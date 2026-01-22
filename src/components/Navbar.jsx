@@ -1,162 +1,268 @@
-// src/components/Navbar.jsx
-import React, { useState, useEffect } from "react";
-import { Search, LogOut, User, ChevronDown, Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { removeToken, getCurrentUser } from "../api";
-import { useNavigate } from "react-router-dom";
-import { useDarkMode } from "@/context/DarkModeContext";
+// // src/components/Navbar.jsx
+// import React, { useState, useEffect } from "react";
+// import { Search, LogOut, User, ChevronDown, Moon, Sun } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { removeToken, getCurrentUser } from "../api";
+// import { useNavigate } from "react-router-dom";
+// import { useDarkMode } from "@/context/DarkModeContext";
 
-export default function Navbar({ onLogout }) {
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { darkMode, toggleDarkMode } = useDarkMode();
-  const navigate = useNavigate();
+// export default function Navbar({ onLogout }) {
+//   const [showUserMenu, setShowUserMenu] = useState(false);
+//   const [userData, setUserData] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const { darkMode, toggleDarkMode } = useDarkMode();
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const fetchUserData = async () => {
+//       try {
+//         const data = await getCurrentUser();
+//         setUserData(data);
+//       } catch (error) {
+//         console.error("Failed to fetch user data:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchUserData();
+//   }, []);
+
+//   const handleLogout = () => {
+//     // Explicitly remove token
+//     removeToken();
+//     // Call onLogout prop
+//     onLogout();
+//   };
+
+//   const handleProfileClick = () => {
+//     navigate("/profile");
+//     setShowUserMenu(false);
+//   };
+
+//   const getInitials = (firstName, lastName) => {
+//     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+//   };
+
+//   return (
+//     <nav className={`fixed top-0 left-64 right-0 h-16 z-30 shadow-sm border-b ${
+//       darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+//     }`}>
+//       <div className="flex items-center justify-between px-6 h-full">
+//         {/* Search Bar */}
+//         <div className="flex-1 max-w-xl">
+//           <div className="relative">
+//             <Search size={20} className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+//               darkMode ? 'text-gray-400' : 'text-gray-400'
+//             }`} />
+//             <input
+//               type="text"
+//               placeholder="Search employees, departments, or documents..."
+//               className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
+//                 darkMode 
+//                   ? 'bg-gray-700 border-gray-600 text-gray-100 focus:ring-green-500/20 focus:border-green-500' 
+//                   : 'bg-white border-gray-200 text-gray-800 focus:ring-green-500/20 focus:border-green-500'
+//               }`}
+//             />
+//           </div>
+//         </div>
+
+//         {/* Right Side Actions */}
+//         <div className="flex items-center gap-4">
+//           {/* Dark Mode Toggle */}
+//           <button
+//             onClick={toggleDarkMode}
+//             className={`p-2 rounded-lg transition-colors ${
+//               darkMode 
+//                 ? 'text-gray-300 hover:text-gray-100 hover:bg-gray-700' 
+//                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+//             }`}
+//             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+//           >
+//             {darkMode ? (
+//               <Sun size={20} />
+//             ) : (
+//               <Moon size={20} />
+//             )}
+//           </button>
+
+//           {/* User Profile Dropdown */}
+//           <div className="relative">
+//             <button
+//               onClick={() => setShowUserMenu(!showUserMenu)}
+//               className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+//                 darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
+//               }`}
+//             >
+//               <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
+//                 {userData?.profile_photo_url ? (
+//                   <img 
+//                     src={userData.profile_photo_url} 
+//                     alt="Profile" 
+//                     className="w-full h-full object-cover"
+//                     onError={(e) => {
+//                       e.target.onerror = null;
+//                       e.target.style.display = 'none';
+//                       e.target.nextSibling.style.display = 'flex';
+//                     }}
+//                   />
+//                 ) : null}
+//                 <div className={`w-full h-full bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center ${userData?.profile_photo_url ? 'hidden' : ''}`}>
+//                   <span className="text-white text-sm font-medium">
+//                     {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
+//                   </span>
+//                 </div>
+//               </div>
+//               <div className="text-left">
+//                 <p className={`text-sm font-medium ${
+//                   darkMode ? 'text-gray-100' : 'text-gray-800'
+//                 }`}>
+//                   {loading ? "Loading..." : userData ? `${userData.first_name} ${userData.last_name}` : "User"}
+//                 </p>
+//                 <p className={`text-xs ${
+//                   darkMode ? 'text-gray-400' : 'text-gray-500'
+//                 }`}>
+//                   {loading ? "..." : userData ? userData.role : "Unknown"}
+//                 </p>
+//               </div>
+//               <ChevronDown size={16} className={darkMode ? 'text-gray-400' : 'text-gray-400'} />
+//             </button>
+
+//             {/* Dropdown Menu */}
+//             {showUserMenu && (
+//               <div className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-lg border py-2 z-50 ${
+//                 darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+//               }`}>
+//                 <button 
+//                   onClick={handleProfileClick}
+//                   className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
+//                     darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'
+//                   }`}
+//                 >
+//                   <User size={16} />
+//                   Profile
+//                 </button>
+//                 <hr className={darkMode ? 'border-gray-700' : 'border-gray-200'} />
+//                 <button 
+//                   onClick={handleLogout}
+//                   className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
+//                     darkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
+//                   }`}
+//                 >
+//                   <LogOut size={16} />
+//                   Logout
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </nav>
+//   );
+// }
+
+import React, { useState, useEffect } from "react"
+import { Search, LogOut, User, ChevronDown, Moon, Sun } from "lucide-react"
+import { removeToken, getCurrentUser } from "../api"
+import { useNavigate } from "react-router-dom"
+import { useDarkMode } from "@/context/DarkModeContext"
+
+export default function Navbar({ onLogout, collapsed }) {
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const { darkMode, toggleDarkMode } = useDarkMode()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await getCurrentUser();
-        setUserData(data);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        const data = await getCurrentUser()
+        setUserData(data)
+      } catch (e) {
+        console.error(e)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-
-    fetchUserData();
-  }, []);
+    }
+    fetchUserData()
+  }, [])
 
   const handleLogout = () => {
-    // Explicitly remove token
-    removeToken();
-    // Call onLogout prop
-    onLogout();
-  };
+    removeToken()
+    onLogout()
+  }
 
-  const handleProfileClick = () => {
-    navigate("/profile");
-    setShowUserMenu(false);
-  };
-
-  const getInitials = (firstName, lastName) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  };
+  const getInitials = (f, l) =>
+    `${f?.charAt(0) || ""}${l?.charAt(0) || ""}`.toUpperCase()
 
   return (
-    <nav className={`fixed top-0 left-64 right-0 h-16 z-30 shadow-sm border-b ${
-      darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-    }`}>
+    <nav
+      className={`fixed top-0 right-0 h-16 z-30 border-b shadow-sm
+      transition-all duration-300
+      ${collapsed ? "left-20" : "left-56"}
+      ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
+    >
       <div className="flex items-center justify-between px-6 h-full">
-        {/* Search Bar */}
+
+        {/* SEARCH */}
         <div className="flex-1 max-w-xl">
           <div className="relative">
-            <Search size={20} className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-              darkMode ? 'text-gray-400' : 'text-gray-400'
-            }`} />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              type="text"
-              placeholder="Search employees, departments, or documents..."
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
-                darkMode 
-                  ? 'bg-gray-700 border-gray-600 text-gray-100 focus:ring-green-500/20 focus:border-green-500' 
-                  : 'bg-white border-gray-200 text-gray-800 focus:ring-green-500/20 focus:border-green-500'
+              placeholder="Search..."
+              className={`w-full pl-9 pr-3 py-2 rounded-lg border
+              ${darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white"
               }`}
             />
           </div>
         </div>
 
-        {/* Right Side Actions */}
+        {/* RIGHT */}
         <div className="flex items-center gap-4">
-          {/* Dark Mode Toggle */}
+
+          {/* DARK MODE */}
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-lg transition-colors ${
-              darkMode 
-                ? 'text-gray-300 hover:text-gray-100 hover:bg-gray-700' 
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-            }`}
-            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="p-2 rounded hover:bg-gray-100"
           >
-            {darkMode ? (
-              <Sun size={20} />
-            ) : (
-              <Moon size={20} />
-            )}
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* User Profile Dropdown */}
+          {/* PROFILE */}
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-              }`}
+              className="flex items-center gap-2"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                {userData?.profile_photo_url ? (
-                  <img 
-                    src={userData.profile_photo_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className={`w-full h-full bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center ${userData?.profile_photo_url ? 'hidden' : ''}`}>
-                  <span className="text-white text-sm font-medium">
-                    {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
-                  </span>
-                </div>
+              <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
+                {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
               </div>
-              <div className="text-left">
-                <p className={`text-sm font-medium ${
-                  darkMode ? 'text-gray-100' : 'text-gray-800'
-                }`}>
-                  {loading ? "Loading..." : userData ? `${userData.first_name} ${userData.last_name}` : "User"}
-                </p>
-                <p className={`text-xs ${
-                  darkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  {loading ? "..." : userData ? userData.role : "Unknown"}
-                </p>
-              </div>
-              <ChevronDown size={16} className={darkMode ? 'text-gray-400' : 'text-gray-400'} />
+              <ChevronDown size={14} />
             </button>
 
-            {/* Dropdown Menu */}
             {showUserMenu && (
-              <div className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-lg border py-2 z-50 ${
-                darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-              }`}>
-                <button 
-                  onClick={handleProfileClick}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
-                    darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+              <div className="absolute right-0 mt-2 w-40 bg-white shadow rounded">
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="w-full px-3 py-2 text-left hover:bg-gray-100"
                 >
-                  <User size={16} />
                   Profile
                 </button>
-                <hr className={darkMode ? 'border-gray-700' : 'border-gray-200'} />
-                <button 
+                <button
                   onClick={handleLogout}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
-                    darkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'
-                  }`}
+                  className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-50"
                 >
-                  <LogOut size={16} />
                   Logout
                 </button>
               </div>
             )}
           </div>
+
         </div>
       </div>
     </nav>
-  );
+  )
 }

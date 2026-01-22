@@ -31,7 +31,7 @@ export default function ProfessionalReferencesForm({ initialData, generatedEmplo
   const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
 
   // API-specific states
   const [referencesLoading, setReferencesLoading] = useState(false);
