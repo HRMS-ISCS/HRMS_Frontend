@@ -896,7 +896,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { apiRequest } from "../api";
 
-export default function ProfessionalTrainingForm({ initialData, generatedEmployeeId, onSubmit, onDataUpdate, onBack }) {
+export default function ProfessionalTrainingForm({ initialData, generatedEmployeeId, onSubmit, onDataUpdate}) {
   const { darkMode } = useDarkMode();
   const { toast } = useToast();
   const [formData, setFormData] = useState(initialData);

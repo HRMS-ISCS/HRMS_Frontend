@@ -1,6 +1,6 @@
 // src/auth/LoginPage.jsx
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+//import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";

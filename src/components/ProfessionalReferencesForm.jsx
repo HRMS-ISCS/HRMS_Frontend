@@ -769,7 +769,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDarkMode } from "@/context/DarkModeContext"; // Import dark mode context
 import { apiRequest } from "../api"; // Import API request function
 
-export default function ProfessionalReferencesForm({ initialData, generatedEmployeeId, onSubmit, onBack, onAboutSelfSubmit }) {
+export default function ProfessionalReferencesForm({ initialData, generatedEmployeeId, onSubmit, onAboutSelfSubmit }) {
   const { darkMode } = useDarkMode(); // Get dark mode state
   const { toast } = useToast(); // Initialize toast
   const [formData, setFormData] = useState(initialData);
