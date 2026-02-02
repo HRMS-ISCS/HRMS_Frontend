@@ -1,421 +1,3 @@
-// // src/components/RegisterPage.jsx
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { Card } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { CheckCircle2 } from "lucide-react"; // Removed Lock import
-// import { Toaster } from "@/components/ui/toaster";
-// import { useToast } from "@/components/ui/use-toast";
-// import { useDarkMode } from "@/context/DarkModeContext";
-// import EmploymentApplicationForm from "./EmploymentApplicationForm";
-// import PersonalProfileForm from "./PersonalProfileForm";
-// import BankAndFamilyForm from "./BankAndFamilyForm";
-// import ProfessionalTrainingForm from "./ProfessionalTrainingForm";
-// import ProfessionalReferencesForm from "./ProfessionalReferencesForm";
-// import DeclarationForm from "./DeclarationForm";
-
-// export default function RegisterPage() {
-//   const { darkMode } = useDarkMode();
-//   const [currentStep, setCurrentStep] = useState(1);
-//   const [isTransitioning, setIsTransitioning] = useState(false);
-//   const [slideDirection, setSlideDirection] = useState("");
-//   const [generatedEmployeeId, setGeneratedEmployeeId] = useState("");
-//   const [formData, setFormData] = useState({
-//     // Employment Application Data
-//     employmentApplication: {
-//       name: "",
-//       employeeId: "",
-//       email: "",
-//       phone: "",
-//       dateOfJoining: "",
-//       position: "",
-//       clientName: "",
-//       skillSet: "",
-//       generatedEmployeeId: "",
-//     },
-//     // Personal Profile Data
-//     personalProfile: {
-//       firstName: "",
-//       middleName: "",
-//       lastName: "",
-//       dateOfBirth: "",
-//       gender: "",
-//       bloodGroup: "",
-//       nationality: "",
-//       currentAddress: "",
-//       permanentAddress: "",
-//       currentDistrict: "",
-//       currentCity: "",
-//       currentState: "",
-//       currentPinCode: "",
-//       permanentDistrict: "",
-//       permanentCity: "",
-//       permanentState: "",
-//       permanentPinCode: "",
-//       mobilePhone: "",
-//       email: "",
-//       telephone: "",
-//       emergencyName: "",
-//       emergencyRelation: "",
-//       emergencyMobile: "",
-//       emergencyEmail: "",
-//       aadharNumber: "",
-//       panNumber: "",
-//       passportNumber: "",
-//       uanNumber: "",
-//       esiNumber: "",
-//       photo: null,
-//     },
-//     // Bank and Family Data
-//     bankAndFamily: {
-//       bankName: "",
-//       branch: "",
-//       accountNumber: "",
-//       ifscCode: "",
-//       maritalStatus: "",
-//       marriageDate: "",
-//       familyMembers: {
-//         employee: { name: "", gender: "", dateOfBirth: "", age: "" },
-//         spouse: { name: "", gender: "", dateOfBirth: "", age: "" },
-//         child1: { name: "", gender: "", dateOfBirth: "", age: "" },
-//         child2: { name: "", gender: "", dateOfBirth: "", age: "" },
-//         father: { name: "", gender: "", dateOfBirth: "", age: "" },
-//         mother: { name: "", gender: "", dateOfBirth: "", age: "" },
-//       },
-//       academicQualifications: [
-//         {
-//           qualification: "",
-//           specification: "",
-//           instituteName: "",
-//           instituteAddress: "",
-//           yearOfPassing: "",
-//           durationFrom: "",
-//           durationTo: "",
-//           rankGradePercentage: "",
-//         },
-//       ],
-//     },
-//     // Professional Training & Experience Data
-//     professionalTraining: {
-//       professionalTraining: [
-//         {
-//           instituteName: "",
-//           instituteAddress: "",
-//           duration: "",
-//           areaOfTraining: "",
-//         },
-//       ],
-//       professionalExperience: [
-//         {
-//           location: "",
-//           empId: "",
-//           rmContactNo: "",
-//           hrEmailId: "",
-//           designation: "",
-//           periodFrom: "",
-//           periodTo: "",
-//           ctc: "",
-//           reasonForLeaving: "",
-//           uanNumber: "",
-//         },
-//       ],
-//       otherInterests: ["", ""],
-//     },
-//     // Professional References Data
-//     professionalReferences: {
-//       professionalReferences: [
-//         {
-//           name: "",
-//           designation: "",
-//           company: "",
-//           address: "",
-//           phoneNumber: "",
-//           email: "",
-//           knownPeriod: "",
-//           capacity: "",
-//         },
-//         {
-//           name: "",
-//           designation: "",
-//           company: "",
-//           address: "",
-//           phoneNumber: "",
-//           email: "",
-//           knownPeriod: "",
-//           capacity: "",
-//         },
-//       ],
-//       employeeReferral: {
-//         isReferred: "",
-//         name: "",
-//         phoneNumber: "",
-//       },
-//       aboutSelf: {
-//         careerAmbition: "",
-//         achievements: "",
-//         professionalFailures: "",
-//       },
-//       strengths: ["", "", ""],
-//       weaknesses: ["", "", ""],
-//     },
-//     // Declaration Data
-//     declaration: {
-//       place: "",
-//       date: "",
-//       applicantName: "",
-//       signature: "",
-//     },
-//   });
-
-//   const navigate = useNavigate();
-//   const { toast } = useToast();
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, [currentStep]);
-
-//   const navigateToStep = (targetStep) => {
-//     if (targetStep === currentStep || isTransitioning) return;
-
-//     setIsTransitioning(true);
-
-//     if (targetStep > currentStep) {
-//       setSlideDirection("slide-left");
-//     } else {
-//       setSlideDirection("slide-right");
-//     }
-
-//     setTimeout(() => {
-//       setCurrentStep(targetStep);
-//       window.scrollTo(0, 0);
-
-//       setTimeout(() => {
-//         setSlideDirection("");
-//         setIsTransitioning(false);
-//       }, 50);
-//     }, 300);
-//   };
-
-//   const handleEmploymentFormSubmit = (data) => {
-//     if (data.generatedEmployeeId) {
-//       setGeneratedEmployeeId(data.generatedEmployeeId);
-//     }
-
-//     setFormData((prev) => ({
-//       ...prev,
-//       employmentApplication: data,
-//     }));
-    
-//     // Automatically navigate to step 2
-//     setTimeout(() => {
-//       navigateToStep(2);
-//     }, 0);
-//   };
-
-//   const handlePersonalProfileSubmit = (data) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       personalProfile: data,
-//     }));
-//     setTimeout(() => {
-//       navigateToStep(3);
-//     }, 0);
-//   };
-
-//   const handleBankAndFamilySubmit = (data) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       bankAndFamily: data,
-//     }));
-//     setTimeout(() => {
-//       navigateToStep(4);
-//     }, 0);
-//   };
-
-//   const handleProfessionalTrainingFormSubmit = (data) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       professionalTraining: data,
-//     }));
-//     setTimeout(() => {
-//       navigateToStep(5);
-//     }, 0);
-//   };
-
-//   const handleProfessionalReferencesFormSubmit = (data) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       professionalReferences: data,
-//     }));
-//     setTimeout(() => {
-//       navigateToStep(6);
-//     }, 0);
-//   };
-
-//   const handleDeclarationSubmit = (data) => {
-//     const completeFormData = {
-//       ...formData,
-//       declaration: data,
-//     };
-
-//     console.log("Complete form data:", completeFormData);
-
-//     toast({
-//       title: (
-//         <div className="flex items-center gap-2">
-//           <CheckCircle2 className="h-5 w-5 text-green-500" />
-//           <span>Application Submitted Successfully</span>
-//         </div>
-//       ),
-//       description: "Thank you for registering with ISCS Technologies.",
-//       className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-//     });
-
-//     navigate("/employees");
-//   };
-
-//   const steps = [
-//     { id: 1, title: "Employment" },
-//     { id: 2, title: "Personal" },
-//     { id: 3, title: "Bank & Family" },
-//     { id: 4, title: "Training" },
-//     { id: 5, title: "References" },
-//     { id: 6, title: "Declaration" },
-//   ];
-
-//   return (
-//     <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-green-50'}`}>
-//       <style jsx>{`
-//         .page-container { position: relative; overflow: hidden; }
-//         .page-content { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center; }
-//         .slide-left { transform: translateX(-100%) rotateY(-15deg); opacity: 0; }
-//         .slide-right { transform: translateX(100%) rotateY(15deg); opacity: 0; }
-//       `}</style>
-
-//       <div className={`sticky top-0 z-40 ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-100'} backdrop-blur-sm border-b`}>
-//         <div className="max-w-7xl mx-auto px-4 py-3">
-//           <div className="flex items-center justify-between">
-//             <h1 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-//               Employee Registration
-//             </h1>
-            
-//             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3">
-//               {steps.map((step) => {
-//                 const isCompleted = currentStep > step.id;
-//                 const isCurrent = currentStep === step.id;
-                
-//                 return (
-//                   <React.Fragment key={step.id}>
-//                     <div className="flex items-center">
-//                       <div
-//                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
-//                           isCompleted
-//                             ? "bg-green-500 text-white"
-//                             : isCurrent
-//                             ? "bg-blue-500 text-white shadow-md ring-4 ring-blue-100"
-//                             : darkMode ? "bg-gray-700 text-gray-400" : "bg-gray-200 text-gray-500"
-//                         }`}
-//                       >
-//                         {isCompleted ? <CheckCircle2 size={14} /> : step.id}
-//                       </div>
-//                       {/* Label for larger screens */}
-//                       <span className={`ml-2 text-xs hidden md:block font-medium ${
-//                         isCurrent ? 'text-blue-600 dark:text-blue-400' : 
-//                         isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-400'
-//                       }`}>
-//                         {step.title}
-//                       </span>
-//                     </div>
-//                     {/* Connector line */}
-//                     {step.id !== steps.length && (
-//                       <div className={`w-8 h-0.5 ${step.id < currentStep ? 'bg-green-400' : 'bg-gray-300'}`} />
-//                     )}
-//                   </React.Fragment>
-//                 );
-//               })}
-//             </div>
-            
-//             <div className="w-32"></div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {generatedEmployeeId && (
-//         <div className="flex justify-center mt-4">
-//           <div className={`${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full px-4 py-1.5 flex items-center gap-2 text-sm`}>
-//             <CheckCircle2 className={darkMode ? "text-green-400" : "text-green-600"} size={14} />
-//             <span className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-700'}`}>
-//               Employee ID: {generatedEmployeeId}
-//             </span>
-//           </div>
-//         </div>
-//       )}
-
-//       <div className="max-w-4xl mx-auto px-4 py-6">
-//         <Card
-//           className={`${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-100'} backdrop-blur-sm rounded-xl shadow-sm transition-all duration-500 ${
-//             isTransitioning ? "scale-95 opacity-90" : "scale-100 opacity-100"
-//           }`}
-//         >
-//           <div className={`p-6 page-content ${slideDirection}`}>
-//             {currentStep === 1 && (
-//               <EmploymentApplicationForm
-//                 initialData={formData.employmentApplication}
-//                 onSubmit={handleEmploymentFormSubmit}
-//               />
-//             )}
-//             {currentStep === 2 && (
-//               <PersonalProfileForm
-//                 initialData={formData.personalProfile}
-//                 generatedEmployeeId={generatedEmployeeId}
-//                 onSubmit={handlePersonalProfileSubmit}
-//                 onBack={() => navigateToStep(1)}
-//               />
-//             )}
-//             {currentStep === 3 && (
-//               <BankAndFamilyForm
-//                 initialData={formData.bankAndFamily}
-//                 generatedEmployeeId={generatedEmployeeId}
-//                 onSubmit={handleBankAndFamilySubmit}
-//                 onBack={() => navigateToStep(2)}
-//               />
-//             )}
-//             {currentStep === 4 && (
-//               <ProfessionalTrainingForm
-//                 initialData={formData.professionalTraining}
-//                 generatedEmployeeId={generatedEmployeeId}
-//                 onSubmit={handleProfessionalTrainingFormSubmit}
-//                 onBack={() => navigateToStep(3)}
-//               />
-//             )}
-//             {currentStep === 5 && (
-//               <ProfessionalReferencesForm
-//                 initialData={formData.professionalReferences}
-//                 generatedEmployeeId={generatedEmployeeId}
-//                 onSubmit={handleProfessionalReferencesFormSubmit}
-//                 onBack={() => navigateToStep(4)}
-//               />
-//             )}
-//             {currentStep === 6 && (
-//               <DeclarationForm
-//                 initialData={formData.declaration}
-//                 generatedEmployeeId={generatedEmployeeId}
-//                 onSubmit={handleDeclarationSubmit}
-//                 onBack={() => navigateToStep(5)}
-//               />
-//             )}
-//           </div>
-//         </Card>
-//       </div>
-      
-//       <Toaster />
-//     </div>
-//   );
-// }
-
-
-
-
 // src/components/RegisterPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -543,6 +125,8 @@ export default function RegisterPage() {
         },
       ],
       otherInterests: ["", ""],
+      has_training: true,     // Added
+      has_experience: true     // Added
     },
     professionalReferences: {
       professionalReferences: [
@@ -596,18 +180,13 @@ export default function RegisterPage() {
   useEffect(() => {
     const initializeProgress = async () => {
       try {
-        // Step A: Get Progress Status
         const progressRes = await apiRequest('/application/progress');
         
         if (progressRes.last_completed_step > 0) {
-          // Step B: If user has started, fetch the full data
           const resumeData = await apiRequest('/application/resume-data');
           
           if (resumeData.has_data) {
-            // Step C: Map API data to Frontend State
             hydrateFormData(resumeData);
-            
-            // Set Step based on API suggestion or next available step
             const nextStep = progressRes.next_step || (progressRes.last_completed_step + 1);
             setCurrentStep(nextStep);
             
@@ -620,7 +199,6 @@ export default function RegisterPage() {
         }
       } catch (error) {
         console.error("Error fetching progress:", error);
-        // If error (e.g., 401 or server error), just start fresh at step 1
       } finally {
         setIsLoadingResume(false);
       }
@@ -630,11 +208,10 @@ export default function RegisterPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Helper: Map Backend Resume Data to Frontend State Structure
+  // Helper: Map Backend Resume Data to Frontend State
   const hydrateFormData = (data) => {
     const steps = data.steps;
     
-    // Map Step 1: Employment Application
     if (steps.step_1?.completed) {
       const s1 = steps.step_1.data;
       setGeneratedEmployeeId(s1.employee_id);
@@ -655,7 +232,6 @@ export default function RegisterPage() {
       }));
     }
 
-    // Map Step 2: Personal Profile
     if (steps.step_2?.completed) {
       const s2 = steps.step_2.data;
       setFormData(prev => ({
@@ -675,7 +251,6 @@ export default function RegisterPage() {
       }));
     }
 
-    // Map Step 3: Bank & Family
     if (steps.step_3?.completed) {
       const s3 = steps.step_3.data;
       const bank = s3.data?.bankDetails || {};
@@ -706,13 +281,15 @@ export default function RegisterPage() {
       }));
     }
 
-    // Map Step 4: Training
+    // Map Step 4: Training (Updated to handle flags)
     if (steps.step_4?.completed) {
       const s4 = steps.step_4.data;
       setFormData(prev => ({
         ...prev,
         professionalTraining: {
           ...prev.professionalTraining,
+          has_training: s4.has_training ?? true, // Default to true if missing
+          has_experience: s4.has_experience ?? true, // Default to true if missing
           professionalTraining: (s4.data?.professionalTraining || []).map(t => ({
             instituteName: t.instituteName,
             instituteAddress: t.instituteAddress,
@@ -735,7 +312,6 @@ export default function RegisterPage() {
       }));
     }
 
-    // Map Step 5: References
     if (steps.step_5?.completed) {
       const s5 = steps.step_5.data;
       setFormData(prev => ({
@@ -758,12 +334,11 @@ export default function RegisterPage() {
             professionalFailures: s5.data.aboutSelf.professionalFailures,
           } : prev.professionalReferences.aboutSelf,
           strengths: s5.data?.aboutSelf?.strengths || ["", "", ""],
-          weaknesses: s5.data?.aboutSelf?.weaknesses || ["", ""]
+          weaknesses: s5.data?.aboutSelf?.weaknesses || ["", "", ""]
         }
       }));
     }
 
-    // Map Step 6: Declaration
     if (steps.step_6?.completed) {
       const s6 = steps.step_6.data;
       setFormData(prev => ({
@@ -777,12 +352,8 @@ export default function RegisterPage() {
     }
   };
 
-  // ============================================
-  // 2. Helper: Sync Progress with Backend
-  // ============================================
   const syncBackendProgress = async (stepNumber) => {
     try {
-      // Just notify the backend, we don't need to update local 'unlocked' state
       await apiRequest('/application/progress', {
         method: 'PUT',
         body: JSON.stringify({ step: stepNumber, completed: true })
@@ -797,9 +368,6 @@ export default function RegisterPage() {
     }
   };
 
-  // ============================================
-  // 3. Navigation Logic
-  // ============================================
   const navigateToStep = (targetStep) => {
     if (targetStep === currentStep || isTransitioning) return;
     setIsTransitioning(true);
@@ -815,9 +383,7 @@ export default function RegisterPage() {
     }, 300);
   };
 
-  // ============================================
-  // 4. Form Submission Handlers
-  // ============================================
+  // --- Handlers ---
 
   const handleEmploymentFormSubmit = async (data) => {
     if (data.generatedEmployeeId) {
@@ -840,8 +406,26 @@ export default function RegisterPage() {
     navigateToStep(4);
   };
 
+  // NEW: Handle Data Update from Child (without navigation)
+  const handleProfessionalTrainingDataUpdate = (data) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      professionalTraining: {
+        ...prev.professionalTraining,
+        ...data // Spreads { has_training, has_experience, ...arrays }
+      } 
+    }));
+  };
+
   const handleProfessionalTrainingFormSubmit = async (data) => {
-    setFormData(prev => ({ ...prev, professionalTraining: data }));
+    // Update final state before moving
+    setFormData(prev => ({ 
+      ...prev, 
+      professionalTraining: {
+        ...prev.professionalTraining,
+        ...data 
+      } 
+    }));
     await syncBackendProgress(4);
     navigateToStep(5);
   };
@@ -921,10 +505,9 @@ export default function RegisterPage() {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <h1 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-            .
+              .
             </h1>
             
-            {/* Progress Bar - Visual Only (Non-clickable) */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3">
               {steps.map((step) => {
                 const isCompleted = currentStep > step.id;
@@ -966,12 +549,12 @@ export default function RegisterPage() {
 
       {generatedEmployeeId && (
         <div className="flex justify-center mt-4">
-          <div className={`${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full px-4 py-1.5 flex items-center gap-2 text-sm`}>
+          {/* <div className={`${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full px-4 py-1.5 flex items-center gap-2 text-sm`}>
             <CheckCircle2 className={darkMode ? "text-green-400" : "text-green-600"} size={14} />
             <span className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-700'}`}>
               Employee ID: {generatedEmployeeId}
             </span>
-          </div>
+          </div> */}
         </div>
       )}
 
@@ -1009,6 +592,7 @@ export default function RegisterPage() {
                 initialData={formData.professionalTraining}
                 generatedEmployeeId={generatedEmployeeId}
                 onSubmit={handleProfessionalTrainingFormSubmit}
+                onDataUpdate={handleProfessionalTrainingDataUpdate}
                 onBack={() => navigateToStep(3)}
               />
             )}
