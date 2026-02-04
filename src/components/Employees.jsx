@@ -17,6 +17,12 @@ import { useDarkMode } from "@/context/DarkModeContext";
 export default function Employees() {
   const { darkMode } = useDarkMode();
   const [allEmployees, setAllEmployees] = useState([]);
+  const [paginationData, setPaginationData] = useState({
+    total: 0,
+    page: 1,
+    pageSize: 8,
+    totalPages: 0
+  });
   const [searchedEmployee, setSearchedEmployee] = useState(null);
   const [searchEmployeeId, setSearchEmployeeId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,8 +49,8 @@ export default function Employees() {
   const [profilePictures, setProfilePictures] = useState({});
 
   useEffect(() => {
-    fetchAllEmployees();
-  }, []);
+    fetchEmployees(currentPage);
+  }, [currentPage, viewMode]);
 
   useEffect(() => {
     if (allEmployees.length > 0) {
@@ -52,20 +58,44 @@ export default function Employees() {
     }
   }, [allEmployees]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [viewMode, searchMode]);
-
-  const fetchAllEmployees = async () => {
+  const fetchEmployees = async (page = 1) => {
     setLoading(true);
-    setError("");   
+    setError("");
     try {
-      // Use the apiRequest function instead of direct fetch
-      const data = await apiRequest("/db/employment-applications");
-      setAllEmployees(data || []);
+      // Use pagination parameters
+      const itemsPerPage = viewMode === "cards" ? cardItemsPerPage : tableItemsPerPage;
+      const data = await apiRequest(`/db/employment-applications?page=${page}&page_size=${itemsPerPage}`);
+      
+      // Handle both paginated and non-paginated responses
+      if (data.applications) {
+        // Paginated response
+        setAllEmployees(data.applications);
+        setPaginationData({
+          total: data.total,
+          page: data.page,
+          pageSize: data.page_size,
+          totalPages: data.total_pages
+        });
+      } else {
+        // Non-paginated response (backward compatibility)
+        setAllEmployees(data || []);
+        setPaginationData({
+          total: data?.length || 0,
+          page: 1,
+          pageSize: itemsPerPage,
+          totalPages: Math.ceil((data?.length || 0) / itemsPerPage)
+        });
+      }
     } catch (error) {
       console.error("Error fetching employees:", error);
       setError("Failed to fetch employee data. Please try again.");
+      setAllEmployees([]);
+      setPaginationData({
+        total: 0,
+        page: 1,
+        pageSize: viewMode === "cards" ? cardItemsPerPage : tableItemsPerPage,
+        totalPages: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -75,9 +105,7 @@ export default function Employees() {
     try {
       const picturePromises = allEmployees.map(async (employee) => {
         try {
-          // Use the apiRequest function for profile pictures
           const data = await apiRequest(`/db/generate-sas/${employee.employee_id}`);
-          // FIX: Changed 'data.documents' to 'data.personal_documents'
           if (data.personal_documents?.profile_photo?.sas_url) {
             return {
               employeeId: employee.employee_id,
@@ -104,9 +132,7 @@ export default function Employees() {
 
   const fetchProfilePicture = async (employeeId) => {
     try {
-      // Use the apiRequest function for individual profile picture
       const data = await apiRequest(`/db/generate-sas/${employeeId}`);
-      // FIX: Changed 'data.documents' to 'data.personal_documents'
       if (data.personal_documents?.profile_photo?.sas_url) {
         setProfilePictures(prev => ({
           ...prev,
@@ -131,7 +157,6 @@ export default function Employees() {
     setSearchLoading(true);
     setSearchError("");
     try {
-      // Use the apiRequest function for searching employee
       const data = await apiRequest(`/db/employment-applications/${idToSearch}`);
       setSearchedEmployee(data);
       setSearchMode(true);
@@ -163,10 +188,24 @@ export default function Employees() {
     setSearchedEmployee(null);
     setSearchEmployeeId("");
     setSearchError("");
+    // Reset to first page when clearing search
+    setCurrentPage(1);
   };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") searchEmployeeById();
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    // Data will be fetched automatically via useEffect
+  };
+
+  const handleRefresh = () => {
+    if (searchMode) {
+      clearSearch();
+    }
+    fetchEmployees(currentPage);
   };
 
   const formatDate = (dateString) => {
@@ -185,14 +224,10 @@ export default function Employees() {
     }));
   };
 
-  // Pagination logic
-  const itemsPerPage = viewMode === "cards" ? cardItemsPerPage : tableItemsPerPage;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  // Calculate current items based on view mode
   const currentItems = searchMode 
-    ? (searchedEmployee ? [searchedEmployee] : []) 
-    : allEmployees.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(allEmployees.length / itemsPerPage);
+    ? (searchedEmployee ? [searchedEmployee] : [])
+    : allEmployees;
 
   const sectionColors = {
     personalProfile: { 
@@ -652,7 +687,6 @@ export default function Employees() {
               </div>
             </div>
             <div className="text-center mt-2">
-              {/* <h3 className={`font-bold text-sm mb-0.5 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{name}</h3> */}
               <h3 className={`font-bold text-sm mb-0.5 ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{name.toUpperCase()}</h3>
               <div className="flex items-center justify-center">
                 <span className={`font-mono px-1.5 py-0.5 rounded-full text-[10px] font-medium ${darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
@@ -719,8 +753,8 @@ export default function Employees() {
   };
 
   const EmployeeTable = ({ employees }) => {
-    // Create array of 6 items (fill with empty objects if needed)
-    const tableRows = Array.from({ length: 6 }, (_, index) => {
+    // Create array of tableItemsPerPage items (fill with empty objects if needed)
+    const tableRows = Array.from({ length: tableItemsPerPage }, (_, index) => {
       if (index < employees.length) {
         return employees[index];
       }
@@ -738,7 +772,7 @@ export default function Employees() {
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Position</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Department</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Joined</th>
-                <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-303' : 'text-gray-700'}`}>Actions</th>
+                <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
               </tr>
             </thead>
             <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
@@ -801,7 +835,6 @@ export default function Employees() {
                           )}
                         </div>
                         <div>
-                          {/* <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{name}</div> */}
                           <div className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{name.toUpperCase()}</div>
                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>#{employee.employee_id || "N/A"}</div>
                         </div>
@@ -835,29 +868,29 @@ export default function Employees() {
           </table>
         </div>
         
-        {/* Always show pagination with fixed 6 rows per page */}
+        {/* Pagination */}
         <div className={`flex items-center justify-between px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} border-t`}>
           <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
-            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, allEmployees.length)} of {allEmployees.length} employees
+            Showing {(paginationData.page - 1) * paginationData.pageSize + 1} to {Math.min(paginationData.page * paginationData.pageSize, paginationData.total)} of {paginationData.total} employees
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+            <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
               <ChevronLeft size={14} />
             </Button>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+            {Array.from({ length: Math.min(paginationData.totalPages, 5) }, (_, i) => {
               let pageNum;
-              if (totalPages <= 5) pageNum = i + 1;
+              if (paginationData.totalPages <= 5) pageNum = i + 1;
               else if (currentPage <= 3) pageNum = i + 1;
-              else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+              else if (currentPage >= paginationData.totalPages - 2) pageNum = paginationData.totalPages - 4 + i;
               else pageNum = currentPage - 2 + i;
               
               return (
-                <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" className={`h-8 w-8 p-0 ${currentPage === pageNum ? (darkMode ? 'bg-blue-600' : 'bg-blue-600') : (darkMode ? 'bg-gray-800' : 'bg-white')} ${darkMode ? 'hover:bg-blue-700' : 'hover:bg-gray-50'}`} onClick={() => setCurrentPage(pageNum)}>
+                <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" className={`h-8 w-8 p-0 ${currentPage === pageNum ? (darkMode ? 'bg-blue-600' : 'bg-blue-600') : (darkMode ? 'bg-gray-800' : 'bg-white')} ${darkMode ? 'hover:bg-blue-700' : 'hover:bg-gray-50'}`} onClick={() => handlePageChange(pageNum)}>
                   {pageNum}
                 </Button>
               );
             })}
-            <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+            <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === paginationData.totalPages}>
               <ChevronRightIcon size={14} />
             </Button>
           </div>
@@ -867,7 +900,6 @@ export default function Employees() {
   };
 
   return (
-    /* Top-level wrapper: full width + full viewport height so background doesn't show as a band */
     <div className={`w-full min-h-screen p-4 space-y-4 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
@@ -915,7 +947,7 @@ export default function Employees() {
               </div>
             )}
 
-            <Button variant="outline" size="sm" className={`h-8 px-3 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} disabled={loading} onClick={fetchAllEmployees}>
+            <Button variant="outline" size="sm" className={`h-8 px-3 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} disabled={loading} onClick={handleRefresh}>
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             </Button>
           </div>
@@ -938,10 +970,10 @@ export default function Employees() {
               {searchMode ? "Employee Details" : "All Employees"}
             </h2>
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
-              {searchMode ? (searchedEmployee ? "1" : "0") : allEmployees.length} {searchMode ? "Found" : "Total"}
+              {searchMode ? (searchedEmployee ? "1" : "0") : paginationData.total} {searchMode ? "Found" : "Total"}
             </span>
           </div>
-          {!searchMode && <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Last updated: {new Date().toLocaleTimeString()}</div>}
+          {!searchMode && <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Page {currentPage} of {paginationData.totalPages}</div>}
         </div>
 
         {loading && (
@@ -959,7 +991,7 @@ export default function Employees() {
               <AlertCircle size={24} className="text-red-500" />
               <div>
                 <p className={`text-red-700 font-medium text-sm ${darkMode ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
-                <Button onClick={fetchAllEmployees} className="mt-3" variant="outline" size="sm">Try Again</Button>
+                <Button onClick={handleRefresh} className="mt-3" variant="outline" size="sm">Try Again</Button>
               </div>
             </div>
           </Card>
@@ -967,7 +999,7 @@ export default function Employees() {
 
         {searchMode && searchedEmployee && !searchLoading && <DetailedEmployeeView employee={searchedEmployee} />}
 
-        {!searchMode && !loading && !error && allEmployees.length > 0 && (
+        {!searchMode && !loading && !error && currentItems.length > 0 && (
           <>
             {viewMode === "cards" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -979,25 +1011,25 @@ export default function Employees() {
               <EmployeeTable employees={currentItems} />
             )}
             
-            {viewMode === "cards" && allEmployees.length > cardItemsPerPage && (
+            {viewMode === "cards" && paginationData.totalPages > 1 && (
               <div className="flex items-center justify-center gap-1 mt-4">
-                <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                   <ChevronLeft size={14} />
                 </Button>
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                {Array.from({ length: Math.min(paginationData.totalPages, 5) }, (_, i) => {
                   let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
+                  if (paginationData.totalPages <= 5) pageNum = i + 1;
                   else if (currentPage <= 3) pageNum = i + 1;
-                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                  else if (currentPage >= paginationData.totalPages - 2) pageNum = paginationData.totalPages - 4 + i;
                   else pageNum = currentPage - 2 + i;
                   
                   return (
-                    <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" className={`h-8 w-8 p-0 ${currentPage === pageNum ? (darkMode ? 'bg-blue-600' : 'bg-blue-600') : (darkMode ? 'bg-gray-800' : 'bg-white')} ${darkMode ? 'hover:bg-blue-700' : 'hover:bg-gray-50'}`} onClick={() => setCurrentPage(pageNum)}>
+                    <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" className={`h-8 w-8 p-0 ${currentPage === pageNum ? (darkMode ? 'bg-blue-600' : 'bg-blue-600') : (darkMode ? 'bg-gray-800' : 'bg-white')} ${darkMode ? 'hover:bg-blue-700' : 'hover:bg-gray-50'}`} onClick={() => handlePageChange(pageNum)}>
                       {pageNum}
                     </Button>
                   );
                 })}
-                <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+                <Button variant="outline" size="sm" className={`h-8 w-8 p-0 ${darkMode ? 'border-gray-600 bg-gray-800 hover:bg-gray-700' : 'border-gray-200 bg-white hover:bg-gray-50'}`} onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === paginationData.totalPages}>
                   <ChevronRightIcon size={14} />
                 </Button>
               </div>
@@ -1005,7 +1037,7 @@ export default function Employees() {
           </>
         )}
 
-        {!searchMode && !loading && !error && allEmployees.length === 0 && (
+        {!searchMode && !loading && !error && currentItems.length === 0 && (
           <Card className={`p-8 text-center ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}>
             <div className="flex flex-col items-center gap-3">
               <Users size={32} className={darkMode ? 'text-gray-600' : 'text-gray-300'} />
