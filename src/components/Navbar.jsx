@@ -1,6 +1,6 @@
-// // src/components/Navbar.jsx
-import React, { useState, useEffect } from "react"
-import { Search, LogOut, User, ChevronDown, Moon, Sun } from "lucide-react"
+// // // src/components/Navbar.jsx
+import React, { useState, useEffect, useRef } from "react"
+import { ChevronDown, Moon, Sun } from "lucide-react"
 import { removeToken, getCurrentUser } from "../api"
 import { useNavigate } from "react-router-dom"
 import { useDarkMode } from "@/context/DarkModeContext"
@@ -9,9 +9,12 @@ export default function Navbar({ onLogout, collapsed }) {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
+
   const { darkMode, toggleDarkMode } = useDarkMode()
   const navigate = useNavigate()
+  const menuRef = useRef(null)
 
+  // Fetch logged in user
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -24,6 +27,18 @@ export default function Navbar({ onLogout, collapsed }) {
       }
     }
     fetchUserData()
+  }, [])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowUserMenu(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   const handleLogout = () => {
@@ -41,65 +56,62 @@ export default function Navbar({ onLogout, collapsed }) {
       ${collapsed ? "left-20" : "left-56"}
       ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
     >
-      <div className="flex items-center justify-between px-6 h-full">
+      <div className="flex items-center justify-end px-6 h-full gap-4">
 
-        {/* SEARCH */}
-        <div className="flex-1 max-w-xl">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              placeholder="Search..."
-              className={`w-full pl-9 pr-3 py-2 rounded-lg border
-              ${darkMode
-                ? "bg-gray-700 text-white border-gray-600"
-                : "bg-white"
-              }`}
-            />
-          </div>
-        </div>
+        {/* DARK MODE TOGGLE */}
+        <button
+          onClick={toggleDarkMode}
+          className={`p-2 rounded transition ${
+            darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+          }`}
+        >
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-4">
-
-          {/* DARK MODE */}
+        {/* PROFILE DROPDOWN */}
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded hover:bg-gray-100"
+            onClick={() => setShowUserMenu(prev => !prev)}
+            className="flex items-center gap-2"
           >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
+              {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
+            </div>
+            <ChevronDown size={14} />
           </button>
 
-          {/* PROFILE */}
-          <div className="relative">
-            <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2"
+          {showUserMenu && (
+            <div
+              className={`absolute right-0 mt-2 w-40 shadow rounded border
+              ${darkMode
+                ? "bg-gray-800 border-gray-700 text-white"
+                : "bg-white border-gray-200 text-gray-800"
+              }`}
             >
-              <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
-                {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
-              </div>
-              <ChevronDown size={14} />
-            </button>
+              <button
+                onClick={() => {
+                  setShowUserMenu(false)
+                  navigate("/profile")
+                }}
+                className={`w-full px-3 py-2 text-left ${
+                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
+              >
+                Profile
+              </button>
 
-            {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow rounded">
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="w-full px-3 py-2 text-left hover:bg-gray-100"
-                >
-                  Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-50"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-
+              <button
+                onClick={handleLogout}
+                className={`w-full px-3 py-2 text-left text-red-600 ${
+                  darkMode ? "hover:bg-red-900/20" : "hover:bg-red-50"
+                }`}
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
+
       </div>
     </nav>
   )
