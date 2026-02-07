@@ -2,7 +2,7 @@
 // src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import LoginPage from "./auth/LoginPage";
+import LoginPage from "./auth/LoginPage"; 
 import RegisterPage from "./components/RegisterPage";
 import LoadingScreen from "./auth/LoadingScreen";
 import AboutISCS from "./components/AboutISCS";
