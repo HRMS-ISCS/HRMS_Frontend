@@ -70,21 +70,42 @@ export default function EmploymentApplicationForm({
     fetchPositions();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
+  //   // Clear error when user starts typing
+  //   if (errors[name]) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       [name]: "",
+  //     }));
+  //   }
+  // };
+  const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  // Convert clientName to uppercase automatically
+  const updatedValue =
+    name === "clientName" ? value.toUpperCase() : value;
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: updatedValue,
+  }));
+
+  // Clear error when user starts typing
+  if (errors[name]) {
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  }
+};
+
 
   // --- NEW: Create Position Handler ---
   const handleCreateNewPosition = async () => {
