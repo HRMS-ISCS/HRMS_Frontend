@@ -482,7 +482,7 @@ export default function EmploymentApplicationForm({
               )}
             </div>
             {/* Position Field */}
-            <div className="lg:col-span-2 space-y-2">
+            {/* <div className="lg:col-span-2 space-y-2">
               <Label
                 className={`${darkMode ? "text-gray-300" : "text-gray-700"} font-medium flex items-center gap-2 text-sm sm:text-base`}
               >
@@ -580,8 +580,143 @@ export default function EmploymentApplicationForm({
                   {errors.position}
                 </p>
               )}
-            </div>
+            </div> */}
+            {/* Position Field */}
+<div className="lg:col-span-2 space-y-2">
+  <Label
+    className={`${darkMode ? "text-gray-300" : "text-gray-700"} font-medium flex items-center gap-2 text-sm sm:text-base`}
+  >
+    <Briefcase
+      size={16}
+      className={darkMode ? "text-gray-400" : "text-gray-500"}
+    />
+    Position *
+  </Label>
 
+  {showNewPositionInput ? (
+    // MODE: ADD NEW
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          id="position"
+          name="position"
+          type="text"
+          value={formData.position}
+          onChange={handleChange}
+          placeholder="Enter new position title..."
+          className={`h-10 sm:h-12 flex-1 transition-all duration-200 ${darkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white text-gray-900"} text-sm sm:text-base ${
+            errors.position
+              ? "border-red-500 focus:border-red-500"
+              : "border-gray-200 focus:border-green-500"
+          }`}
+        />
+        <Button
+          type="button"
+          onClick={handleCreateNewPosition}
+          disabled={isSavingPosition}
+          className="bg-green-600 hover:bg-green-700 text-white h-10 sm:h-12 px-4 flex items-center gap-2"
+        >
+          {isSavingPosition ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Save size={16} />
+          )}
+          <span className="hidden sm:inline">Save</span>
+        </Button>
+      </div>
+      <button
+        type="button"
+        onClick={() => setShowNewPositionInput(false)}
+        className={`text-xs sm:text-sm ${darkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"} flex items-center gap-1`}
+      >
+        ← Back to selection
+      </button>
+    </div>
+  ) : (
+    // MODE: SELECT EXISTING - BLOCK STYLE
+    <div className="space-y-2">
+      <div 
+        className={`rounded-md border transition-all duration-200 ${
+          darkMode
+            ? "bg-gray-700/30 border-gray-600"
+            : "bg-gray-50 border-gray-200"
+        } ${
+          errors.position
+            ? "border-red-500"
+            : ""
+        }`}
+        style={{
+          minHeight: "120px",
+          maxHeight: "160px",
+          overflowY: "auto",
+          padding: "8px"
+        }}
+      >
+        {/* Placeholder when nothing selected */}
+        {!formData.position && positions.length > 0 && (
+          <div className={`text-sm px-3 py-2 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+            Select a position from below
+          </div>
+        )}
+        
+        {positions.length === 0 && (
+          <div className={`text-sm px-3 py-2 ${darkMode ? "text-gray-500" : "text-gray-400"} text-center`}>
+            No positions available. Add a new one below.
+          </div>
+        )}
+
+        {/* Position Blocks */}
+        <div className="space-y-1">
+          {positions.map((pos) => (
+            <button
+              key={pos}
+              type="button"
+              onClick={() => {
+                setFormData((prev) => ({ ...prev, position: pos }));
+                if (errors.position) {
+                  setErrors((prev) => ({ ...prev, position: "" }));
+                }
+              }}
+              className={`w-full text-left px-3 py-2 rounded-md text-sm sm:text-base transition-all duration-200 ${
+                formData.position === pos
+                  ? darkMode
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-blue-500 text-white shadow-md"
+                  : darkMode
+                  ? "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
+                  : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{pos}</span>
+                {formData.position === pos && (
+                  <CheckCircle size={16} className="flex-shrink-0 ml-2" />
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      <button
+        type="button"
+        onClick={() => setShowNewPositionInput(true)}
+        className={`text-xs sm:text-sm ${darkMode ? "text-green-400 hover:text-green-300" : "text-green-600 hover:text-green-700"} flex items-center gap-1`}
+      >
+        <Plus size={14} />
+        Add new position
+      </button>
+    </div>
+  )}
+
+  {errors.position && (
+    <p className="text-xs sm:text-sm text-red-600 mt-1">
+      {errors.position}
+    </p>
+  )}
+</div>
+
+            
             {/* Client Name Field */}
             <div className="space-y-2">
               <Label
