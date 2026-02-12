@@ -1772,7 +1772,7 @@ export default function Employees() {
                 <Building2 size={12} className={darkMode ? 'text-purple-400' : 'text-purple-600'} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className={`text-[10px] ${darkMode ? 'text-gray-400' : 'text-gray-500'} font-medium`}>Department</p>
+                <p className={`text-[10px] ${darkMode ? 'text-gray-400' : 'text-gray-500'} font-medium`}>Client</p>
                 <p className={`text-xs ${darkMode ? 'text-gray-100' : 'text-gray-900'} font-semibold truncate`}>{employee.client || employee.department || "N/A"}</p>
               </div>
             </div>
@@ -1831,7 +1831,7 @@ export default function Employees() {
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Employee</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Contact</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Position</th>
-                <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Department</th>
+                <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Client</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Joined</th>
                 <th className={`px-3 py-2 text-left text-xs font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
               </tr>
