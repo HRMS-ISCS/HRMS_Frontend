@@ -608,7 +608,7 @@ export default function RegisterPage() {
 
       {/* Main Content - Center aligned, no right shift */}
       <div className="pt-20">
-        {generatedEmployeeId && (
+        {/* {generatedEmployeeId && (
           <div className="flex justify-center mt-4">
             <div className={`${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full px-4 py-1.5 flex items-center gap-2 text-sm`}>
               <CheckCircle2 className={darkMode ? "text-green-400" : "text-green-600"} size={14} />
@@ -617,7 +617,7 @@ export default function RegisterPage() {
               </span>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Centered Form Container */}
         <div className="max-w-4xl mx-auto px-4 py-6">

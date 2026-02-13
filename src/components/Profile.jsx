@@ -2,17 +2,32 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 import {
-  User, Mail, Phone, Calendar, Shield, Building, Briefcase
+  User, Mail, Phone, Calendar, Shield, Building, Briefcase, Lock, Eye, EyeOff, CheckCircle // Added CheckCircle
 } from "lucide-react";
-import { getCurrentUser } from "../api";
+import { getCurrentUser, apiRequest } from "../api";
 import { useDarkMode } from "@/context/DarkModeContext";
 
 export default function Profile() {
   const { darkMode } = useDarkMode();
+  const { toast } = useToast(); // Initialize toast
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Password change state
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_new_password: ""
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,6 +44,85 @@ export default function Profile() {
 
     fetchUserData();
   }, []);
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const handleChangePasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.new_password !== passwordForm.confirm_new_password) {
+      toast({
+        title: "Error",
+        description: "New passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.new_password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await apiRequest("/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          current_password: passwordForm.current_password,
+          new_password: passwordForm.new_password,
+          confirm_new_password: passwordForm.confirm_new_password
+        })
+      });
+
+      // Success toast matching PersonalProfileForm style
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Password Updated Successfully</span>
+          </div>
+        ),
+        description: "Your password has been changed successfully.",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+      });
+
+      setPasswordForm({
+        current_password: "",
+        new_password: "",
+        confirm_new_password: ""
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to change password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -77,7 +171,6 @@ export default function Profile() {
   };
 
   return (
-    // Top-level full-viewport wrapper so page background always fills screen
     <div className={`w-full min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="w-full max-w-6xl mx-auto">
         {/* Header */}
@@ -257,6 +350,119 @@ export default function Profile() {
                 </div>
               </Card>
             </div>
+          </div>
+        </Card>
+
+        {/* Change Password Section */}
+        <Card className={`mt-6 overflow-hidden ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={`w-10 h-10 ${darkMode ? 'bg-red-900' : 'bg-red-100'} rounded-lg flex items-center justify-center`}>
+                <Lock className={`w-5 h-5 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />
+              </div>
+              <div>
+                <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Change Password</h3>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Update your account password regularly for security</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Current Password */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Current Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.current ? "text" : "password"}
+                      name="current_password"
+                      value={passwordForm.current_password}
+                      onChange={handlePasswordChange}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-800'}`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('current')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPasswords.current ? (
+                        <EyeOff className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      ) : (
+                        <Eye className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* New Password */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.new ? "text" : "password"}
+                      name="new_password"
+                      value={passwordForm.new_password}
+                      onChange={handlePasswordChange}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-800'}`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('new')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPasswords.new ? (
+                        <EyeOff className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      ) : (
+                        <Eye className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm New Password */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.confirm ? "text" : "password"}
+                      name="confirm_new_password"
+                      value={passwordForm.confirm_new_password}
+                      onChange={handlePasswordChange}
+                      className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-800'}`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('confirm')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPasswords.confirm ? (
+                        <EyeOff className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      ) : (
+                        <Eye className={`h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  type="submit" 
+                  disabled={isChangingPassword}
+                  className={`${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
+                >
+                  {isChangingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </div>
+            </form>
           </div>
         </Card>
       </div>
