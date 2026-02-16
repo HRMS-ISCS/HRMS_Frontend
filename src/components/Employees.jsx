@@ -3,6 +3,49 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+// import {
+//   Users,
+//   Search,
+//   Loader2,
+//   RefreshCw,
+//   User,
+//   Mail,
+//   Phone,
+//   Briefcase,
+//   Calendar,
+//   Building2,
+//   Code,
+//   AlertCircle,
+//   CheckCircle2,
+//   Eye,
+//   Filter,
+//   MapPin,
+//   CreditCard,
+//   GraduationCap,
+//   Award,
+//   Heart,
+//   FileText,
+//   Contact,
+//   Building,
+//   Banknote,
+//   ChevronDown,
+//   ChevronRight,
+//   UserCheck,
+//   Shield,
+//   Home,
+//   Flag,
+//   Globe,
+//   BookOpen,
+//   Target,
+//   TrendingUp,
+//   AlertTriangle,
+//   Zap,
+//   Edit2,
+//   Save,
+//   X,
+//   Plus,
+//   Trash2,
+// } from "lucide-react";
 import {
   Users,
   Search,
@@ -30,6 +73,7 @@ import {
   Banknote,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,      // ✅ Added
   UserCheck,
   Shield,
   Home,
@@ -46,6 +90,8 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+
+
 import { apiRequest } from "../api";
 import { useDarkMode } from "@/context/DarkModeContext";
 import {
@@ -3551,7 +3597,9 @@ export default function Employees() {
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === paginationData.totalPages}
                 >
-                  <ChevronRightIcon size={14} />
+                  {/* <ChevronRightIcon size={14} /> */}
+                  <ChevronRight size={14} />
+
                 </Button>
               </div>
             )}
