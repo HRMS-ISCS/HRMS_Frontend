@@ -30,7 +30,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { apiRequest } from "../api"; // Import our API request function
+import { apiRequest } from "../api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast"; // Import the useToast hook
+import { useToast } from "@/components/ui/use-toast";
 import { useDarkMode } from "@/context/DarkModeContext";
 
 export default function Dashboard() {
@@ -77,12 +77,12 @@ export default function Dashboard() {
   });
 
   const [usersList, setUsersList] = useState([]);
-  const [roleFilter, setRoleFilter] = useState("All"); // New state for filtering
+  const [roleFilter, setRoleFilter] = useState("All");
   const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
   const [showNonAxisTable, setShowNonAxisTable] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
-  const [userPageSet, setUserPageSet] = useState(1); // New state to track current page set
+  const [userPageSet, setUserPageSet] = useState(1);
   const rowsPerPage = 3;
   const userRowsPerPage = 5;
 
@@ -98,6 +98,9 @@ export default function Dashboard() {
     role: "",
   });
 
+  // New state for email preference
+  const [sendEmail, setSendEmail] = useState(true);
+
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -106,26 +109,21 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Existing API calls
-    // Internal & External employees
     apiRequest("/dashboard/employment-applications/count/internal-external")
       .then((data) => setEmployeeCounts(data))
       .catch((err) => console.error("Error fetching employee counts:", err));
 
-    // Gender count data
     apiRequest("/dashboard/gender-count")
       .then((data) => setGenderCounts(data))
       .catch((err) => console.error("Error fetching gender counts:", err));
 
-    // Bank account data
     apiRequest("/db/bank-accounts/axis-summary")
       .then((data) => setBankAccountData(data))
       .catch((err) => console.error("Error fetching bank account data:", err));
 
     // New API calls for user management
-
     apiRequest("/admin/users")
       .then((data) => {
-        // ================= SUPERADMIN =================
         if (data.superadmin_data) {
           const grouped = data.superadmin_data;
 
@@ -142,25 +140,18 @@ export default function Dashboard() {
           ];
 
           setUsersList(allUsers);
-        }
-
-        // ================= HR (GLOBAL HR VIEW) =================
-        else if (data.hr_data) {
+        } else if (data.hr_data) {
           const grouped = data.hr_data;
 
           setUserRoleData({
-            superadmin: 0, // HR cannot see superadmins
+            superadmin: 0,
             hr: grouped.hr.length,
             employee: grouped.employee.length,
           });
 
           const allUsers = [...grouped.hr, ...grouped.employee];
-
           setUsersList(allUsers);
-        }
-
-        // ================= ADMIN (TENANT BASED) =================
-        else if (data.admin_data) {
+        } else if (data.admin_data) {
           const users = data.admin_data;
 
           setUserRoleData({
@@ -179,7 +170,6 @@ export default function Dashboard() {
   const validateForm = () => {
     const errors = {};
 
-    // First Name: At least 3 letters
     if (!formData.first_name.trim()) {
       errors.first_name = "First name is required";
     } else if (formData.first_name.trim().length < 3) {
@@ -196,7 +186,6 @@ export default function Dashboard() {
       errors.mobile_number = "Mobile number must be 10 digits";
     }
 
-    // Username: At least 3 letters
     if (!formData.username.trim()) {
       errors.username = "Username is required";
     } else if (formData.username.trim().length < 3) {
@@ -209,7 +198,6 @@ export default function Dashboard() {
       errors.email = "Email is invalid";
     }
 
-    // Password: At least 6 letters
     if (!formData.password.trim()) {
       errors.password = "Password is required";
     } else if (formData.password.length < 6) {
@@ -234,7 +222,6 @@ export default function Dashboard() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when user starts typing
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -259,26 +246,24 @@ export default function Dashboard() {
     setIsSubmitting(true);
 
     try {
-      // Call the API to create a user and capture the response
       const response = await apiRequest("/admin/create-user", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          send_email: sendEmail,
+        }),
       });
 
-      // 1. Capture the new user details and email status from response
       const newUser = response.user;
       const isEmailSent = response.email_sent;
 
-      // 2. Add new user to the TOP of the list immediately
       setUsersList((prev) => [newUser, ...prev]);
 
-      // 3. Update the chart counts manually (optimistic update)
       setUserRoleData((prev) => ({
         ...prev,
         [formData.role]: (prev[formData.role] || 0) + 1,
       }));
 
-      // 4. Reset form
       setFormData({
         first_name: "",
         last_name: "",
@@ -289,11 +274,9 @@ export default function Dashboard() {
         confirm_password: "",
         role: "",
       });
-
-      // 5. Close dialog
+      setSendEmail(true);
       setShowCreateUserDialog(false);
 
-      // 6. Show success toast notification with email status
       toast({
         title: (
           <div className="flex items-center gap-2">
@@ -306,7 +289,6 @@ export default function Dashboard() {
         description: (
           <div>
             <p className="text-sm">{`${newUser.first_name} ${newUser.last_name} has been added as ${newUser.role.toUpperCase()}.`}</p>
-
             {isEmailSent ? (
               <p className="text-xs mt-1 text-green-600 font-medium flex items-center gap-1">
                 ✉️ Welcome email sent to{" "}
@@ -325,7 +307,6 @@ export default function Dashboard() {
       });
     } catch (error) {
       console.error("Error creating user:", error);
-      // Show error toast notification
       toast({
         title: "Error",
         description:
@@ -337,7 +318,6 @@ export default function Dashboard() {
     }
   };
 
-  // Rest of the component remains the same...
   const totalEmployees =
     employeeCounts.internal_employees + employeeCounts.external_employees;
 
@@ -403,25 +383,22 @@ export default function Dashboard() {
     },
   ];
 
-  // Gender pie chart (full circle)
   const genderPieData = [
-    { name: "Male", value: genderCounts.Male, color: "#23989a" }, // teal
-    { name: "Female", value: genderCounts.Female, color: "#d6ad3a" }, // mustard
+    { name: "Male", value: genderCounts.Male, color: "#23989a" },
+    { name: "Female", value: genderCounts.Female, color: "#d6ad3a" },
   ];
 
-  // User role pie chart data - Using Employee Distribution colors with green for superadmin and orange for employee
   const userRolePieData = [
-    { name: "Superadmin", value: userRoleData.superadmin, color: "#10b981" }, // green
-    { name: "HR", value: userRoleData.hr, color: "#53c9cf" }, // teal/cyan (same as External Employees)
-    { name: "Employee", value: userRoleData.employee, color: "#f8a688" }, // peach/orange
+    { name: "Superadmin", value: userRoleData.superadmin, color: "#10b981" },
+    { name: "HR", value: userRoleData.hr, color: "#53c9cf" },
+    { name: "Employee", value: userRoleData.employee, color: "#f8a688" },
   ];
 
-  // Bank account data for charts with pale colors
   const bankAccountChartData = [
     {
       name: "Axis Bank",
       value: bankAccountData.summary.Axis_Bank_Accounts,
-      color: "#E6F3FF", // Pale blue
+      color: "#E6F3FF",
       percentage:
         bankAccountData.summary.Total_Accounts > 0
           ? (
@@ -434,7 +411,7 @@ export default function Dashboard() {
     {
       name: "Non-Axis Bank",
       value: bankAccountData.summary.Non_Axis_Bank_Accounts,
-      color: "#FFEAD0", // Pale orange
+      color: "#FFEAD0",
       percentage:
         bankAccountData.summary.Total_Accounts > 0
           ? (
@@ -511,25 +488,20 @@ export default function Dashboard() {
     endIndex,
   );
 
-  // --- UPDATED LOGIC FOR USERS LIST (Filtering, Sorting, Pagination) ---
-
-  // 1. Sort users by created_at date descending (newest first)
+  // Users List Logic
   const sortedUsers = [...usersList].sort((a, b) => {
     const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
     const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-    return dateB - dateA; // Descending order
+    return dateB - dateA;
   });
 
-  // 2. Filter users based on role selection
   const filteredUsers = sortedUsers.filter((user) => {
     if (roleFilter === "All") return true;
     return user.role === roleFilter;
   });
 
-  // 3. Pagination logic for users table (applied to filtered list)
   const totalUserPages = Math.ceil(filteredUsers.length / userRowsPerPage);
 
-  // Reset to page 1 if filter changes
   useEffect(() => {
     setUserPage(1);
     setUserPageSet(1);
@@ -539,7 +511,6 @@ export default function Dashboard() {
   const userEndIndex = userStartIndex + userRowsPerPage;
   const currentUsers = filteredUsers.slice(userStartIndex, userEndIndex);
 
-  // Calculate page numbers to display (max 5 at a time)
   const pageNumbersToShow = () => {
     const pages = [];
     const maxPagesToShow = 5;
@@ -560,7 +531,6 @@ export default function Dashboard() {
   const handleUserPageChange = (page) => {
     setUserPage(page);
 
-    // Update page set if needed
     const maxPagesToShow = 5;
     const newPageSet = Math.ceil(page / maxPagesToShow);
     if (newPageSet !== userPageSet) {
@@ -664,7 +634,7 @@ export default function Dashboard() {
         })}
       </div>
 
-        {/* User Role Distribution - NEW SECTION */}
+      {/* User Role Distribution */}
       <Card
         className={`p-6 shadow-lg border-0 ${
           darkMode
@@ -1001,7 +971,6 @@ export default function Dashboard() {
                   <ChevronLeft size={16} />
                 </button>
 
-                {/* Show page numbers with a maximum of 5 at a time */}
                 {userPageSet > 1 && (
                   <button
                     onClick={handlePrevPageSet}
@@ -1031,7 +1000,6 @@ export default function Dashboard() {
                   </button>
                 ))}
 
-                {/* Show next page set button if there are more pages */}
                 {userPageSet * 5 < totalUserPages && (
                   <button
                     onClick={handleNextPageSet}
@@ -1361,7 +1329,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Bank Account Distribution - Replacing Quick Actions */}
+      {/* Bank Account Distribution */}
       <Card
         className={`p-6 shadow-lg border-0 ${
           darkMode
@@ -1416,7 +1384,7 @@ export default function Dashboard() {
                       labelLine={false}
                       label={renderLabel}
                       outerRadius={85}
-                      innerRadius={65} // Larger inner radius for a thinner ring
+                      innerRadius={65}
                       fill="#8884d8"
                       dataKey="value"
                       stroke={darkMode ? "#1F2937" : "#ffffff"}
@@ -1717,7 +1685,7 @@ export default function Dashboard() {
             </div>
           )}
       </Card>
-      
+
       {/* Create User Dialog */}
       {showCreateUserDialog && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto pointer-events-none">
@@ -1991,6 +1959,40 @@ export default function Dashboard() {
                     </p>
                   )}
                 </div>
+              </div>
+
+              {/* Email Notification Preference - NEW SECTION */}
+              <div className={`flex items-center justify-between py-3 px-4 rounded-lg border ${
+                darkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="send_email"
+                    checked={sendEmail}
+                    onChange={(e) => setSendEmail(e.target.checked)}
+                    disabled={isSubmitting}
+                    className={`w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
+                      darkMode ? "bg-gray-700 border-gray-600" : ""
+                    }`}
+                  />
+                  <Label
+                    htmlFor="send_email"
+                    className={`text-sm font-medium cursor-pointer ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Send welcome email with login credentials
+                  </Label>
+                </div>
+                
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  sendEmail 
+                    ? "bg-green-100 text-green-700" 
+                    : "bg-gray-100 text-gray-600"
+                }`}>
+                  {sendEmail ? "✓ Email will be sent" : "✗ No email"}
+                </span>
               </div>
 
               {/* Action Buttons */}

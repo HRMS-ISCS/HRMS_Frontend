@@ -24,7 +24,7 @@
 // import { useDarkMode } from "@/context/DarkModeContext";
 // import { apiRequest } from "../api";
 
-// export default function ProfessionalTrainingForm({ initialData, generatedEmployeeId, onSubmit, onDataUpdate, onBack }) {
+// export default function ProfessionalTrainingForm({ initialData, generatedEmployeeId, onSubmit, onDataUpdate}) {
 //   const { darkMode } = useDarkMode();
 //   const { toast } = useToast();
 //   const [formData, setFormData] = useState(initialData);
@@ -349,15 +349,14 @@
 //         <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Complete your professional training and work experience details</p>
 //       </div>
 
-//       {generatedEmployeeId && (
-//         <div className="text-center mb-6">
-//           <div className={`inline-flex items-center gap-3 px-6 py-3 ${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full shadow-sm`}>
-//             <CheckCircle size={20} className={darkMode ? "text-green-400" : "text-green-600"} />
-//             <span className={`text-gray-700 font-medium ${darkMode ? 'text-gray-200' : ''}`}>Auto-filled Employee ID:</span>
-//             <span className={`text-lg font-bold ${darkMode ? 'text-green-300' : 'text-green-700'}`}>{generatedEmployeeId}</span>
-//           </div>
+//       {/* Global Employee ID Display - HIDDEN */}
+//       <div className="hidden text-center mb-6">
+//         <div className={`inline-flex items-center gap-3 px-6 py-3 ${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full shadow-sm`}>
+//           <CheckCircle size={20} className={darkMode ? "text-green-400" : "text-green-600"} />
+//           <span className={`text-gray-700 font-medium ${darkMode ? 'text-gray-200' : ''}`}>Auto-filled Employee ID:</span>
+//           <span className={`text-lg font-bold ${darkMode ? 'text-green-300' : 'text-green-700'}`}>{generatedEmployeeId}</span>
 //         </div>
-//       )}
+//       </div>
 
 //       <div className="space-y-8">
 //         {/* Professional Training Section */}
@@ -384,7 +383,8 @@
 //             </div>
 //           </div>
           
-//           <div className="mb-4">
+//           {/* Employee ID Input for Training - HIDDEN */}
+//           <div className="hidden mb-4">
 //             <Label htmlFor="trainingEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
 //               Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
 //             </Label>
@@ -572,7 +572,8 @@
 //             </div>
 //           </div>
           
-//           <div className="mb-4">
+//           {/* Employee ID Input for Experience - HIDDEN */}
+//           <div className="hidden mb-4">
 //             <Label htmlFor="experienceEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
 //               Employee ID {generatedEmployeeId ? '(Auto-filled)' : ''}
 //             </Label>
@@ -664,12 +665,12 @@
 //                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 //                     <div className="space-y-2">
 //                       <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm`}>
-//                         Company/Location
+//                         Company
 //                       </Label>
 //                       <Input
 //                         value={experience.location}
 //                         onChange={(e) => handleProfessionalExperienceChange(index, 'location', e.target.value)}
-//                         placeholder="Enter company/location"
+//                         placeholder="Enter company"
 //                         className={`text-sm ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
 //                       />
 //                     </div>
@@ -833,7 +834,7 @@
 //           </div>
 //         </Card>
 
-//         <div className="flex justify-between pt-6">
+//         {/* <div className="flex justify-between pt-6">
 //           <Button
 //             type="button"
 //             onClick={onBack}
@@ -842,7 +843,14 @@
 //           >
 //             <ArrowLeft size={16} />
 //             Back
-//           </Button>
+//           </Button> */}
+//               <div className="flex justify-between pt-6">
+//           <div className="flex gap-4">
+//             {/* <Button type="button" onClick={onBack} variant="outline" className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
+//               <ArrowLeft size={16} />
+//               Back
+//             </Button> */}
+//           </div>
           
 //           <Button
 //             onClick={handleSubmit}
@@ -870,7 +878,7 @@
 //     </div>
 //   );
 // }
-// // ProfessionalTrainingForm.jsx
+// ProfessionalTrainingForm.jsx
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -890,7 +898,8 @@ import {
   Save,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  MapPin
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useDarkMode } from "@/context/DarkModeContext";
@@ -971,16 +980,17 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
       professionalExperience: [
         ...prev.professionalExperience,
         {
-          location: "",
-          empId: "",
-          rmContactNo: "",
-          hrEmailId: "",
-          designation: "",
-          periodFrom: "",
-          periodTo: "",
-          ctc: "",
-          reasonForLeaving: "",
-          uanNumber: ""
+          companyName: "",           // company_name in backend
+          employerLocation: "",      // employer_location in backend
+          empId: "",                 // employer_id in backend
+          rmContactNo: "",           // rm_contact_no in backend
+          hrEmailId: "",             // hr_email in backend
+          designation: "",           // designation in backend
+          periodFrom: "",            // period_from in backend
+          periodTo: "",              // period_to in backend
+          ctc: "",                   // ctc in backend
+          reasonForLeaving: "",      // reason_for_leaving in backend
+          uanNumber: ""              // uan_number in backend
         }
       ]
     }));
@@ -1031,28 +1041,34 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
       } 
       // Case 2: User HAS Training Experience
       else {
-        const validTrainings = formData.professionalTraining.filter(training => 
-          training.instituteName?.trim() && training.duration?.trim() && training.areaOfTraining?.trim()
+        // Check if at least one training has minimum required fields (institute name, duration, area of training)
+        const hasAnyTraining = formData.professionalTraining.some(training => 
+          training.instituteName?.trim() || training.duration?.trim() || training.areaOfTraining?.trim()
         );
 
-        if (validTrainings.length === 0) {
-          setErrors(prev => ({ ...prev, trainingGeneral: "Please fill at least one training record" }));
+        if (!hasAnyTraining) {
+          setErrors(prev => ({ ...prev, trainingGeneral: "Please fill at least one training field or select 'No Training'" }));
           setTrainingLoading(false);
           return;
         }
 
-        for (const training of validTrainings) {
-          const apiData = {
-            has_training: true,
-            institute_name: training.instituteName,
-            duration: training.duration,
-            area_of_training: training.areaOfTraining
-          };
+        // Send each training record that has at least one field filled
+        for (const training of formData.professionalTraining) {
+          // Only send if at least one field is filled
+          if (training.instituteName?.trim() || training.duration?.trim() || training.areaOfTraining?.trim() || training.instituteAddress?.trim()) {
+            const apiData = {
+              has_training: true,
+              institute_name: training.instituteName || null,
+              duration: training.duration || null,
+              area_of_training: training.areaOfTraining || null,
+              institute_address: training.instituteAddress || null
+            };
 
-          await apiRequest(`/users/Professional_Training/${trainingEmployeeId}`, {
-            method: 'POST',
-            body: JSON.stringify(apiData)
-          });
+            await apiRequest(`/users/Professional_Training/${trainingEmployeeId}`, {
+              method: 'POST',
+              body: JSON.stringify(apiData)
+            });
+          }
         }
 
         setTrainingSuccess(true);
@@ -1062,23 +1078,23 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
         if (onDataUpdate) {
             onDataUpdate({
                 has_training: true,
-                professionalTraining: validTrainings
+                professionalTraining: formData.professionalTraining.filter(t => 
+                  t.instituteName?.trim() || t.duration?.trim() || t.areaOfTraining?.trim()
+                )
             });
         }
       }
 
-      if (trainingSuccess || (!errors.trainingGeneral)) {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Professional Training Updated</span>
-            </div>
-          ),
-          description: noTrainingExperience ? "No training recorded." : "Training records saved successfully.",
-          className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-        });
-      }
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Professional Training Updated</span>
+          </div>
+        ),
+        description: noTrainingExperience ? "No training recorded." : "Training records saved successfully.",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+      });
 
     } catch (error) {
       console.error('Training API Error:', error);
@@ -1127,36 +1143,57 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
       } 
       // Case 2: User HAS Professional Experience
       else {
-        const validExperiences = formData.professionalExperience.filter(exp => 
-          exp.location?.trim() && exp.designation?.trim() && exp.periodFrom && exp.periodTo && exp.ctc?.trim()
+        // Check if at least one experience has any field filled
+        const hasAnyExperience = formData.professionalExperience.some(exp => 
+          exp.companyName?.trim() || 
+          exp.employerLocation?.trim() || 
+          exp.designation?.trim() || 
+          exp.periodFrom || 
+          exp.periodTo || 
+          exp.ctc?.trim()
         );
 
-        if (validExperiences.length === 0) {
-          setErrors(prev => ({ ...prev, experienceGeneral: "Please fill at least one complete experience record" }));
+        if (!hasAnyExperience) {
+          setErrors(prev => ({ ...prev, experienceGeneral: "Please fill at least one experience field or select 'No Experience'" }));
           setExperienceLoading(false);
           return;
         }
 
-        for (const experience of validExperiences) {
-          const apiData = {
-            has_experience: true,
-            company_name: experience.location,
-            designation: experience.designation,
-            employer_location: experience.location,
-            employer_id: experience.empId || null,
-            rm_contact_no: experience.rmContactNo || null,
-            hr_email: experience.hrEmailId || null,
-            period_from: experience.periodFrom,
-            period_to: experience.periodTo,
-            ctc: parseFloat(experience.ctc),
-            reason_for_leaving: experience.reasonForLeaving || "Not specified",
-            uan_number: experience.uanNumber || null
-          };
+        // Send each experience record that has at least one field filled
+        for (const experience of formData.professionalExperience) {
+          // Only send if at least one field is filled
+          if (experience.companyName?.trim() || 
+              experience.employerLocation?.trim() || 
+              experience.empId?.trim() || 
+              experience.rmContactNo?.trim() || 
+              experience.hrEmailId?.trim() || 
+              experience.designation?.trim() || 
+              experience.periodFrom || 
+              experience.periodTo || 
+              experience.ctc?.trim() || 
+              experience.reasonForLeaving?.trim() || 
+              experience.uanNumber?.trim()) {
+            
+            const apiData = {
+              has_experience: true,
+              company_name: experience.companyName || null,
+              employer_location: experience.employerLocation || null,
+              employer_id: experience.empId || null,
+              rm_contact_no: experience.rmContactNo || null,
+              hr_email: experience.hrEmailId || null,
+              designation: experience.designation || null,
+              period_from: experience.periodFrom || null,
+              period_to: experience.periodTo || null,
+              ctc: experience.ctc ? parseFloat(experience.ctc) : null,
+              reason_for_leaving: experience.reasonForLeaving || null,
+              uan_number: experience.uanNumber || null
+            };
 
-          await apiRequest(`/users/Professional_Experience/${experienceEmployeeId}`, {
-            method: 'POST',
-            body: JSON.stringify(apiData)
-          });
+            await apiRequest(`/users/Professional_Experience/${experienceEmployeeId}`, {
+              method: 'POST',
+              body: JSON.stringify(apiData)
+            });
+          }
         }
 
         setExperienceSuccess(true);
@@ -1166,23 +1203,28 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
         if (onDataUpdate) {
             onDataUpdate({
                 has_experience: true,
-                professionalExperience: validExperiences
+                professionalExperience: formData.professionalExperience.filter(exp => 
+                  exp.companyName?.trim() || 
+                  exp.employerLocation?.trim() || 
+                  exp.designation?.trim() || 
+                  exp.periodFrom || 
+                  exp.periodTo || 
+                  exp.ctc?.trim()
+                )
             });
         }
       }
 
-      if (experienceSuccess || (!errors.experienceGeneral)) {
-        toast({
-          title: (
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Professional Experience Updated</span>
-            </div>
-          ),
-          description: noProfessionalExperience ? "No experience recorded." : "Experience records saved successfully.",
-          className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-        });
-      }
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Professional Experience Updated</span>
+          </div>
+        ),
+        description: noProfessionalExperience ? "No experience recorded." : "Experience records saved successfully.",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+      });
 
     } catch (error) {
       console.error('Experience API Error:', error);
@@ -1475,7 +1517,8 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
                   setFormData(prev => ({
                     ...prev,
                     professionalExperience: [{
-                      location: "",
+                      companyName: "",
+                      employerLocation: "",
                       empId: "",
                       rmContactNo: "",
                       hrEmailId: "",
@@ -1514,47 +1557,61 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
             )}
           </div>
           
-          <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>• Beginning with last employment</p>
+          <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>• Beginning with last employment (all fields are optional)</p>
 
           {!noProfessionalExperience && (
             <div className={`space-y-6 mb-6 ${darkMode ? 'bg-gray-700/50' : 'bg-white/50'} rounded-lg p-4`}>
               {formData.professionalExperience.map((experience, index) => (
                 <div key={index} className={`border ${darkMode ? 'border-gray-600' : 'border-gray-200'} rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} relative`}>
                   {formData.professionalExperience.length > 1 && (
-                        <Button
-                          type="button"
-                          onClick={() => removeProfessionalExperience(index)}
-                          variant="outline"
-                          size="sm"
-                          className={`absolute top-2 right-2 ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'}`}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                    <Button
+                      type="button"
+                      onClick={() => removeProfessionalExperience(index)}
+                      variant="outline"
+                      size="sm"
+                      className={`absolute top-2 right-2 ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700'}`}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
                   )}
                   
-                  <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-4`}>{index + 1}. Employer Details</h3>
+                  <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'} mb-4`}>Experience {index + 1}</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm`}>
-                        Company/Location
+                      <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm flex items-center gap-2`}>
+                        <Building size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
+                        Company Name
                       </Label>
                       <Input
-                        value={experience.location}
-                        onChange={(e) => handleProfessionalExperienceChange(index, 'location', e.target.value)}
-                        placeholder="Enter company/location"
+                        value={experience.companyName}
+                        onChange={(e) => handleProfessionalExperienceChange(index, 'companyName', e.target.value)}
+                        placeholder="Enter company name"
+                        className={`text-sm ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm flex items-center gap-2`}>
+                        <MapPin size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
+                        Employer Location
+                      </Label>
+                      <Input
+                        value={experience.employerLocation}
+                        onChange={(e) => handleProfessionalExperienceChange(index, 'employerLocation', e.target.value)}
+                        placeholder="Enter employer location"
                         className={`text-sm ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm`}>
-                        Emp. ID
+                        Employer ID
                       </Label>
                       <Input
                         value={experience.empId}
                         onChange={(e) => handleProfessionalExperienceChange(index, 'empId', e.target.value)}
-                        placeholder="Enter employee ID"
+                        placeholder="Enter employer ID"
                         className={`text-sm ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
                       />
                     </div>
@@ -1706,17 +1763,7 @@ export default function ProfessionalTrainingForm({ initialData, generatedEmploye
           </div>
         </Card>
 
-        {/* <div className="flex justify-between pt-6">
-          <Button
-            type="button"
-            onClick={onBack}
-            variant="outline"
-            className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-          >
-            <ArrowLeft size={16} />
-            Back
-          </Button> */}
-              <div className="flex justify-between pt-6">
+        <div className="flex justify-between pt-6">
           <div className="flex gap-4">
             {/* <Button type="button" onClick={onBack} variant="outline" className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
               <ArrowLeft size={16} />

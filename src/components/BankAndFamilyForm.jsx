@@ -2047,7 +2047,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               </select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="marriageDate" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium flex items-center gap-2`}>
                 <Calendar size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
                 Marriage Date
@@ -2070,7 +2070,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               {formData.maritalStatus === 'Single' && (
                 <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Marriage date is automatically disabled for Single status</p>
               )}
-            </div>
+            </div> */}
           </div>
 
           {errors.maritalGeneral && (
