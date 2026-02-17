@@ -656,7 +656,7 @@ I agree that I will take Medical Examination whenever requested and I will compl
             <div className="space-y-2">
               <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium text-sm flex items-center gap-2`}>
                 <Calendar size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
-                Date *
+                Date of joining
               </Label>
               <Input
                 type="date"

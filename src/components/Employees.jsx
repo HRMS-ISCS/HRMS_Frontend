@@ -1033,7 +1033,7 @@ export default function Employees() {
                   size={16}
                   className={darkMode ? "text-blue-400" : "text-blue-600"}
                 />
-                Emergency Contact
+                Alternative Contact
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoRow
@@ -1635,7 +1635,7 @@ export default function Employees() {
                     icon={User}
                   />
                   <InfoRow
-                    label="Date of Declaration"
+                    label="Date of joining"
                     value={formatDate(declaration.date_of_declaration)}
                     icon={Calendar}
                   />
@@ -1676,7 +1676,7 @@ export default function Employees() {
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
                 <TabsTrigger value="address">Address</TabsTrigger>
-                <TabsTrigger value="emergency">Emergency</TabsTrigger>
+                <TabsTrigger value="emergency">Alternative no</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4 mt-4">
@@ -2999,7 +2999,7 @@ export default function Employees() {
               />
             </div>
             <div>
-              <Label>Date of Declaration</Label>
+              <Label>Date of joining</Label>
               <Input
                 type="date"
                 value={formatDateForInput(editDialogData.date_of_declaration)}
