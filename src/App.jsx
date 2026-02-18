@@ -426,15 +426,6 @@ function AppContent({
             </ProtectedRoute>
           }
         />
-                    <main className="min-h-screen pt-16">
-                      <Profile />
-                    </main>
-                  </div>
-                </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
 
         {/* EMPLOYEES */}
         <Route
@@ -452,15 +443,6 @@ function AppContent({
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
                     <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-                    <main className="min-h-screen pt-16">
-                      <Employees user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
                     <main className="min-h-screen pt-16">
                       <Employees user={user} />
                     </main>
@@ -496,15 +478,6 @@ function AppContent({
             </ProtectedRoute>
           }
         />
-                    <main className="min-h-screen pt-16">
-                      <Documents user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
 
         {/* CALENDAR */}
         <Route
@@ -531,15 +504,6 @@ function AppContent({
             </ProtectedRoute>
           }
         />
-                    <main className="min-h-screen pt-16">
-                      <CalendarComponent user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
 
         <Route
           path="*"
@@ -553,9 +517,6 @@ function AppContent({
         />
       </Routes>
 
-      {typeof Toaster !== "undefined" && <Toaster />}
-    </>
-  );
       {typeof Toaster !== "undefined" && <Toaster />}
     </>
   );
