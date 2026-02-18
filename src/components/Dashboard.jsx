@@ -15,6 +15,8 @@ import {
   ChevronRight,
   X,
   CheckCircle,
+  Eye,
+  EyeOff,
   Filter,
 } from "lucide-react";
 import {
@@ -85,6 +87,8 @@ export default function Dashboard() {
   const [userPageSet, setUserPageSet] = useState(1);
   const rowsPerPage = 3;
   const userRowsPerPage = 5;
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Form state for creating user
   const [formData, setFormData] = useState({
@@ -1911,20 +1915,34 @@ export default function Dashboard() {
                   >
                     Password <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Min. 6 characters"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className={`w-full ${formErrors.password ? "border-red-500 focus:ring-red-500" : ""} ${
-                      darkMode
-                        ? "text-white bg-gray-700 border-gray-600"
-                        : "text-gray-900 bg-white border-gray-300"
-                    }`}
-                    disabled={isSubmitting}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Min. 6 characters"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className={`w-full pr-10 ${formErrors.password ? "border-red-500 focus:ring-red-500" : ""} ${
+                        darkMode
+                          ? "text-white bg-gray-700 border-gray-600"
+                          : "text-gray-900 bg-white border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                        darkMode
+                          ? "text-gray-400 hover:text-gray-300"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      tabIndex="-1"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {formErrors.password && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                       <span>⚠</span> {formErrors.password}
@@ -1939,20 +1957,40 @@ export default function Dashboard() {
                   >
                     Confirm Password <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="confirm_password"
-                    name="confirm_password"
-                    type="password"
-                    placeholder="Re-enter password"
-                    value={formData.confirm_password}
-                    onChange={handleInputChange}
-                    className={`w-full ${formErrors.confirm_password ? "border-red-500 focus:ring-red-500" : ""} ${
-                      darkMode
-                        ? "text-white bg-gray-700 border-gray-600"
-                        : "text-gray-900 bg-white border-gray-300"
-                    }`}
-                    disabled={isSubmitting}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirm_password"
+                      name="confirm_password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Re-enter password"
+                      value={formData.confirm_password}
+                      onChange={handleInputChange}
+                      className={`w-full pr-10 ${formErrors.confirm_password ? "border-red-500 focus:ring-red-500" : ""} ${
+                        darkMode
+                          ? "text-white bg-gray-700 border-gray-600"
+                          : "text-gray-900 bg-white border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                        darkMode
+                          ? "text-gray-400 hover:text-gray-300"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      tabIndex="-1"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
+                    </button>
+                  </div>
                   {formErrors.confirm_password && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                       <span>⚠</span> {formErrors.confirm_password}
@@ -1962,9 +2000,13 @@ export default function Dashboard() {
               </div>
 
               {/* Email Notification Preference - NEW SECTION */}
-              <div className={`flex items-center justify-between py-3 px-4 rounded-lg border ${
-                darkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'
-              }`}>
+              <div
+                className={`flex items-center justify-between py-3 px-4 rounded-lg border ${
+                  darkMode
+                    ? "bg-gray-700/50 border-gray-600"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
                 <div className="flex items-center space-x-3">
                   <input
                     type="checkbox"
@@ -1985,12 +2027,14 @@ export default function Dashboard() {
                     Send welcome email with login credentials
                   </Label>
                 </div>
-                
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  sendEmail 
-                    ? "bg-green-100 text-green-700" 
-                    : "bg-gray-100 text-gray-600"
-                }`}>
+
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    sendEmail
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
                   {sendEmail ? "✓ Email will be sent" : "✗ No email"}
                 </span>
               </div>
