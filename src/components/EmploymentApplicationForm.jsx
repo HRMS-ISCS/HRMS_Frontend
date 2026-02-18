@@ -70,27 +70,13 @@ export default function EmploymentApplicationForm({
     fetchPositions();
   }, []);
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
 
-  //   // Clear error when user starts typing
-  //   if (errors[name]) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       [name]: "",
-  //     }));
-  //   }
-  // };
-  const handleChange = (e) => {
+ const handleChange = (e) => {
   const { name, value } = e.target;
 
-  // Convert clientName to uppercase automatically
+  // Convert clientName and position to uppercase automatically
   const updatedValue =
-    name === "clientName" ? value.toUpperCase() : value;
+    name === "clientName" || name === "position" ? value.toUpperCase() : value;
 
   setFormData((prev) => ({
     ...prev,
@@ -108,62 +94,61 @@ export default function EmploymentApplicationForm({
 
 
   // --- NEW: Create Position Handler ---
-  const handleCreateNewPosition = async () => {
-    const positionName = formData.position.trim();
+const handleCreateNewPosition = async () => {
+  const positionName = formData.position.trim().toUpperCase(); // Convert to uppercase
 
-    if (!positionName) {
+  if (!positionName) {
+    toast({
+      title: "Error",
+      description: "Position name is required",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsSavingPosition(true);
+  try {
+    // Call API to create position (POST /positions)
+    const response = await apiRequest("/positions", {
+      method: "POST",
+      body: JSON.stringify({ name: positionName }), // Send uppercase name
+    });
+
+    if (response && response.position) {
+      const pos = response.position;
+
       toast({
-        title: "Error",
-        description: "Position name is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSavingPosition(true);
-    try {
-      // Call API to create position (POST /positions)
-      const response = await apiRequest("/positions", {
-        method: "POST",
-        body: JSON.stringify({ name: positionName }),
+        title: pos.is_new ? "Position Created" : "Position Exists",
+        description: pos.is_new
+          ? "New position added to database"
+          : "This position already exists. It has been selected.",
+        className: darkMode
+          ? "bg-green-900/80 border-green-700 text-green-100"
+          : "bg-green-50 border-green-200 text-green-800",
       });
 
-      if (response && response.position) {
-        const pos = response.position;
-
-        toast({
-          title: pos.is_new ? "Position Created" : "Position Exists",
-          description: pos.is_new
-            ? "New position added to database"
-            : "This position already exists. It has been selected.",
-          className: darkMode
-            ? "bg-green-900/80 border-green-700 text-green-100"
-            : "bg-green-50 border-green-200 text-green-800",
-        });
-
-        // If it was new, update our local list so it appears in dropdown next time
-        if (pos.is_new) {
-          setPositions((prev) => [...prev, pos.name]);
-        }
-
-        // Ensure the main form has this name set so it submits correctly
-        setFormData((prev) => ({ ...prev, position: pos.name }));
-
-        // Optional: Switch back to dropdown view after saving
-        // setShowNewPositionInput(false);
+      // If it was new, update our local list so it appears in dropdown next time
+      if (pos.is_new) {
+        setPositions((prev) => [...prev, pos.name]);
       }
-    } catch (error) {
-      console.error("Error creating position:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save position",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingPosition(false);
+
+      // Ensure the main form has this name set so it submits correctly
+      setFormData((prev) => ({ ...prev, position: pos.name }));
+
+      // Optional: Switch back to dropdown view after saving
+      // setShowNewPositionInput(false);
     }
-  };
-  // ----------------------------------
+  } catch (error) {
+    console.error("Error creating position:", error);
+    toast({
+      title: "Error",
+      description: error.message || "Failed to save position",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSavingPosition(false);
+  }
+};
 
   const validateForm = () => {
     const newErrors = {};
@@ -689,33 +674,34 @@ export default function EmploymentApplicationForm({
         {/* Position Blocks */}
         <div className="space-y-1">
           {positions.map((pos) => (
-            <button
-              key={pos}
-              type="button"
-              onClick={() => {
-                setFormData((prev) => ({ ...prev, position: pos }));
-                if (errors.position) {
-                  setErrors((prev) => ({ ...prev, position: "" }));
-                }
-              }}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm sm:text-base transition-all duration-200 ${
-                formData.position === pos
-                  ? darkMode
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-blue-500 text-white shadow-md"
-                  : darkMode
-                  ? "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
-                  : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">{pos}</span>
-                {formData.position === pos && (
-                  <CheckCircle size={16} className="flex-shrink-0 ml-2" />
-                )}
-              </div>
-            </button>
-          ))}
+  <button
+    key={pos}
+    type="button"
+    onClick={() => {
+      setFormData((prev) => ({ ...prev, position: pos }));
+      if (errors.position) {
+        setErrors((prev) => ({ ...prev, position: "" }));
+      }
+    }}
+    className={`w-full text-left px-3 py-2 rounded-md text-sm sm:text-base transition-all duration-200 ${
+      formData.position === pos
+        ? darkMode
+          ? "bg-blue-600 text-white shadow-md"
+          : "bg-blue-500 text-white shadow-md"
+        : darkMode
+        ? "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
+        : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
+    }`}
+  >
+    <div className="flex items-center justify-between">
+      <span className="font-medium">{pos.toUpperCase()}</span>
+      {formData.position === pos && (
+        <CheckCircle size={16} className="flex-shrink-0 ml-2" />
+      )}
+    </div>
+  </button>
+))}
+        
         </div>
       </div>
       

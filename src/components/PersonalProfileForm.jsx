@@ -1,4 +1,4 @@
-// src/components/PersonalProfileForm.jsx (dark mode )
+// src/components/PersonalProfileForm.jsx 
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   User, Calendar, MapPin, Phone, Mail, CreditCard, FileText, Camera,
   ArrowLeft, ArrowRight, Globe, Users, Shield, Save, Building, CheckCircle, UploadCloud,
-  X, AlertCircle
+  X, AlertCircle, Copy
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useDarkMode } from "@/context/DarkModeContext"; // Import dark mode context
@@ -27,6 +28,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
   const [uploadError, setUploadError] = useState("");
   const [profileSubmitted, setProfileSubmitted] = useState(false); // New state to track if profile is submitted
   const [isFormValid, setIsFormValid] = useState(false); // New state to track form validity
+  const [sameAsCurrent, setSameAsCurrent] = useState(false); // State for "Same as Current Address" checkbox
 
   // Document upload states
   const [aadharFile, setAadharFile] = useState(null);
@@ -36,6 +38,14 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
   const [photoPreview, setPhotoPreview] = useState(null);
   const [uploadEmployeeId, setUploadEmployeeId] = useState("");
   const [uploadLoading, setUploadLoading] = useState(false);
+
+  // File validation errors
+  const [fileErrors, setFileErrors] = useState({
+    aadhar: "",
+    pan: "",
+    resume: "",
+    photo: ""
+  });
 
   useEffect(() => {
     if (generatedEmployeeId) {
@@ -48,6 +58,21 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
   useEffect(() => {
     checkFormValidity();
   }, [formData, employeeId]);
+
+  // Effect to handle "Same as Current Address" checkbox
+  useEffect(() => {
+    if (sameAsCurrent) {
+      // Copy all current address fields to permanent address
+      setFormData(prev => ({
+        ...prev,
+        permanentAddress: prev.currentAddress,
+        permanentDistrict: prev.currentDistrict,
+        permanentCity: prev.currentCity,
+        permanentState: prev.currentState,
+        permanentPinCode: prev.currentPinCode
+      }));
+    }
+  }, [sameAsCurrent, formData.currentAddress, formData.currentDistrict, formData.currentCity, formData.currentState, formData.currentPinCode]);
 
   const checkFormValidity = () => {
     const required = [
@@ -93,6 +118,10 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
+  const handleSameAsCurrentChange = (checked) => {
+    setSameAsCurrent(checked);
+  };
+
   const validateForm = () => {
     const newErrors = {};
     const required = [
@@ -105,7 +134,9 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
       }
     });
     if (formData.aadharNumber && !/^\d{12}$/.test(formData.aadharNumber)) newErrors.aadharNumber = "12 digits required";
-    if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) newErrors.panNumber = "Invalid PAN format";
+    // if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) newErrors.panNumber = "Invalid PAN format";
+    if (formData.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber)) 
+  newErrors.panNumber = "Invalid PAN format";
     if (!employeeId.trim()) newErrors.employeeId = "Employee ID required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -211,6 +242,156 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     }
   };
 
+  // Validate file based on document type
+  const validateFile = (file, docType) => {
+    if (!file) return { isValid: true, error: "" };
+
+    const fileExt = file.name.split('.').pop().toLowerCase();
+    const fileType = file.type;
+
+    // Define allowed extensions and MIME types for each document type
+    const allowedTypes = {
+      aadhar: {
+        extensions: ['pdf', 'jpg', 'jpeg'],
+        mimeTypes: ['application/pdf', 'image/jpeg', 'image/jpg'],
+        maxSize: 3 * 1024 * 1024, // 3MB
+        label: "PDF, JPG, or JPEG"
+      },
+      pan: {
+        extensions: ['pdf', 'jpg', 'jpeg'],
+        mimeTypes: ['application/pdf', 'image/jpeg', 'image/jpg'],
+        maxSize: 3 * 1024 * 1024, // 3MB
+        label: "PDF, JPG, or JPEG"
+      },
+      resume: {
+        extensions: ['pdf'], // Only PDF allowed now
+        mimeTypes: ['application/pdf'],
+        maxSize: 10 * 1024 * 1024, // 10MB
+        label: "PDF only"
+      },
+      photo: {
+        extensions: ['jpg', 'jpeg', 'png'],
+        mimeTypes: ['image/jpeg', 'image/jpg', 'image/png'],
+        maxSize: 5 * 1024 * 1024, // 5MB
+        label: "JPG, JPEG, or PNG"
+      }
+    };
+
+    const rules = allowedTypes[docType];
+
+    // Check file size
+    if (file.size > rules.maxSize) {
+      return {
+        isValid: false,
+        error: `File size should not exceed ${rules.maxSize / (1024 * 1024)}MB`
+      };
+    }
+
+    // Check file extension
+    if (!rules.extensions.includes(fileExt)) {
+      return {
+        isValid: false,
+        error: `Invalid file type. Allowed: ${rules.label}`
+      };
+    }
+
+    // Check MIME type (optional but recommended)
+    if (!rules.mimeTypes.includes(fileType) && !fileType.startsWith('image/')) {
+      // Skip strict MIME type check for some cases as browsers might report differently
+      console.warn(`Unexpected MIME type: ${fileType} for extension .${fileExt}`);
+    }
+
+    return { isValid: true, error: "" };
+  };
+
+  // Handle Aadhar file change
+  const handleAadharChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validation = validateFile(file, 'aadhar');
+      if (validation.isValid) {
+        setAadharFile(file);
+        setFileErrors(prev => ({ ...prev, aadhar: "" }));
+        setUploadError("");
+      } else {
+        setAadharFile(null);
+        setFileErrors(prev => ({ ...prev, aadhar: validation.error }));
+      }
+    } else {
+      setAadharFile(null);
+    }
+  };
+
+  // Handle PAN file change
+  const handlePanChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validation = validateFile(file, 'pan');
+      if (validation.isValid) {
+        setPanFile(file);
+        setFileErrors(prev => ({ ...prev, pan: "" }));
+        setUploadError("");
+      } else {
+        setPanFile(null);
+        setFileErrors(prev => ({ ...prev, pan: validation.error }));
+      }
+    } else {
+      setPanFile(null);
+    }
+  };
+
+  // Handle Resume file change - Updated to only accept PDF
+  const handleResumeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validation = validateFile(file, 'resume');
+      if (validation.isValid) {
+        setResumeFile(file);
+        setFileErrors(prev => ({ ...prev, resume: "" }));
+        setUploadError("");
+      } else {
+        setResumeFile(null);
+        setFileErrors(prev => ({ ...prev, resume: validation.error }));
+      }
+    } else {
+      setResumeFile(null);
+    }
+  };
+
+  // Handle profile photo selection and preview
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validation = validateFile(file, 'photo');
+      if (validation.isValid) {
+        setPhotoFile(file);
+        setFileErrors(prev => ({ ...prev, photo: "" }));
+        setUploadError("");
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPhotoPreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setPhotoFile(null);
+        setPhotoPreview(null);
+        setFileErrors(prev => ({ ...prev, photo: validation.error }));
+      }
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+    }
+  };
+
+  // Remove profile photo
+  const removePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setFileErrors(prev => ({ ...prev, photo: "" }));
+  };
+
   const handleDocumentUpload = async () => {
     // We don't need to check uploadEmployeeId here manually because it is auto-filled via useEffect,
     // but we keep the check for safety.
@@ -224,6 +405,12 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     if (!hasFiles) {
       setUploadError("Please select at least one document to upload.");
       setUploadSuccess("");
+      return;
+    }
+
+    // Check for any file validation errors
+    if (fileErrors.aadhar || fileErrors.pan || fileErrors.resume || fileErrors.photo) {
+      setUploadError("Please fix file validation errors before uploading.");
       return;
     }
     
@@ -292,40 +479,6 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
     } finally {
       setUploadLoading(false);
     }
-  };
-
-  // Handle profile photo selection and preview
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setUploadError("Please select an image file for profile photo.");
-        return;
-      }
-      
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        setUploadError("Profile photo size should not exceed 5MB.");
-        return;
-      }
-      
-      setPhotoFile(file);
-      setUploadError("");
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPhotoPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Remove profile photo
-  const removePhoto = () => {
-    setPhotoFile(null);
-    setPhotoPreview(null);
   };
 
   return (
@@ -517,7 +670,25 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
 
             {/* Permanent Address */}
             <div className="space-y-4">
-              <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-4`}>Permanent Address</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Permanent Address</h3>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="sameAsCurrent" 
+                    checked={sameAsCurrent}
+                    onCheckedChange={handleSameAsCurrentChange}
+                    className={darkMode ? 'border-gray-500' : ''}
+                  />
+                  <Label 
+                    htmlFor="sameAsCurrent" 
+                    className={`text-sm cursor-pointer flex items-center gap-1 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                  >
+                    <Copy size={14} />
+                    Same as Current Address
+                  </Label>
+                </div>
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="permanentAddress" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                   Address
@@ -527,8 +698,9 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                   name="permanentAddress"
                   value={formData.permanentAddress}
                   onChange={handleChange}
-                  placeholder="Enter permanent address"
-                  className={`${errors.permanentAddress ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                  placeholder={sameAsCurrent ? "Same as current address" : "Enter permanent address"}
+                  disabled={sameAsCurrent}
+                  className={`${errors.permanentAddress ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${sameAsCurrent ? 'opacity-70' : ''}`}
                 />
                 {errors.permanentAddress && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.permanentAddress}</p>}
               </div>
@@ -543,7 +715,8 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentDistrict"
                     value={formData.permanentDistrict}
                     onChange={handleChange}
-                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                    disabled={sameAsCurrent}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${sameAsCurrent ? 'opacity-70' : ''}`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -555,7 +728,8 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentCity"
                     value={formData.permanentCity}
                     onChange={handleChange}
-                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                    disabled={sameAsCurrent}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${sameAsCurrent ? 'opacity-70' : ''}`}
                   />
                 </div>
               </div>
@@ -570,7 +744,8 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentState"
                     value={formData.permanentState}
                     onChange={handleChange}
-                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                    disabled={sameAsCurrent}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${sameAsCurrent ? 'opacity-70' : ''}`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -582,11 +757,18 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                     name="permanentPinCode"
                     value={formData.permanentPinCode}
                     onChange={handleChange}
+                    disabled={sameAsCurrent}
                     maxLength={6}
-                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+                    className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${sameAsCurrent ? 'opacity-70' : ''}`}
                   />
                 </div>
               </div>
+              
+              {sameAsCurrent && (
+                <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-2`}>
+                  ✓ Permanent address is set to match current address
+                </p>
+              )}
             </div>
           </div>
         </Card>
@@ -678,7 +860,7 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
               {errors.aadharNumber && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.aadharNumber}</p>}
             </div>
             
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="panNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 PAN Card Number *
               </Label>
@@ -692,7 +874,35 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
                 className={`${errors.panNumber ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
               />
               {errors.panNumber && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.panNumber}</p>}
-            </div>
+            </div> */}
+            <div className="space-y-2">
+  <Label htmlFor="panNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+    PAN Card Number *
+  </Label>
+  <Input
+    id="panNumber"
+    name="panNumber"
+    value={formData.panNumber}
+    onChange={(e) => {
+      // Convert to uppercase and limit to 10 characters
+      const upperValue = e.target.value.toUpperCase().slice(0, 10);
+      handleChange({
+        target: {
+          name: 'panNumber',
+          value: upperValue
+        }
+      });
+    }}
+    placeholder="Enter PAN number (e.g., ABCDE1234F)"
+    maxLength={10}
+    className={`${errors.panNumber ? 'border-red-500' : ''} ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
+    style={{ textTransform: 'uppercase' }}
+  />
+  {errors.panNumber && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.panNumber}</p>}
+  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+    Letters will automatically appear in UPPERCASE
+  </p>
+</div>
             
             <div className="space-y-2">
               <Label htmlFor="passportNumber" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
@@ -779,31 +989,103 @@ export default function PersonalProfileForm({ initialData, generatedEmployeeId, 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Aadhar Card Upload */}
             <div className="space-y-2">
-              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Aadhar Card (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setAadharFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
-              {aadharFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {aadharFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+                Aadhar Card <span className="text-xs text-gray-500">(PDF, JPG, JPEG - Max 3MB)</span>
+              </Label>
+              <Input 
+                type="file" 
+                accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg,image/jpg" 
+                onChange={handleAadharChange}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${fileErrors.aadhar ? 'border-red-500' : ''}`}
+              />
+              {aadharFile && (
+                <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                  Selected: {aadharFile.name}
+                </p>
+              )}
+              {fileErrors.aadhar && (
+                <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                  {fileErrors.aadhar}
+                </p>
+              )}
             </div>
+
+            {/* PAN Card Upload */}
             <div className="space-y-2">
-              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>PAN Card (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setPanFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
-              {panFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {panFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+                PAN Card <span className="text-xs text-gray-500">(PDF, JPG, JPEG - Max 3MB)</span>
+              </Label>
+              <Input 
+                type="file" 
+                accept=".pdf,.jpg,.jpeg,application/pdf,image/jpeg,image/jpg" 
+                onChange={handlePanChange}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${fileErrors.pan ? 'border-red-500' : ''}`}
+              />
+              {panFile && (
+                <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                  Selected: {panFile.name}
+                </p>
+              )}
+              {fileErrors.pan && (
+                <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                  {fileErrors.pan}
+                </p>
+              )}
             </div>
+
+            {/* Resume Upload - Updated to only accept PDF */}
             <div className="space-y-2">
-              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Resume (PDF only)</Label>
-              <Input type="file" accept=".pdf" onChange={(e) => setResumeFile(e.target.files[0])} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
-              {resumeFile && <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Selected: {resumeFile.name}</p>}
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+                Resume <span className="text-xs text-gray-500">(PDF only - Max 10MB)</span>
+              </Label>
+              <Input 
+                type="file" 
+                accept=".pdf,application/pdf" 
+                onChange={handleResumeChange}
+                className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${fileErrors.resume ? 'border-red-500' : ''}`}
+              />
+              {resumeFile && (
+                <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                  Selected: {resumeFile.name}
+                </p>
+              )}
+              {fileErrors.resume && (
+                <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                  {fileErrors.resume}
+                </p>
+              )}
             </div>
+
+            {/* Profile Photo Upload */}
             <div className="space-y-2">
-              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Profile Photo (Image only)</Label>
+              <Label className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+                Profile Photo <span className="text-xs text-gray-500">(JPG, JPEG, PNG - Max 5MB)</span>
+              </Label>
               <div className="flex items-center gap-2">
-                <Input type="file" accept="image/*" onChange={handlePhotoChange} className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`} />
+                <Input 
+                  type="file" 
+                  accept=".jpg,.jpeg,.png,image/jpeg,image/jpg,image/png" 
+                  onChange={handlePhotoChange}
+                  className={`${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'} ${fileErrors.photo ? 'border-red-500' : ''}`}
+                />
                 {photoFile && (
                   <Button type="button" variant="outline" size="sm" onClick={removePhoto}>
                     <X size={14} />
                   </Button>
                 )}
               </div>
+              {photoFile && (
+                <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                  Selected: {photoFile.name}
+                </p>
+              )}
+              {fileErrors.photo && (
+                <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                  {fileErrors.photo}
+                </p>
+              )}
               {photoPreview && (
                 <div className="mt-2">
                   <img 

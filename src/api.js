@@ -56,7 +56,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       } catch (e) {
         removeToken();
         removeRefreshToken();
-        window.location.href = "/";
+        window.location.href = "/login";
         return null;
       }
     }

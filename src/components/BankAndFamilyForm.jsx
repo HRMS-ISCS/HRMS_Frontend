@@ -189,63 +189,120 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   };
 
   // API Submit Functions
-  const submitBankAccount = async () => {
-    if (!bankEmployeeId.trim()) {
-      setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
-      return;
-    }
+  // const submitBankAccount = async () => {
+  //   if (!bankEmployeeId.trim()) {
+  //     setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
+  //     return;
+  //   }
 
-    if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
-      setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
-      return;
-    }
+  //   if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
+  //     setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
+  //     return;
+  //   }
 
-    setBankLoading(true);
-    setBankSuccess(false);
+  //   setBankLoading(true);
+  //   setBankSuccess(false);
     
-    try {
-      const apiData = {
-        bank_name: formData.bankName,
-        account_number: formData.accountNumber,
-        branch_name: formData.branch || null,
-        ifsc_code: formData.ifscCode,
-        account_type: formData.accountType || "Savings"
-      };
+  //   try {
+  //     const apiData = {
+  //       bank_name: formData.bankName,
+  //       account_number: formData.accountNumber,
+  //       branch_name: formData.branch || null,
+  //       ifsc_code: formData.ifscCode,
+  //       account_type: formData.accountType || "Savings"
+  //     };
 
-      // Use apiRequest function without assigning to unused variable
-      await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
-        method: 'POST',
-        body: JSON.stringify(apiData)
-      });
+  //     // Use apiRequest function without assigning to unused variable
+  //     await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
+  //       method: 'POST',
+  //       body: JSON.stringify(apiData)
+  //     });
 
-      setBankSuccess(true);
-      setErrors(prev => ({ ...prev, bankGeneral: "" }));
+  //     setBankSuccess(true);
+  //     setErrors(prev => ({ ...prev, bankGeneral: "" }));
       
-      // Show success toast
-      toast({
-        title: (
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-            <span>Bank Account Details Saved</span>
-          </div>
-        ),
-        description: "Your bank account information has been saved successfully.",
-        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-      });
-    } catch (error) {
-      console.error('Bank API Error:', error);
-      setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
+  //     // Show success toast
+  //     toast({
+  //       title: (
+  //         <div className="flex items-center gap-2">
+  //           <CheckCircle className="h-5 w-5 text-green-500" />
+  //           <span>Bank Account Details Saved</span>
+  //         </div>
+  //       ),
+  //       description: "Your bank account information has been saved successfully.",
+  //       className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+  //     });
+  //   } catch (error) {
+  //     console.error('Bank API Error:', error);
+  //     setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
       
-      // Show error toast
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save bank details. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setBankLoading(false);
-    }
-  };
+  //     // Show error toast
+  //     toast({
+  //       title: "Error",
+  //       description: error.message || "Failed to save bank details. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setBankLoading(false);
+  //   }
+  // };
+  const submitBankAccount = async () => {
+  if (!bankEmployeeId.trim()) {
+    setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
+    return;
+  }
+
+  if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
+    setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
+    return;
+  }
+
+  setBankLoading(true);
+  setBankSuccess(false);
+  
+  try {
+    const apiData = {
+      bank_name: formData.bankName,
+      account_number: formData.accountNumber,
+      branch_name: formData.branch || null,
+      ifsc_code: formData.ifscCode,
+      account_type: formData.accountType || "Savings" // This will now be either "Savings" or "Salary"
+    };
+
+    // Use apiRequest function without assigning to unused variable
+    await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
+      method: 'POST',
+      body: JSON.stringify(apiData)
+    });
+
+    setBankSuccess(true);
+    setErrors(prev => ({ ...prev, bankGeneral: "" }));
+    
+    // Show success toast
+    toast({
+      title: (
+        <div className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 text-green-500" />
+          <span>Bank Account Details Saved</span>
+        </div>
+      ),
+      description: "Your bank account information has been saved successfully.",
+      className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+    });
+  } catch (error) {
+    console.error('Bank API Error:', error);
+    setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
+    
+    // Show error toast
+    toast({
+      title: "Error",
+      description: error.message || "Failed to save bank details. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setBankLoading(false);
+  }
+};
 
   const submitMaritalStatus = async () => {
     if (!maritalEmployeeId.trim()) {
@@ -658,25 +715,28 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               {errors.ifscCode && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.ifscCode}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="accountType" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-                Account Type
-              </Label>
-              <select
-                id="accountType"
-                name="accountType"
-                value={formData.accountType}
-                onChange={handleChange}
-                className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  darkMode 
-                    ? 'bg-gray-700 text-white border-gray-600' 
-                    : 'bg-white text-gray-900 border-gray-200'
-                }`}
-              >
-                <option value="Savings">Savings</option>
-                <option value="Current">Current</option>
-              </select>
-            </div>
+           <div className="space-y-2">
+  <Label htmlFor="accountType" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+    Account Type *
+  </Label>
+  <select
+    id="accountType"
+    name="accountType"
+    value={formData.accountType || "Savings"}
+    onChange={handleChange}
+    className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+      darkMode 
+        ? 'bg-gray-700 text-white border-gray-600' 
+        : 'bg-white text-gray-900 border-gray-200'
+    }`}
+  >
+    <option value="Savings">Savings</option>
+    <option value="Salary">Salary</option>
+  </select>
+  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+    Select Savings for personal accounts or Salary for salary accounts
+  </p>
+</div>
           </div>
 
           {errors.bankGeneral && (
