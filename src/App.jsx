@@ -1,8 +1,7 @@
-
 // src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import LoginPage from "./auth/LoginPage"; 
+import LoginPage from "./auth/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import LoadingScreen from "./auth/LoadingScreen";
 import AboutISCS from "./components/AboutISCS";
@@ -20,9 +19,9 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 // Protected Route
 function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
-  if (!isLoggedIn) return <Navigate to="/" replace />;
+  if (!isLoggedIn) return <Navigate to="/hrms" replace />;
   if (requiredRole && userRole === requiredRole)
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/hrms/dashboard" replace />;
   return children;
 }
 
@@ -291,7 +290,7 @@ function AppContent({
   onLogin,
   onLogout,
   onLoadingComplete,
-  isCheckingToken
+  isCheckingToken,
 }) {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -299,7 +298,7 @@ function AppContent({
   const handleLogout = () => {
     removeToken();
     onLogout();
-    navigate("/login");
+    navigate("/hrms");
   };
 
   if (isCheckingToken) {
@@ -312,15 +311,17 @@ function AppContent({
   return (
     <>
       <Routes>
-        {/* LOGIN PAGE - NOW AT /login */}
+        <Route path="/" element={<Navigate to="/hrms" replace />} />
+
+        {/* HOME */}
         <Route
-          path="/login"
+          path="/hrms"
           element={
             isLoggedIn ? (
               user?.role === "superadmin" ? (
-                <Navigate to="/loading" replace />
+                <Navigate to="/hrms/loading" replace />
               ) : (
-                <Navigate to="/about-iscs" replace />
+                <Navigate to="/hrms/about-iscs" replace />
               )
             ) : (
               <LoginPage onLogin={onLogin} />
@@ -328,31 +329,25 @@ function AppContent({
           }
         />
 
-        {/* REDIRECT FROM ROOT TO LOGIN */}
         <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
-
-        <Route
-          path="/about-iscs"
+          path="/hrms/about-iscs"
           element={
             isLoggedIn && user?.role !== "superadmin" ? (
               <AboutISCS />
             ) : (
-              <Navigate to="/dashboard" replace />
+              <Navigate to="/hrms/dashboard" replace />
             )
           }
         />
 
         <Route
-          path="/loading"
+          path="/hrms/loading"
           element={<LoadingScreen onLoadingComplete={onLoadingComplete} />}
         />
 
         {/* REGISTER */}
         <Route
-          path="/register"
+          path="/hrms/register"
           element={
             <ProtectedRoute
               isLoggedIn={isLoggedIn}
@@ -368,10 +363,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <RegisterPage />
@@ -385,7 +377,7 @@ function AppContent({
 
         {/* DASHBOARD */}
         <Route
-          path="/dashboard"
+          path="/hrms/dashboard"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <div className="w-full min-h-screen">
@@ -397,10 +389,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <Dashboard user={user} />
@@ -414,7 +403,7 @@ function AppContent({
 
         {/* PROFILE */}
         <Route
-          path="/profile"
+          path="/hrms/profile"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <div className="w-full min-h-screen">
@@ -426,10 +415,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <Profile />
@@ -443,7 +429,7 @@ function AppContent({
 
         {/* EMPLOYEES */}
         <Route
-          path="/employees"
+          path="/hrms/employees"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <div className="w-full min-h-screen">
@@ -455,10 +441,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <Employees user={user} />
@@ -472,7 +455,7 @@ function AppContent({
 
         {/* DOCUMENTS */}
         <Route
-          path="/documents"
+          path="/hrms/documents"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <div className="w-full min-h-screen">
@@ -484,10 +467,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <Documents user={user} />
@@ -501,7 +481,7 @@ function AppContent({
 
         {/* CALENDAR */}
         <Route
-          path="/calendar"
+          path="/hrms/calendar"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <div className="w-full min-h-screen">
@@ -513,10 +493,7 @@ function AppContent({
                   />
 
                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar
-                      onLogout={handleLogout}
-                      collapsed={collapsed}
-                    />
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
                     <main className="min-h-screen pt-16">
                       <CalendarComponent user={user} />
@@ -532,9 +509,9 @@ function AppContent({
           path="*"
           element={
             isLoggedIn ? (
-              <Navigate to="/dashboard" replace />
+              <Navigate to="/hrms/dashboard" replace />
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/hrms" replace />
             )
           }
         />
@@ -578,10 +555,10 @@ export default function App() {
         //   setIsCheckingToken(false);
         //   return;
         // }
-if (!token) {
-  setIsCheckingToken(false);
-  return;
-}
+        if (!token) {
+          setIsCheckingToken(false);
+          return;
+        }
 
         const userData = await getCurrentUser();
         setUser(userData);

@@ -1,53 +1,53 @@
 // // // src/components/Navbar.jsx
-import React, { useState, useEffect, useRef } from "react"
-import { ChevronDown, Moon, Sun } from "lucide-react"
-import { removeToken, getCurrentUser } from "../api"
-import { useNavigate } from "react-router-dom"
-import { useDarkMode } from "@/context/DarkModeContext"
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, Moon, Sun } from "lucide-react";
+import { removeToken, getCurrentUser } from "../api";
+import { useNavigate } from "react-router-dom";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export default function Navbar({ onLogout, collapsed }) {
-  const [showUserMenu, setShowUserMenu] = useState(false)
-  const [userData, setUserData] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const { darkMode, toggleDarkMode } = useDarkMode()
-  const navigate = useNavigate()
-  const menuRef = useRef(null)
+  const { darkMode, toggleDarkMode } = useDarkMode();
+  const navigate = useNavigate();
+  const menuRef = useRef(null);
 
   // Fetch logged in user
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await getCurrentUser()
-        setUserData(data)
+        const data = await getCurrentUser();
+        setUserData(data);
       } catch (e) {
-        console.error(e)
+        console.error(e);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchUserData()
-  }, [])
+    };
+    fetchUserData();
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowUserMenu(false)
+        setShowUserMenu(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
-    removeToken()
-    onLogout()
-  }
+    removeToken();
+    onLogout();
+  };
 
   const getInitials = (f, l) =>
-    `${f?.charAt(0) || ""}${l?.charAt(0) || ""}`.toUpperCase()
+    `${f?.charAt(0) || ""}${l?.charAt(0) || ""}`.toUpperCase();
 
   return (
     <nav
@@ -57,7 +57,6 @@ export default function Navbar({ onLogout, collapsed }) {
       ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
     >
       <div className="flex items-center justify-end px-6 h-full gap-4">
-
         {/* DARK MODE TOGGLE */}
         <button
           onClick={toggleDarkMode}
@@ -71,11 +70,13 @@ export default function Navbar({ onLogout, collapsed }) {
         {/* PROFILE DROPDOWN */}
         <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setShowUserMenu(prev => !prev)}
+            onClick={() => setShowUserMenu((prev) => !prev)}
             className="flex items-center gap-2"
           >
             <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center">
-              {loading ? "" : getInitials(userData?.first_name, userData?.last_name)}
+              {loading
+                ? ""
+                : getInitials(userData?.first_name, userData?.last_name)}
             </div>
             <ChevronDown size={14} />
           </button>
@@ -83,15 +84,16 @@ export default function Navbar({ onLogout, collapsed }) {
           {showUserMenu && (
             <div
               className={`absolute right-0 mt-2 w-40 shadow rounded border
-              ${darkMode
-                ? "bg-gray-800 border-gray-700 text-white"
-                : "bg-white border-gray-200 text-gray-800"
+              ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700 text-white"
+                  : "bg-white border-gray-200 text-gray-800"
               }`}
             >
               <button
                 onClick={() => {
-                  setShowUserMenu(false)
-                  navigate("/profile")
+                  setShowUserMenu(false);
+                  navigate("/hrms/profile");
                 }}
                 className={`w-full px-3 py-2 text-left ${
                   darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
@@ -111,12 +113,10 @@ export default function Navbar({ onLogout, collapsed }) {
             </div>
           )}
         </div>
-
       </div>
     </nav>
-  )
+  );
 }
-
 
 // // src/components/Navbar.jsx
 // import React, { useState, useEffect, useRef } from "react"
@@ -203,8 +203,8 @@ export default function Navbar({ onLogout, collapsed }) {
 //                 <>
 //                   {userData?.profile_photo_url ? (
 //                     <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm">
-//                       <img 
-//                         src={userData.profile_photo_url} 
+//                       <img
+//                         src={userData.profile_photo_url}
 //                         alt={`${userData.first_name} ${userData.last_name}`}
 //                         className="w-full h-full object-cover"
 //                         onError={(e) => {
@@ -243,8 +243,8 @@ export default function Navbar({ onLogout, collapsed }) {
 //                   <div className="relative">
 //                     {userData?.profile_photo_url ? (
 //                       <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
-//                         <img 
-//                           src={userData.profile_photo_url} 
+//                         <img
+//                           src={userData.profile_photo_url}
 //                           alt={`${userData.first_name} ${userData.last_name}`}
 //                           className="w-full h-full object-cover"
 //                           onError={(e) => {
