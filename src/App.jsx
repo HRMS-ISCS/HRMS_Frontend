@@ -1,8 +1,7 @@
-
 // src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import LoginPage from "./auth/LoginPage"; 
+import LoginPage from "./auth/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import LoadingScreen from "./auth/LoadingScreen";
 import AboutISCS from "./components/AboutISCS";
@@ -20,9 +19,9 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 // Protected Route
 function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
-  if (!isLoggedIn) return <Navigate to="/" replace />;
+  if (!isLoggedIn) return <Navigate to="/hrms" replace />;
   if (requiredRole && userRole === requiredRole)
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/hrms/dashboard" replace />;
   return children;
 }
 
@@ -34,7 +33,7 @@ function AppContent({
   onLogin,
   onLogout,
   onLoadingComplete,
-  isCheckingToken
+  isCheckingToken,
 }) {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false); // 👈 ADDED
@@ -42,7 +41,7 @@ function AppContent({
   const handleLogout = () => {
     removeToken();
     onLogout();
-    navigate("/");
+    navigate("/hrms");
   };
 
   if (isCheckingToken) {
@@ -55,233 +54,215 @@ function AppContent({
   return (
     <>
       <Routes>
+        <Route path="/" element={<Navigate to="/hrms" replace />} />
 
-{/* HOME */}
-<Route
-  path="/"
-  element={
-    isLoggedIn ? (
-      user?.role === "superadmin" ? (
-        <Navigate to="/loading" replace />
-      ) : (
-        <Navigate to="/about-iscs" replace />
-      )
-    ) : (
-      <LoginPage onLogin={onLogin} />
-    )
-  }
-/>
+        {/* HOME */}
+        <Route
+          path="/hrms"
+          element={
+            isLoggedIn ? (
+              user?.role === "superadmin" ? (
+                <Navigate to="/hrms/loading" replace />
+              ) : (
+                <Navigate to="/hrms/about-iscs" replace />
+              )
+            ) : (
+              <LoginPage onLogin={onLogin} />
+            )
+          }
+        />
 
-<Route
-  path="/about-iscs"
-  element={
-    isLoggedIn && user?.role !== "superadmin" ? (
-      <AboutISCS />
-    ) : (
-      <Navigate to="/dashboard" replace />
-    )
-  }
-/>
+        <Route
+          path="/hrms/about-iscs"
+          element={
+            isLoggedIn && user?.role !== "superadmin" ? (
+              <AboutISCS />
+            ) : (
+              <Navigate to="/hrms/dashboard" replace />
+            )
+          }
+        />
 
-<Route
-  path="/loading"
-  element={<LoadingScreen onLoadingComplete={onLoadingComplete} />}
-/>
+        <Route
+          path="/hrms/loading"
+          element={<LoadingScreen onLoadingComplete={onLoadingComplete} />}
+        />
 
-{/* REGISTER */}
-<Route
-  path="/register"
-  element={
-    <ProtectedRoute
-      isLoggedIn={isLoggedIn}
-      userRole={user?.role}
-      requiredRole="superadmin"
-    >
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* REGISTER */}
+        <Route
+          path="/hrms/register"
+          element={
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+              userRole={user?.role}
+              requiredRole="superadmin"
+            >
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <RegisterPage />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <RegisterPage />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-{/* DASHBOARD */}
-<Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute isLoggedIn={isLoggedIn}>
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* DASHBOARD */}
+        <Route
+          path="/hrms/dashboard"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <Dashboard user={user} />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <Dashboard user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-{/* PROFILE */}
-<Route
-  path="/profile"
-  element={
-    <ProtectedRoute isLoggedIn={isLoggedIn}>
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* PROFILE */}
+        <Route
+          path="/hrms/profile"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <Profile />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <Profile />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-{/* EMPLOYEES */}
-<Route
-  path="/employees"
-  element={
-    <ProtectedRoute isLoggedIn={isLoggedIn}>
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* EMPLOYEES */}
+        <Route
+          path="/hrms/employees"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <Employees user={user} />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <Employees user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-{/* DOCUMENTS */}
-<Route
-  path="/documents"
-  element={
-    <ProtectedRoute isLoggedIn={isLoggedIn}>
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* DOCUMENTS */}
+        <Route
+          path="/hrms/documents"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <Documents user={user} />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <Documents user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-{/* CALENDAR */}
-<Route
-  path="/calendar"
-  element={
-    <ProtectedRoute isLoggedIn={isLoggedIn}>
-      <div className="w-full min-h-screen">
-        <div className="flex">
-          <Sidebar
-            user={user}
-            collapsed={collapsed}
-            setCollapsed={setCollapsed}
-          />
+        {/* CALENDAR */}
+        <Route
+          path="/hrms/calendar"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
 
-          <div className={`flex-1 ${sidebarMargin} transition-all`}>
-            <Navbar
-              onLogout={handleLogout}
-              collapsed={collapsed}
-            />
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-            <main className="min-h-screen pt-16">
-              <CalendarComponent user={user} />
-            </main>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
-  }
-/>
+                    <main className="min-h-screen pt-16">
+                      <CalendarComponent user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="*"
-  element={
-    isLoggedIn ? (
-      <Navigate to="/dashboard" replace />
-    ) : (
-      <Navigate to="/" replace />
-    )
-  }
-/>
+        <Route
+          path="*"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/hrms/dashboard" replace />
+            ) : (
+              <Navigate to="/hrms" replace />
+            )
+          }
+        />
+      </Routes>
 
-</Routes>
-
-{typeof Toaster !== "undefined" && <Toaster />}
-</>
-);
+      {typeof Toaster !== "undefined" && <Toaster />}
+    </>
+  );
 }
 
 // Wrapper
@@ -317,10 +298,10 @@ export default function App() {
         //   setIsCheckingToken(false);
         //   return;
         // }
-if (!token) {
-  setIsCheckingToken(false);
-  return;
-}
+        if (!token) {
+          setIsCheckingToken(false);
+          return;
+        }
 
         const userData = await getCurrentUser();
         setUser(userData);

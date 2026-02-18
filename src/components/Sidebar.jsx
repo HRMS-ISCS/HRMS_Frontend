@@ -1,6 +1,6 @@
 // // src/components/Sidebar.jsx
-import React from "react"
-import { Link, useLocation } from "react-router-dom"
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -8,50 +8,58 @@ import {
   UserPlus,
   Calendar,
   ChevronRight,
-  ChevronLeft
-} from "lucide-react"
-import { useDarkMode } from "@/context/DarkModeContext"
-import iscsLogo from "@/assets/iscslogo.png"
+  ChevronLeft,
+} from "lucide-react";
+import { useDarkMode } from "@/context/DarkModeContext";
+import iscsLogo from "@/assets/iscslogo.png";
 
 export default function Sidebar({ user, collapsed, setCollapsed }) {
-  const location = useLocation()
-  const { darkMode } = useDarkMode()
+  const location = useLocation();
+  const { darkMode } = useDarkMode();
 
-  const isSuperAdmin = user?.role === "superadmin"
-  const isEmployee = user?.role === "employee"
+  const isSuperAdmin = user?.role === "superadmin";
+  const isEmployee = user?.role === "employee";
 
   const menuItems = [
-    ...(isEmployee ? [] : [{
-      id: "dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/dashboard"
-    }]),
+    ...(isEmployee
+      ? []
+      : [
+          {
+            id: "dashboard",
+            label: "Dashboard",
+            icon: LayoutDashboard,
+            path: "/hrms/dashboard",
+          },
+        ]),
     {
       id: "employees",
       label: "Employees",
       icon: Users,
-      path: "/employees"
+      path: "/hrms/employees",
     },
-    ...(isSuperAdmin ? [] : [{
-      id: "employee-reg",
-      label: "Employee REG",
-      icon: UserPlus,
-      path: "/register"
-    }]),
+    ...(isSuperAdmin
+      ? []
+      : [
+          {
+            id: "employee-reg",
+            label: "Employee REG",
+            icon: UserPlus,
+            path: "/hrms/register",
+          },
+        ]),
     {
       id: "documents",
       label: "Documents",
       icon: FileText,
-      path: "/documents"
+      path: "/hrms/documents",
     },
     {
       id: "calendar",
       label: "Calendar",
       icon: Calendar,
-      path: "/calendar"
-    }
-  ]
+      path: "/hrms/calendar",
+    },
+  ];
 
   return (
     <div
@@ -60,7 +68,6 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       ${collapsed ? "w-20" : "w-56"}
       ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
     >
-
       {/* LOGO */}
       <div className="p-4 border-b flex justify-center">
         <img
@@ -73,26 +80,25 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       {/* MENU */}
       <nav className="mt-4 px-2">
         <ul className="space-y-2">
-          {menuItems.map(item => {
-            const Icon = item.icon
-            const active = location.pathname === item.path
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = location.pathname === item.path;
 
             return (
               <li key={item.id}>
                 <Link
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg
-                  ${active
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
+                  ${
+                    active
+                      ? "bg-green-100 text-green-700"
+                      : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <Icon size={20} />
 
                   {!collapsed && (
-                    <span className="text-sm font-medium">
-                      {item.label}
-                    </span>
+                    <span className="text-sm font-medium">{item.label}</span>
                   )}
 
                   {active && !collapsed && (
@@ -100,7 +106,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
                   )}
                 </Link>
               </li>
-            )
+            );
           })}
         </ul>
       </nav>
@@ -109,7 +115,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       <div className="absolute bottom-14 left-0 right-0 px-3">
         {!collapsed && (
           <div className="text-center text-xs text-gray-500">
-            HRMS v1.0  
+            HRMS v1.0
             <br />
             Role: {user?.role}
           </div>
@@ -126,5 +132,5 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
         {collapsed ? <ChevronRight /> : <ChevronLeft />}
       </button>
     </div>
-  )
+  );
 }
