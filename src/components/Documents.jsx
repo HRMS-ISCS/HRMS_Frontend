@@ -1222,10 +1222,10 @@ export default function Documents() {
                     </div>
 
                     <div className={`mt-4 p-3 ${darkMode ? 'bg-blue-900/50 border-blue-700' : 'bg-blue-50 border-blue-200'} rounded-lg flex items-start gap-3`}>
-                        <Clock className={`h-4 w-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
+                        {/* <Clock className={`h-4 w-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'} flex-shrink-0 mt-0.5`} />
                         <p className={`text-xs sm:text-sm ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
                             This secure link will expire in {formatExpiryTime(selectedDoc.expires_in_minutes)}.
-                        </p>
+                        </p> */}
                     </div>
                 </Card>
             )}
