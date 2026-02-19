@@ -335,7 +335,7 @@ export default function LoadingScreen({ onLoadingComplete }) {
       if (userData.role === "employee") {
         navigate("/hrms/employees");
       } else {
-        navigate("/hrms/dashboard");
+        navigate("/hrms/documents");
       }
     }, 500);
   };
