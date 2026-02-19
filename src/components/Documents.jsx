@@ -1023,8 +1023,8 @@ export default function Documents() {
                                             {isAvailable && (
                                                 <>
                                                     <div className={`flex items-center gap-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                        <Clock size={10} />
-                                                        <span className="text-xs">Expires in {formatExpiryTime(doc.expires_in_minutes)}</span>
+                                                        {/* <Clock size={10} />
+                                                        <span className="text-xs">Expires in {formatExpiryTime(doc.expires_in_minutes)}</span> */}
                                                     </div>
 
                                                     <div className="flex gap-2 w-full mt-auto">
@@ -1108,8 +1108,8 @@ export default function Documents() {
                                             {hasSasUrl && (
                                                 <>
                                                     <div className={`flex items-center gap-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                        <Clock size={10} />
-                                                        <span className="text-xs">Expires in {formatExpiryTime(doc.expires_in_minutes)}</span>
+                                                        {/* <Clock size={10} />
+                                                        <span className="text-xs">Expires in {formatExpiryTime(doc.expires_in_minutes)}</span> */}
                                                     </div>
 
                                                     <div className="flex gap-2 w-full mt-auto">

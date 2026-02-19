@@ -3,49 +3,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import {
-//   Users,
-//   Search,
-//   Loader2,
-//   RefreshCw,
-//   User,
-//   Mail,
-//   Phone,
-//   Briefcase,
-//   Calendar,
-//   Building2,
-//   Code,
-//   AlertCircle,
-//   CheckCircle2,
-//   Eye,
-//   Filter,
-//   MapPin,
-//   CreditCard,
-//   GraduationCap,
-//   Award,
-//   Heart,
-//   FileText,
-//   Contact,
-//   Building,
-//   Banknote,
-//   ChevronDown,
-//   ChevronRight,
-//   UserCheck,
-//   Shield,
-//   Home,
-//   Flag,
-//   Globe,
-//   BookOpen,
-//   Target,
-//   TrendingUp,
-//   AlertTriangle,
-//   Zap,
-//   Edit2,
-//   Save,
-//   X,
-//   Plus,
-//   Trash2,
-// } from "lucide-react";
 import {
   Users,
   Search,
@@ -73,7 +30,7 @@ import {
   Banknote,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,      // ✅ Added
+  ChevronLeft, 
   UserCheck,
   Shield,
   Home,
@@ -478,51 +435,6 @@ export default function Employees() {
   };
 
   // Save basic info changes
-  // const saveBasicInfoChanges = async (dataToSave) => {
-  //   if (!searchedEmployee?.employee_id) return;
-
-  //   setSaveLoading(true);
-  //   setSaveError(null);
-  //   setSaveSuccess(null);
-
-  //   try {
-  //     const updatePayload = {
-  //       name: dataToSave.name,
-  //       email: dataToSave.email,
-  //       phone: dataToSave.phone,
-  //       position: dataToSave.position,
-  //       date_of_joining: dataToSave.date_of_joining,
-  //       client: dataToSave.client,
-  //       skill_set: dataToSave.skill_set,
-  //     };
-  //     await apiRequest(
-  //       `/db/employment-applications/${searchedEmployee.employee_id}`,
-  //       {
-  //         method: "PUT",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify(updatePayload),
-  //       },
-  //     );
-
-  //     // ✅ Re-fetch updated employee
-  //     const updatedEmployee = await apiRequest(
-  //       `/db/employment-applications/${searchedEmployee.employee_id}`,
-  //     );
-
-  //     setSearchedEmployee(updatedEmployee);
-
-  //     setSaveSuccess(`Basic information updated successfully!`);
-  //     setIsEditBasicInfoOpen(false);
-  //     setTimeout(() => setSaveSuccess(null), 3000);
-  //   } catch (error) {
-  //     setSaveError(
-  //       error.message || "Failed to save changes. Please try again.",
-  //     );
-  //   } finally {
-  //     setSaveLoading(false);
-  //   }
-  // };
-
   const saveBasicInfoChanges = async (dataToSave) => {
     if (!searchedEmployee?.employee_id) return;
 
@@ -916,7 +828,7 @@ export default function Employees() {
                 />
               </div>
               <div className="space-y-2">
-                <InfoRow
+                {/* <InfoRow
                   label="Mobile Phone"
                   value={personalProfile.mobile_phone}
                   icon={Phone}
@@ -930,7 +842,28 @@ export default function Employees() {
                   label="Telephone"
                   value={personalProfile.tel_no}
                   icon={Phone}
-                />
+                /> */}
+                 {personalProfile.mobile_phone && (
+          <InfoRow
+            label="Mobile Phone"
+            value={personalProfile.mobile_phone}
+            icon={Phone}
+          />
+        )}
+        {personalProfile.mail_id && (
+          <InfoRow
+            label="Email"
+            value={personalProfile.mail_id}
+            icon={Mail}
+          />
+        )}
+        {personalProfile.tel_no && (
+          <InfoRow
+            label="Telephone"
+            value={personalProfile.tel_no}
+            icon={Phone}
+          />
+        )}
                 <InfoRow
                   label="Aadhar Number"
                   value={personalProfile.aadhar_no}
@@ -1766,7 +1699,7 @@ export default function Employees() {
                       className="mt-1"
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     <Label>Mobile Phone</Label>
                     <Input
                       value={editDialogData.mobile_phone || ""}
@@ -1796,7 +1729,7 @@ export default function Employees() {
                       }
                       className="mt-1"
                     />
-                  </div>
+                  </div> */}
                   <div>
                     <Label>Aadhar Number</Label>
                     <Input
@@ -3044,10 +2977,6 @@ export default function Employees() {
       }));
     };
 
-    // const handleSave = () => {
-    //   setBasicInfoData(localBasicInfoData);
-    //   saveBasicInfoChanges();
-    // };
     const handleSave = () => {
       saveBasicInfoChanges(localBasicInfoData);
     };
