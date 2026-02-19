@@ -44,7 +44,7 @@
 //     if (!loading && userData && userData.first_name) {
 //       const fullName = userData.first_name;
 //       let currentIndex = 0;
-      
+
 //       const interval = setInterval(() => {
 //         if (currentIndex <= fullName.length) {
 //           setDisplayedName(fullName.substring(0, currentIndex));
@@ -54,7 +54,7 @@
 //           setNameAnimationComplete(true);
 //         }
 //       }, 100); // Adjust speed of letter appearance
-      
+
 //       return () => clearInterval(interval);
 //     }
 //   }, [loading, userData]);
@@ -66,7 +66,7 @@
 //       const timer = setTimeout(() => {
 //         handleTransition();
 //       }, 1500); // Increased wait time to allow user to see their name
-      
+
 //       return () => clearTimeout(timer);
 //     }
 //   }, [nameAnimationComplete]);
@@ -112,17 +112,17 @@
 //               </span>
 //             </div>
 //           )}
-          
+
 //           {/* Full Name Display - No Avatar Card */}
 //           {!loading && userData && nameAnimationComplete && (
 //             <div className="text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-500 animate-float-in tracking-wide">
-//               {userData.first_name && userData.last_name 
-//                 ? `${userData.first_name} ${userData.last_name}` 
+//               {userData.first_name && userData.last_name
+//                 ? `${userData.first_name} ${userData.last_name}`
 //                 : userData.username || 'User'
 //               }
 //             </div>
 //           )}
-          
+
 //           <p className="text-xl text-gray-600 animate-pulse flex items-center gap-2">
 //             <Loader2 className="w-5 h-5 animate-spin" />
 //             Welcome to HRMS
@@ -144,7 +144,7 @@
 
 //       <style jsx>{`
 //         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Satisfy&display=swap');
-        
+
 //         @keyframes blob {
 //           0%, 100% {
 //             transform: translate(0, 0) scale(1);
@@ -333,9 +333,9 @@ export default function LoadingScreen({ onLoadingComplete }) {
       onLoadingComplete();
 
       if (userData.role === "employee") {
-        navigate("/employees");
+        navigate("/hrms/employees");
       } else {
-        navigate("/dashboard");
+        navigate("/hrms/dashboard");
       }
     }, 500);
   };
@@ -368,11 +368,11 @@ export default function LoadingScreen({ onLoadingComplete }) {
                 Hi,
               </span> */}
               <span
-  className="text-6xl font-light text-gray-800 drop-shadow-lg"
-  style={{ fontFamily: 'Brush Script MT, cursive' }}
->
-  Hi,
-</span>
+                className="text-6xl font-light text-gray-800 drop-shadow-lg"
+                style={{ fontFamily: "Brush Script MT, cursive" }}
+              >
+                Hi,
+              </span>
 
               <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-400">
                 {displayedName}!
