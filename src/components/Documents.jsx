@@ -1098,8 +1098,8 @@ export default function Documents() {
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />
-                                                            <span className={darkMode ? "text-gray-500" : "text-gray-400"}>Not Available</span>
+                                                            {/* <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />
+                                                            <span className={darkMode ? "text-gray-500" : "text-gray-400"}>Not Available</span> */}
                                                         </>
                                                     )}
                                                 </div>
