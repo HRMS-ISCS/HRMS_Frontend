@@ -62,7 +62,8 @@ export default function Documents() {
         signed_info_security_policy: null,
         // NDA and Joining Letter
         signed_nda: null,
-        signed_joining_letter: null
+        signed_joining_letter: null,
+         signed_operational_risk_policy: null 
     });
 
     // Track unsigned documents availability
@@ -143,121 +144,137 @@ export default function Documents() {
     ];
 
     // Policy Document Configuration with custom order:
+// 1. Joining Letter
+// 2. Employee Handbook
+// 3. NDA
+// 4. ABAC Policy
+// 5. COBEC Policy
+// 6. Diversity Policy
+// 7. Information Security Policy
+// 8. Operational Risk Management Policy
+const policyDocumentConfig = [
     // 1. Joining Letter
+    {
+        type: "signed_joining_letter",
+        label: "Appointment Letterr",
+        icon: FileCheck,
+        color: "from-blue-50 to-cyan-50",
+        iconColor: "text-blue-600",
+        borderColor: "border-blue-200",
+        darkColor: "from-blue-900/30 to-cyan-900/30",
+        darkIconColor: "text-blue-400",
+        darkBorderColor: "border-blue-700",
+        documentType: "Joining Letter",
+        unsignedType: "joining_letter",
+        order: 1
+    },
     // 2. Employee Handbook
+    {
+        type: "signed_employee_handbook",
+        label: "Employee Handbook",
+        icon: FileText,
+        color: "from-amber-50 to-yellow-50",
+        iconColor: "text-amber-600",
+        borderColor: "border-amber-200",
+        darkColor: "from-amber-900/30 to-yellow-900/30",
+        darkIconColor: "text-amber-400",
+        darkBorderColor: "border-amber-700",
+        documentType: "Employee Handbook",
+        unsignedType: "employee_handbook",
+        order: 2
+    },
     // 3. NDA
+    {
+        type: "signed_nda",
+        label: "NDA",
+        icon: FileSignature,
+        color: "from-purple-50 to-indigo-50",
+        iconColor: "text-purple-600",
+        borderColor: "border-purple-200",
+        darkColor: "from-purple-900/30 to-indigo-900/30",
+        darkIconColor: "text-purple-400",
+        darkBorderColor: "border-purple-700",
+        documentType: "NDA",
+        unsignedType: "nda",
+        order: 3
+    },
     // 4. ABAC Policy
+    {
+        type: "signed_abac_policy",
+        label: "ABAC Policy",
+        icon: Shield,
+        color: "from-indigo-50 to-purple-50",
+        iconColor: "text-indigo-600",
+        borderColor: "border-indigo-200",
+        darkColor: "from-indigo-900/30 to-purple-900/30",
+        darkIconColor: "text-indigo-400",
+        darkBorderColor: "border-indigo-700",
+        documentType: "ABAC Policy",
+        unsignedType: "abac_policy",
+        order: 4
+    },
     // 5. COBEC Policy
+    {
+        type: "signed_cobec_policy",
+        label: "COBEC Policy",
+        icon: BookOpen,
+        color: "from-teal-50 to-cyan-50",
+        iconColor: "text-teal-600",
+        borderColor: "border-teal-200",
+        darkColor: "from-teal-900/30 to-cyan-900/30",
+        darkIconColor: "text-teal-400",
+        darkBorderColor: "border-teal-700",
+        documentType: "COBEC Policy",
+        unsignedType: "cobec_policy",
+        order: 5
+    },
     // 6. Diversity Policy
+    {
+        type: "signed_diversity_policy",
+        label: "Diversity Policy",
+        icon: DiversityIcon,
+        color: "from-pink-50 to-rose-50",
+        iconColor: "text-pink-600",
+        borderColor: "border-pink-200",
+        darkColor: "from-pink-900/30 to-rose-900/30",
+        darkIconColor: "text-pink-400",
+        darkBorderColor: "border-pink-700",
+        documentType: "Diversity Policy",
+        unsignedType: "diversity_policy",
+        order: 6
+    },
     // 7. Information Security Policy
-    const policyDocumentConfig = [
-        // 1. Joining Letter
-        {
-            type: "signed_joining_letter",
-            label: "Appointment Letterr",
-            icon: FileCheck,
-            color: "from-blue-50 to-cyan-50",
-            iconColor: "text-blue-600",
-            borderColor: "border-blue-200",
-            darkColor: "from-blue-900/30 to-cyan-900/30",
-            darkIconColor: "text-blue-400",
-            darkBorderColor: "border-blue-700",
-            documentType: "Joining Letter",
-            unsignedType: "joining_letter",
-            order: 1
-        },
-        // 2. Employee Handbook
-        {
-            type: "signed_employee_handbook",
-            label: "Employee Handbook",
-            icon: FileText,
-            color: "from-amber-50 to-yellow-50",
-            iconColor: "text-amber-600",
-            borderColor: "border-amber-200",
-            darkColor: "from-amber-900/30 to-yellow-900/30",
-            darkIconColor: "text-amber-400",
-            darkBorderColor: "border-amber-700",
-            documentType: "Employee Handbook",
-            unsignedType: "employee_handbook",
-            order: 2
-        },
-        // 3. NDA
-        {
-            type: "signed_nda",
-            label: "NDA",
-            icon: FileSignature,
-            color: "from-purple-50 to-indigo-50",
-            iconColor: "text-purple-600",
-            borderColor: "border-purple-200",
-            darkColor: "from-purple-900/30 to-indigo-900/30",
-            darkIconColor: "text-purple-400",
-            darkBorderColor: "border-purple-700",
-            documentType: "NDA",
-            unsignedType: "nda",
-            order: 3
-        },
-        // 4. ABAC Policy
-        {
-            type: "signed_abac_policy",
-            label: "ABAC Policy",
-            icon: Shield,
-            color: "from-indigo-50 to-purple-50",
-            iconColor: "text-indigo-600",
-            borderColor: "border-indigo-200",
-            darkColor: "from-indigo-900/30 to-purple-900/30",
-            darkIconColor: "text-indigo-400",
-            darkBorderColor: "border-indigo-700",
-            documentType: "ABAC Policy",
-            unsignedType: "abac_policy",
-            order: 4
-        },
-        // 5. COBEC Policy
-        {
-            type: "signed_cobec_policy",
-            label: "COBEC Policy",
-            icon: BookOpen,
-            color: "from-teal-50 to-cyan-50",
-            iconColor: "text-teal-600",
-            borderColor: "border-teal-200",
-            darkColor: "from-teal-900/30 to-cyan-900/30",
-            darkIconColor: "text-teal-400",
-            darkBorderColor: "border-teal-700",
-            documentType: "COBEC Policy",
-            unsignedType: "cobec_policy",
-            order: 5
-        },
-        // 6. Diversity Policy
-        {
-            type: "signed_diversity_policy",
-            label: "Diversity Policy",
-            icon: DiversityIcon,
-            color: "from-pink-50 to-rose-50",
-            iconColor: "text-pink-600",
-            borderColor: "border-pink-200",
-            darkColor: "from-pink-900/30 to-rose-900/30",
-            darkIconColor: "text-pink-400",
-            darkBorderColor: "border-pink-700",
-            documentType: "Diversity Policy",
-            unsignedType: "diversity_policy",
-            order: 6
-        },
-        // 7. Information Security Policy
-        {
-            type: "signed_info_security_policy",
-            label: "Information Security",
-            icon: Lock,
-            color: "from-red-50 to-orange-50",
-            iconColor: "text-red-600",
-            borderColor: "border-red-200",
-            darkColor: "from-red-900/30 to-orange-900/30",
-            darkIconColor: "text-red-400",
-            darkBorderColor: "border-red-700",
-            documentType: "Information Security Policy",
-            unsignedType: "info_security_policy",
-            order: 7
-        }
-    ];
-
+    {
+        type: "signed_info_security_policy",
+        label: "Information Security",
+        icon: Lock,
+        color: "from-red-50 to-orange-50",
+        iconColor: "text-red-600",
+        borderColor: "border-red-200",
+        darkColor: "from-red-900/30 to-orange-900/30",
+        darkIconColor: "text-red-400",
+        darkBorderColor: "border-red-700",
+        documentType: "Information Security Policy",
+        unsignedType: "info_security_policy",
+        order: 7
+    },
+    // 8. Operational Risk Management Policy
+    {
+        type: "signed_operational_risk_policy",
+        label: "Operational Risk",
+        icon: Shield,
+        color: "from-slate-50 to-gray-50",
+        iconColor: "text-slate-600",
+        borderColor: "border-slate-200",
+        darkColor: "from-slate-900/30 to-gray-900/30",
+        darkIconColor: "text-slate-400",
+        darkBorderColor: "border-slate-700",
+        documentType: "Operational Risk Management Policy",
+        unsignedType: "operational_risk_policy",
+        order: 8
+    }
+];
+  
     // Sort policy documents by order
     const sortedPolicyDocuments = [...policyDocumentConfig].sort((a, b) => a.order - b.order);
 
@@ -340,7 +357,8 @@ export default function Documents() {
                 signed_cobec_policy: data.signed_policy_documents?.signed_cobec_policy || null,
                 signed_diversity_policy: data.signed_policy_documents?.signed_diversity_policy || null,
                 signed_employee_handbook: data.signed_policy_documents?.signed_employee_handbook || null,
-                signed_info_security_policy: data.signed_policy_documents?.signed_info_security_policy || null
+                signed_info_security_policy: data.signed_policy_documents?.signed_info_security_policy || null,
+                 signed_operational_risk_policy: data.signed_policy_documents?.signed_operational_risk_policy || null
             };
 
             setDocuments(newDocs);
@@ -620,7 +638,8 @@ export default function Documents() {
             signed_cobec_policy: null,
             signed_diversity_policy: null,
             signed_employee_handbook: null,
-            signed_info_security_policy: null
+            signed_info_security_policy: null,
+            signed_operational_risk_policy: null  // Add this line
         });
         setHasUnsignedNDA(false);
         setHasUnsignedJoiningLetter(false);
