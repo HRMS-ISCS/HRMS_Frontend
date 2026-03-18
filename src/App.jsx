@@ -1,32 +1,32 @@
-// src/App.jsx
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
-import LoginPage from "./auth/LoginPage";
-import RegisterPage from "./components/RegisterPage";
-import LoadingScreen from "./auth/LoadingScreen";
-import AboutISCS from "./components/AboutISCS";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import Dashboard from "./components/Dashboard";
-import Profile from "./components/Profile";
-import Employees from "./components/Employees";
-import Documents from "./components/Documents";
-import CalendarComponent from "./components/Calendar";
-import { Toaster } from "@/components/ui/toaster";
-import { getToken, removeToken, getCurrentUser, isTokenExpired } from "./api";
-import { DarkModeProvider, useDarkMode } from "@/context/DarkModeContext";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+// // src/App.jsx
+// import React, { useState, useEffect } from "react";
+// import { BrowserRouter as Router } from "react-router-dom";
+// import LoginPage from "./auth/LoginPage";
+// import RegisterPage from "./components/RegisterPage";
+// import LoadingScreen from "./auth/LoadingScreen";
+// import AboutISCS from "./components/AboutISCS";
+// import Sidebar from "./components/Sidebar";
+// import Navbar from "./components/Navbar";
+// import Dashboard from "./components/Dashboard";
+// import Profile from "./components/Profile";
+// import Employees from "./components/Employees";
+// import Documents from "./components/Documents";
+// import CalendarComponent from "./components/Calendar";
+// import Payroll from "./components/Payroll";
+// import { Toaster } from "@/components/ui/toaster";
+// import { getToken, removeToken, getCurrentUser, isTokenExpired } from "./api";
+// import { DarkModeProvider, useDarkMode } from "@/context/DarkModeContext";
+// import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
-// Protected Route
-function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
-  if (!isLoggedIn) return <Navigate to="/hrms" replace />;
-  if (requiredRole && userRole === requiredRole)
-    return <Navigate to="/hrms/dashboard" replace />;
-  return children;
-}
+// // Protected Route
+// function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
+//   if (!isLoggedIn) return <Navigate to="/hrms" replace />;
+//   if (requiredRole && userRole === requiredRole)
+//     return <Navigate to="/hrms/dashboard" replace />;
+//   return children;
+// }
 
-
-// AppContent function - replace the existing Routes section with this updated version
+// // AppContent function - replace the existing Routes section with this updated version
 // function AppContent({
 //   isLoggedIn,
 //   isLoading,
@@ -52,6 +52,19 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //   // sidebar width logic
 //   const sidebarMargin = collapsed ? "ml-20" : "ml-64";
 
+//   // Helper function to get the appropriate redirect path based on user role
+//   const getHomeRedirectPath = () => {
+//     if (!user) return "/hrms";
+
+//     if (user.role === "superadmin") {
+//       return "/hrms/loading";
+//     } else if (user.role === "employee") {
+//       return "/hrms/employees";
+//     } else {
+//       return "/hrms/about-iscs";
+//     }
+//   };
+
 //   return (
 //     <>
 //       <Routes>
@@ -62,11 +75,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //           path="/hrms"
 //           element={
 //             isLoggedIn ? (
-//               user?.role === "superadmin" ? (
-//                 <Navigate to="/hrms/loading" replace />
-//               ) : (
-//                 <Navigate to="/hrms/about-iscs" replace />
-//               )
+//               <Navigate to={getHomeRedirectPath()} replace />
 //             ) : (
 //               <LoginPage onLogin={onLogin} />
 //             )
@@ -76,10 +85,12 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //         <Route
 //           path="/hrms/about-iscs"
 //           element={
-//             isLoggedIn && user?.role !== "superadmin" ? (
+//             isLoggedIn &&
+//             user?.role !== "superadmin" &&
+//             user?.role !== "employee" ? (
 //               <AboutISCS />
 //             ) : (
-//               <Navigate to="/hrms/dashboard" replace />
+//               <Navigate to={getHomeRedirectPath()} replace />
 //             )
 //           }
 //         />
@@ -89,7 +100,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //           element={<LoadingScreen onLoadingComplete={onLoadingComplete} />}
 //         />
 
-//         {/* REGISTER */}
+//         {/* REGISTER - Only accessible by superadmin */}
 //         <Route
 //           path="/hrms/register"
 //           element={
@@ -119,28 +130,32 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //           }
 //         />
 
-//         {/* DASHBOARD */}
+//         {/* DASHBOARD - Not accessible by employees */}
 //         <Route
 //           path="/hrms/dashboard"
 //           element={
 //             <ProtectedRoute isLoggedIn={isLoggedIn}>
-//               <div className="w-full min-h-screen">
-//                 <div className="flex">
-//                   <Sidebar
-//                     user={user}
-//                     collapsed={collapsed}
-//                     setCollapsed={setCollapsed}
-//                   />
+//               {user?.role === "employee" ? (
+//                 <Navigate to="/hrms/employees" replace />
+//               ) : (
+//                 <div className="w-full min-h-screen">
+//                   <div className="flex">
+//                     <Sidebar
+//                       user={user}
+//                       collapsed={collapsed}
+//                       setCollapsed={setCollapsed}
+//                     />
 
-//                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
-//                     <Navbar onLogout={handleLogout} collapsed={collapsed} />
+//                     <div className={`flex-1 ${sidebarMargin} transition-all`}>
+//                       <Navbar onLogout={handleLogout} collapsed={collapsed} />
 
-//                     <main className="min-h-screen pt-16">
-//                       <Dashboard user={user} />
-//                     </main>
+//                       <main className="min-h-screen pt-16">
+//                         <Dashboard user={user} />
+//                       </main>
+//                     </div>
 //                   </div>
 //                 </div>
-//               </div>
+//               )}
 //             </ProtectedRoute>
 //           }
 //         />
@@ -171,7 +186,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //           }
 //         />
 
-//         {/* EMPLOYEES */}
+//         {/* EMPLOYEES - Accessible by all roles but dashboard users will be redirected if needed */}
 //         <Route
 //           path="/hrms/employees"
 //           element={
@@ -249,11 +264,37 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //           }
 //         />
 
+//         {/* PAYROLL */}
+//         <Route
+//           path="/hrms/payroll"
+//           element={
+//             <ProtectedRoute isLoggedIn={isLoggedIn}>
+//               <div className="w-full min-h-screen">
+//                 <div className="flex">
+//                   <Sidebar
+//                     user={user}
+//                     collapsed={collapsed}
+//                     setCollapsed={setCollapsed}
+//                   />
+
+//                   <div className={`flex-1 ${sidebarMargin} transition-all`}>
+//                     <Navbar onLogout={handleLogout} collapsed={collapsed} />
+
+//                     <main className="min-h-screen pt-16">
+//                       <Payroll user={user} />
+//                     </main>
+//                   </div>
+//                 </div>
+//               </div>
+//             </ProtectedRoute>
+//           }
+//         />
+
 //         <Route
 //           path="*"
 //           element={
 //             isLoggedIn ? (
-//               <Navigate to="/hrms/dashboard" replace />
+//               <Navigate to={getHomeRedirectPath()} replace />
 //             ) : (
 //               <Navigate to="/hrms" replace />
 //             )
@@ -265,7 +306,118 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
 //     </>
 //   );
 // }
-// AppContent function - replace the existing Routes section with this updated version
+
+// // Wrapper
+// function InnerAppWrapper(props) {
+//   const { darkMode } = useDarkMode();
+
+//   return (
+//     <div
+//       className={`${
+//         darkMode ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-50"
+//       }`}
+//     >
+//       <Router>
+//         <AppContent {...props} />
+//       </Router>
+//     </div>
+//   );
+// }
+
+// export default function App() {
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [isCheckingToken, setIsCheckingToken] = useState(true);
+//   const [user, setUser] = useState(null);
+
+//   useEffect(() => {
+//     const checkToken = async () => {
+//       try {
+//         const token = getToken();
+
+//         // if (!token || isTokenExpired()) {
+//         //   removeToken();
+//         //   setIsCheckingToken(false);
+//         //   return;
+//         // }
+//         if (!token) {
+//           setIsCheckingToken(false);
+//           return;
+//         }
+
+//         const userData = await getCurrentUser();
+//         setUser(userData);
+//         setIsLoggedIn(true);
+//       } catch (e) {
+//         setIsLoggedIn(false);
+//       } finally {
+//         setIsCheckingToken(false);
+//       }
+//     };
+
+//     checkToken();
+//   }, []);
+
+//   const handleLogin = async () => {
+//     const userData = await getCurrentUser();
+//     setUser(userData);
+//     setIsLoggedIn(true);
+//   };
+
+//   const handleLoadingComplete = () => {
+//     setIsLoading(false);
+//   };
+
+//   const handleLogout = () => {
+//     setIsLoggedIn(false);
+//     setUser(null);
+//   };
+
+//   return (
+//     <DarkModeProvider>
+//       <InnerAppWrapper
+//         isLoggedIn={isLoggedIn}
+//         isLoading={isLoading}
+//         user={user}
+//         onLogin={handleLogin}
+//         onLogout={handleLogout}
+//         onLoadingComplete={handleLoadingComplete}
+//         isCheckingToken={isCheckingToken}
+//       />
+//     </DarkModeProvider>
+//   );
+// }
+
+// src/App.jsx
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import LoginPage from "./auth/LoginPage";
+import RegisterPage from "./components/RegisterPage";
+import LoadingScreen from "./auth/LoadingScreen";
+import AboutISCS from "./components/AboutISCS";
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
+import Dashboard from "./components/Dashboard";
+import Profile from "./components/Profile";
+import Employees from "./components/Employees";
+import Documents from "./components/Documents";
+import CalendarComponent from "./components/Calendar";
+import Help from "./components/Help";
+import Payroll from "./components/Payroll";
+import { Toaster } from "@/components/ui/toaster";
+import { getToken, removeToken, getCurrentUser, isTokenExpired } from "./api";
+import { DarkModeProvider, useDarkMode } from "@/context/DarkModeContext";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+
+// Protected Route
+function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
+  if (!isLoggedIn) return <Navigate to="/hrms" replace />;
+  if (requiredRole && userRole === requiredRole)
+    return <Navigate to="/hrms/dashboard" replace />;
+  return children;
+}
+
+// AppContent function
 function AppContent({
   isLoggedIn,
   isLoading,
@@ -294,11 +446,12 @@ function AppContent({
   // Helper function to get the appropriate redirect path based on user role
   const getHomeRedirectPath = () => {
     if (!user) return "/hrms";
-    
+
     if (user.role === "superadmin") {
       return "/hrms/loading";
     } else if (user.role === "employee") {
-      return "/hrms/employees";
+      // Employees should go to AboutISCS first, then Loading, then Employees
+      return "/hrms/about-iscs";
     } else {
       return "/hrms/about-iscs";
     }
@@ -321,20 +474,27 @@ function AppContent({
           }
         />
 
+        {/* ABOUT ISCS - Accessible by all non-superadmin users including employees */}
         <Route
           path="/hrms/about-iscs"
           element={
-            isLoggedIn && user?.role !== "superadmin" && user?.role !== "employee" ? (
+            isLoggedIn ? (
+              // Allow both regular users AND employees to view AboutISCS
               <AboutISCS />
             ) : (
-              <Navigate to={getHomeRedirectPath()} replace />
+              <Navigate to="/hrms" replace />
             )
           }
         />
 
+        {/* LOADING SCREEN */}
         <Route
           path="/hrms/loading"
-          element={<LoadingScreen onLoadingComplete={onLoadingComplete} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <LoadingScreen onLoadingComplete={onLoadingComplete} />
+            </ProtectedRoute>
+          }
         />
 
         {/* REGISTER - Only accessible by superadmin */}
@@ -423,7 +583,7 @@ function AppContent({
           }
         />
 
-        {/* EMPLOYEES - Accessible by all roles but dashboard users will be redirected if needed */}
+        {/* EMPLOYEES - Accessible by all roles */}
         <Route
           path="/hrms/employees"
           element={
@@ -501,6 +661,59 @@ function AppContent({
           }
         />
 
+        {/* PAYROLL */}
+        <Route
+          path="/hrms/payroll"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <div className="w-full min-h-screen">
+                <div className="flex">
+                  <Sidebar
+                    user={user}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                  />
+
+                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
+                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
+
+                    <main className="min-h-screen pt-16">
+                      <Payroll user={user} />
+                    </main>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HELP */}
+<Route
+  path="/hrms/help"
+  element={
+    <ProtectedRoute isLoggedIn={isLoggedIn}>
+      <div className="w-full min-h-screen">
+        <div className="flex">
+          <Sidebar
+            user={user}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
+          />
+
+          <div className={`flex-1 ${sidebarMargin} transition-all`}>
+            <Navbar onLogout={handleLogout} collapsed={collapsed} />
+
+            <main className="min-h-screen pt-16">
+              <Help />
+            </main>
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  }
+/>
+
+        {/* Catch all route */}
         <Route
           path="*"
           element={
@@ -546,11 +759,6 @@ export default function App() {
       try {
         const token = getToken();
 
-        // if (!token || isTokenExpired()) {
-        //   removeToken();
-        //   setIsCheckingToken(false);
-        //   return;
-        // }
         if (!token) {
           setIsCheckingToken(false);
           return;

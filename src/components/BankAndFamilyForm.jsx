@@ -189,63 +189,6 @@
 //   };
 
 //   // API Submit Functions
-//   // const submitBankAccount = async () => {
-//   //   if (!bankEmployeeId.trim()) {
-//   //     setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
-//   //     return;
-//   //   }
-
-//   //   if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
-//   //     setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
-//   //     return;
-//   //   }
-
-//   //   setBankLoading(true);
-//   //   setBankSuccess(false);
-    
-//   //   try {
-//   //     const apiData = {
-//   //       bank_name: formData.bankName,
-//   //       account_number: formData.accountNumber,
-//   //       branch_name: formData.branch || null,
-//   //       ifsc_code: formData.ifscCode,
-//   //       account_type: formData.accountType || "Savings"
-//   //     };
-
-//   //     // Use apiRequest function without assigning to unused variable
-//   //     await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
-//   //       method: 'POST',
-//   //       body: JSON.stringify(apiData)
-//   //     });
-
-//   //     setBankSuccess(true);
-//   //     setErrors(prev => ({ ...prev, bankGeneral: "" }));
-      
-//   //     // Show success toast
-//   //     toast({
-//   //       title: (
-//   //         <div className="flex items-center gap-2">
-//   //           <CheckCircle className="h-5 w-5 text-green-500" />
-//   //           <span>Bank Account Details Saved</span>
-//   //         </div>
-//   //       ),
-//   //       description: "Your bank account information has been saved successfully.",
-//   //       className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-//   //     });
-//   //   } catch (error) {
-//   //     console.error('Bank API Error:', error);
-//   //     setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
-      
-//   //     // Show error toast
-//   //     toast({
-//   //       title: "Error",
-//   //       description: error.message || "Failed to save bank details. Please try again.",
-//   //       variant: "destructive",
-//   //     });
-//   //   } finally {
-//   //     setBankLoading(false);
-//   //   }
-//   // };
 //   const submitBankAccount = async () => {
 //   if (!bankEmployeeId.trim()) {
 //     setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
@@ -1300,17 +1243,7 @@
 //         )}
 
 //         {/* Action Buttons */}
-//         {/* <div className="flex justify-between pt-6">
-//           <Button
-//             type="button"
-//             onClick={onBack}
-//             variant="outline"
-//             className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-//           >
-//             <ArrowLeft size={16} />
-//             Back
-//           </Button> */}
-//            <div className="flex justify-between pt-6">
+//         <div className="flex justify-between pt-6">
 //           <div className="flex gap-4">
 //             {/* <Button type="button" onClick={onBack} variant="outline" className={`px-8 py-3 flex items-center gap-2 ${darkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
 //               <ArrowLeft size={16} />
@@ -1320,9 +1253,9 @@
           
 //           <Button
 //             onClick={handleSubmit}
-//             disabled={loading || !allSectionsCompleted}
+//             disabled={loading} // Always enabled except when loading
 //             className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
-//               allSectionsCompleted 
+//               !loading 
 //                 ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
 //                 : "bg-gray-400 text-white cursor-not-allowed"
 //             }`}
@@ -1344,13 +1277,13 @@
 //     </div>
 //   );
 // }
+
 // BankAndFamilyForm.jsx(dark mode)
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   CreditCard, 
   Users, 
@@ -1364,15 +1297,21 @@ import {
   Trash2,
   Save,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  FileText,
+  X,
+  RefreshCw,
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useDarkMode } from "@/context/DarkModeContext"; // Import dark mode context
-import { apiRequest } from "../api"; // Import API request function
+import { useDarkMode } from "@/context/DarkModeContext";
+import { apiRequest } from "../api";
 
 export default function BankAndFamilyForm({ initialData, generatedEmployeeId, onSubmit, onAcademicSubmit}) {
-  const { darkMode } = useDarkMode(); // Get dark mode state
-  const { toast } = useToast(); // Initialize toast
+  const { darkMode } = useDarkMode();
+  const { toast } = useToast();
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -1382,22 +1321,49 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   const [maritalLoading, setMaritalLoading] = useState(false);
   const [familyLoading, setFamilyLoading] = useState(false);
   const [academicLoading, setAcademicLoading] = useState(false);
+  const [certificatesLoading, setCertificatesLoading] = useState(false);
   
   const [bankSuccess, setBankSuccess] = useState(false);
   const [maritalSuccess, setMaritalSuccess] = useState(false);
   const [familySuccess, setFamilySuccess] = useState(false);
   const [academicSuccess, setAcademicSuccess] = useState(false);
+  const [certificatesSuccess, setCertificatesSuccess] = useState(false);
   
   const [bankEmployeeId, setBankEmployeeId] = useState("");
   const [maritalEmployeeId, setMaritalEmployeeId] = useState("");
   const [familyEmployeeId, setFamilyEmployeeId] = useState("");
   const [academicEmployeeId, setAcademicEmployeeId] = useState("");
+  const [certificatesEmployeeId, setCertificatesEmployeeId] = useState("");
   
   // New state for bank suggestion dropdown
   const [bankSuggestion, setBankSuggestion] = useState("");
   
+  // Certificate upload states
+  const [certificateFiles, setCertificateFiles] = useState({
+    ssc: null,
+    inter: null,
+    grad: null,
+    postgrad: null,
+    diploma: null,
+    other: null
+  });
+  
+  const [certificatePreviews, setCertificatePreviews] = useState({});
+  const [uploadedCertificates, setUploadedCertificates] = useState({});
+  const [certificateErrors, setCertificateErrors] = useState({});
+  
   // New state to track if all required sections are completed 
   const [allSectionsCompleted, setAllSectionsCompleted] = useState(false);
+
+  // Certificate configuration
+  const certificateConfig = [
+    { key: 'ssc', label: 'SSC Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 },
+    { key: 'inter', label: 'Intermediate Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 },
+    { key: 'grad', label: 'Graduation Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 },
+    { key: 'postgrad', label: 'Post Graduation Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 },
+    { key: 'diploma', label: 'Diploma Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 },
+    { key: 'other', label: 'Other Certificate', accept: '.pdf,.jpg,.jpeg,.png', maxSize: 5 }
+  ];
 
   // Set employee IDs from props when component mounts or when generatedEmployeeId changes
   useEffect(() => {
@@ -1406,15 +1372,15 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       setMaritalEmployeeId(generatedEmployeeId);
       setFamilyEmployeeId(generatedEmployeeId);
       setAcademicEmployeeId(generatedEmployeeId);
+      setCertificatesEmployeeId(generatedEmployeeId);
     }
   }, [generatedEmployeeId]);
   
   // Check if all required sections are completed
   useEffect(() => {
-    // Check if all required sections are completed
-    const isCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+    const isCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess && certificatesSuccess;
     setAllSectionsCompleted(isCompleted);
-  }, [bankSuccess, maritalSuccess, familySuccess, academicSuccess]);
+  }, [bankSuccess, maritalSuccess, familySuccess, academicSuccess, certificatesSuccess]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -1453,13 +1419,11 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   const handleMaritalStatusChange = (e) => {
     const value = e.target.value;
     
-    // Capitalize the first letter for backend compatibility
     const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
     
     setFormData(prev => ({
       ...prev,
       maritalStatus: capitalizedValue,
-      // Clear marriage date if status is Single
       marriageDate: capitalizedValue === 'Single' ? '' : prev.marriageDate
     }));
     
@@ -1521,6 +1485,148 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
     }
   };
 
+  // Certificate file handlers
+  const handleCertificateFileSelect = (certKey, event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file size (5MB max)
+    const fileSizeMB = file.size / (1024 * 1024);
+    const config = certificateConfig.find(c => c.key === certKey);
+    
+    if (fileSizeMB > config.maxSize) {
+      setCertificateErrors(prev => ({
+        ...prev,
+        [certKey]: `File size must be under ${config.maxSize}MB. Current file is ${fileSizeMB.toFixed(1)}MB.`
+      }));
+      
+      toast({
+        title: "File Too Large",
+        description: `${config.label} must be under ${config.maxSize}MB.`,
+        variant: "destructive",
+      });
+      
+      event.target.value = '';
+      return;
+    }
+
+    // Clear any previous error
+    setCertificateErrors(prev => ({ ...prev, [certKey]: null }));
+
+    // Update files
+    setCertificateFiles(prev => ({ ...prev, [certKey]: file }));
+
+    // Create preview URL for images
+    if (file.type.startsWith('image/')) {
+      const previewUrl = URL.createObjectURL(file);
+      setCertificatePreviews(prev => ({ ...prev, [certKey]: previewUrl }));
+    } else {
+      setCertificatePreviews(prev => ({ ...prev, [certKey]: null }));
+    }
+  };
+
+  const handleClearCertificateFile = (certKey) => {
+    setCertificateFiles(prev => ({ ...prev, [certKey]: null }));
+    
+    // Revoke preview URL if exists
+    if (certificatePreviews[certKey]) {
+      URL.revokeObjectURL(certificatePreviews[certKey]);
+      setCertificatePreviews(prev => ({ ...prev, [certKey]: null }));
+    }
+    
+    const fileInput = document.getElementById(`cert-${certKey}`);
+    if (fileInput) fileInput.value = '';
+  };
+
+  const submitCertificates = async () => {
+    if (!certificatesEmployeeId.trim()) {
+      setErrors(prev => ({ ...prev, certificatesEmployeeId: "Employee ID is required" }));
+      return;
+    }
+
+    // Check if at least one file is selected
+    const hasFiles = Object.values(certificateFiles).some(file => file !== null);
+    if (!hasFiles) {
+      toast({
+        title: "No Files Selected",
+        description: "Please select at least one certificate file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCertificatesLoading(true);
+    setCertificatesSuccess(false);
+
+    try {
+      const formData = new FormData();
+      
+      // Append files to form data
+      Object.entries(certificateFiles).forEach(([key, file]) => {
+        if (file) {
+          formData.append(key, file);
+        }
+      });
+
+      const result = await apiRequest(`/users/Certificates/${certificatesEmployeeId}`, {
+        method: 'PUT',
+        body: formData,
+        headers: {} // Let browser set content-type with boundary
+      });
+
+      setCertificatesSuccess(true);
+      
+      // Mark uploaded certificates as completed
+      const uploaded = {};
+      Object.keys(certificateFiles).forEach(key => {
+        if (certificateFiles[key]) {
+          uploaded[key] = true;
+        }
+      });
+      setUploadedCertificates(uploaded);
+
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Certificates Uploaded Successfully</span>
+          </div>
+        ),
+        description: `${Object.values(certificateFiles).filter(f => f !== null).length} certificate(s) have been uploaded.`,
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+      });
+
+      // Clear files after successful upload
+      setCertificateFiles({
+        ssc: null,
+        inter: null,
+        grad: null,
+        postgrad: null,
+        diploma: null,
+        other: null
+      });
+      
+      // Clear previews
+      Object.keys(certificatePreviews).forEach(key => {
+        if (certificatePreviews[key]) {
+          URL.revokeObjectURL(certificatePreviews[key]);
+        }
+      });
+      setCertificatePreviews({});
+
+    } catch (error) {
+      console.error('Certificates API Error:', error);
+      
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload certificates. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCertificatesLoading(false);
+    }
+  };
+
   const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth) return "";
     const today = new Date();
@@ -1536,62 +1642,59 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
 
   // API Submit Functions
   const submitBankAccount = async () => {
-  if (!bankEmployeeId.trim()) {
-    setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
-    return;
-  }
+    if (!bankEmployeeId.trim()) {
+      setErrors(prev => ({ ...prev, bankEmployeeId: "Employee ID is required" }));
+      return;
+    }
 
-  if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
-    setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
-    return;
-  }
+    if (!formData.bankName?.trim() || !formData.accountNumber?.trim() || !formData.ifscCode?.trim()) {
+      setErrors(prev => ({ ...prev, bankGeneral: "Please fill all required bank details" }));
+      return;
+    }
 
-  setBankLoading(true);
-  setBankSuccess(false);
-  
-  try {
-    const apiData = {
-      bank_name: formData.bankName,
-      account_number: formData.accountNumber,
-      branch_name: formData.branch || null,
-      ifsc_code: formData.ifscCode,
-      account_type: formData.accountType || "Savings" // This will now be either "Savings" or "Salary"
-    };
-
-    // Use apiRequest function without assigning to unused variable
-    await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
-      method: 'POST',
-      body: JSON.stringify(apiData)
-    });
-
-    setBankSuccess(true);
-    setErrors(prev => ({ ...prev, bankGeneral: "" }));
+    setBankLoading(true);
+    setBankSuccess(false);
     
-    // Show success toast
-    toast({
-      title: (
-        <div className="flex items-center gap-2">
-          <CheckCircle className="h-5 w-5 text-green-500" />
-          <span>Bank Account Details Saved</span>
-        </div>
-      ),
-      description: "Your bank account information has been saved successfully.",
-      className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
-    });
-  } catch (error) {
-    console.error('Bank API Error:', error);
-    setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
-    
-    // Show error toast
-    toast({
-      title: "Error",
-      description: error.message || "Failed to save bank details. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setBankLoading(false);
-  }
-};
+    try {
+      const apiData = {
+        bank_name: formData.bankName,
+        account_number: formData.accountNumber,
+        branch_name: formData.branch || null,
+        ifsc_code: formData.ifscCode,
+        account_type: formData.accountType || "Savings"
+      };
+
+      await apiRequest(`/users/Bank_Account/${bankEmployeeId}`, {
+        method: 'POST',
+        body: JSON.stringify(apiData)
+      });
+
+      setBankSuccess(true);
+      setErrors(prev => ({ ...prev, bankGeneral: "" }));
+      
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span>Bank Account Details Saved</span>
+          </div>
+        ),
+        description: "Your bank account information has been saved successfully.",
+        className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
+      });
+    } catch (error) {
+      console.error('Bank API Error:', error);
+      setErrors(prev => ({ ...prev, bankGeneral: error.message || 'Failed to save bank details' }));
+      
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save bank details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setBankLoading(false);
+    }
+  };
 
   const submitMaritalStatus = async () => {
     if (!maritalEmployeeId.trim()) {
@@ -1613,7 +1716,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         marriage_date: formData.maritalStatus === 'Single' ? null : (formData.marriageDate || null)
       };
 
-      // Use apiRequest function without assigning to unused variable
       await apiRequest(`/users/MaritalStatus/${maritalEmployeeId}`, {
         method: 'POST',
         body: JSON.stringify(apiData)
@@ -1622,7 +1724,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       setMaritalSuccess(true);
       setErrors(prev => ({ ...prev, maritalGeneral: "" }));
       
-      // Show success toast
       toast({
         title: (
           <div className="flex items-center gap-2">
@@ -1637,7 +1738,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       console.error('Marital API Error:', error);
       setErrors(prev => ({ ...prev, maritalGeneral: error.message || 'Failed to save marital status' }));
       
-      // Show error toast
       toast({
         title: "Error",
         description: error.message || "Failed to save marital status. Please try again.",
@@ -1673,7 +1773,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             age: member.dateOfBirth ? parseInt(calculateAge(member.dateOfBirth)) : null
           };
 
-          // Use apiRequest function without assigning to unused variable
           await apiRequest(`/users/FamilyBackground/${familyEmployeeId}`, {
             method: 'POST',
             body: JSON.stringify(apiData)
@@ -1687,7 +1786,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         setFamilySuccess(true);
         setErrors(prev => ({ ...prev, familyGeneral: "" }));
         
-        // Show success toast
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -1705,7 +1803,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       console.error('Family API Error:', error);
       setErrors(prev => ({ ...prev, familyGeneral: error.message || 'Failed to connect to server' }));
       
-      // Show error toast
       toast({
         title: "Error",
         description: error.message || "Failed to save family background. Please try again.",
@@ -1748,7 +1845,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           rank_or_grade: qualification.rankGradePercentage ? parseFloat(qualification.rankGradePercentage) : null
         };
 
-        // Use apiRequest function without assigning to unused variable
         await apiRequest(`/users/Academic_Background/${academicEmployeeId}`, {
           method: 'POST',
           body: JSON.stringify(apiData)
@@ -1761,7 +1857,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
         setAcademicSuccess(true);
         setErrors(prev => ({ ...prev, academicGeneral: "" }));
         
-        // Show success toast
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -1773,7 +1868,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           className: darkMode ? "bg-green-900/80 border-green-700 text-green-100" : "bg-green-50 border-green-200 text-green-800",
         });
         
-        // Call the onAcademicSubmit callback to unlock step 4
         if (onAcademicSubmit) {
           onAcademicSubmit();
         }
@@ -1784,7 +1878,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
       console.error('Academic API Error:', error);
       setErrors(prev => ({ ...prev, academicGeneral: error.message || 'Failed to connect to server' }));
       
-      // Show error toast
       toast({
         title: "Error",
         description: error.message || "Failed to save academic background. Please try again.",
@@ -1798,7 +1891,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   const validateForm = () => {
     const newErrors = {};
     
-    // Basic bank details validation
     if (!formData.bankName?.trim()) {
       newErrors.bankName = "Bank name is required";
     }
@@ -1818,10 +1910,8 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Directly check if all sections are completed instead of relying on state
-    const sectionsCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess;
+    const sectionsCompleted = bankSuccess && maritalSuccess && familySuccess && academicSuccess && certificatesSuccess;
     
-    // Check if all sections are completed
     if (!sectionsCompleted) {
       setErrors(prev => ({ ...prev, submit: "Please complete all sections before proceeding" }));
       return;
@@ -1829,7 +1919,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
     
     if (validateForm()) {
       setLoading(true);
-      // Calculate ages for family members
       const updatedFormData = {
         ...formData,
         familyMembers: Object.keys(formData.familyMembers).reduce((acc, key) => {
@@ -1857,12 +1946,10 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
     { key: 'mother', label: 'Mother' }
   ];
 
-  // Helper to check if a row should be disabled based on marital status
   const isRowDisabled = (key) => {
     return formData.maritalStatus === 'Single' && (key === 'spouse' || key === 'child1' || key === 'child2');
   };
 
-  // Helper to check if gender is fixed for a member type
   const isGenderFixed = (key) => {
     if (key === 'father') return 'male';
     if (key === 'mother') return 'female';
@@ -1873,16 +1960,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
     <div className={`max-w-5xl mx-auto ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="text-center mb-8">
         <h1 className={`text-3xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>Bank Account & Family Details</h1>
-        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Complete your banking, family background and academic information</p>
-      </div>
-
-      {/* Global Employee ID Display if available - HIDDEN */}
-      <div className="hidden text-center mb-6">
-        <div className={`inline-flex items-center gap-3 px-6 py-3 ${darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-200'} rounded-full shadow-sm`}>
-          <CheckCircle size={20} className={darkMode ? "text-green-400" : "text-green-600"} />
-          <span className={`text-gray-700 font-medium ${darkMode ? 'text-gray-200' : ''}`}>Auto-filled Employee ID:</span>
-          <span className={`text-lg font-bold ${darkMode ? 'text-green-300' : 'text-green-700'}`}>{generatedEmployeeId}</span>
-        </div>
+        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Complete your banking, family background, academic information and upload certificates</p>
       </div>
 
       <div className="space-y-8">
@@ -1896,30 +1974,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             {bankSuccess && <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} />}
           </div>
           
-          {/* Employee ID Input for Bank - HIDDEN */}
-          <div className="hidden mb-4">
-            <Label htmlFor="bankEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
-            </Label>
-            <Input
-              id="bankEmployeeId"
-              value={bankEmployeeId}
-              onChange={(e) => setBankEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className={`max-w-xs ${errors.bankEmployeeId ? 'border-red-500' : ''} ${generatedEmployeeId ? 
-                darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-300'
-                : ''
-              } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
-              readOnly={!!generatedEmployeeId}
-            />
-            {errors.bankEmployeeId && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.bankEmployeeId}</p>}
-            {generatedEmployeeId && (
-              <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>✓ Auto-filled from previous step</p>
-            )}
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* New Bank Suggestion Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="bankSuggestion" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
                 Bank Category
@@ -2004,28 +2059,28 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               {errors.ifscCode && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.ifscCode}</p>}
             </div>
 
-           <div className="space-y-2">
-  <Label htmlFor="accountType" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-    Account Type *
-  </Label>
-  <select
-    id="accountType"
-    name="accountType"
-    value={formData.accountType || "Savings"}
-    onChange={handleChange}
-    className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-      darkMode 
-        ? 'bg-gray-700 text-white border-gray-600' 
-        : 'bg-white text-gray-900 border-gray-200'
-    }`}
-  >
-    <option value="Savings">Savings</option>
-    <option value="Salary">Salary</option>
-  </select>
-  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-    Select Savings for personal accounts or Salary for salary accounts
-  </p>
-</div>
+            <div className="space-y-2">
+              <Label htmlFor="accountType" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
+                Account Type *
+              </Label>
+              <select
+                id="accountType"
+                name="accountType"
+                value={formData.accountType || "Savings"}
+                onChange={handleChange}
+                className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  darkMode 
+                    ? 'bg-gray-700 text-white border-gray-600' 
+                    : 'bg-white text-gray-900 border-gray-200'
+                }`}
+              >
+                <option value="Savings">Savings</option>
+                <option value="Salary">Salary</option>
+              </select>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                Select Savings for personal accounts or Salary for salary accounts
+              </p>
+            </div>
           </div>
 
           {errors.bankGeneral && (
@@ -2069,28 +2124,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             {maritalSuccess && <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} />}
           </div>
           
-          {/* Employee ID Input for Marital - HIDDEN */}
-          <div className="hidden mb-4">
-            <Label htmlFor="maritalEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
-            </Label>
-            <Input
-              id="maritalEmployeeId"
-              value={maritalEmployeeId}
-              onChange={(e) => setMaritalEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className={`max-w-xs ${errors.maritalEmployeeId ? 'border-red-500' : ''} ${generatedEmployeeId ? 
-                darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-300'
-                : ''
-              } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
-              readOnly={!!generatedEmployeeId}
-            />
-            {errors.maritalEmployeeId && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.maritalEmployeeId}</p>}
-            {generatedEmployeeId && (
-              <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>✓ Auto-filled from previous step</p>
-            )}
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-2">
               <Label htmlFor="maritalStatus" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
@@ -2114,31 +2147,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
                 <option value="Widowed">Widowed</option>
               </select>
             </div>
-
-            {/* <div className="space-y-2">
-              <Label htmlFor="marriageDate" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium flex items-center gap-2`}>
-                <Calendar size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />
-                Marriage Date
-                {formData.maritalStatus === 'Single' && (
-                  <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-1`}>(Not applicable for Single status)</span>
-                )}
-              </Label>
-              <Input
-                id="marriageDate"
-                name="marriageDate"
-                type="date"
-                value={formData.marriageDate}
-                onChange={handleChange}
-                disabled={formData.maritalStatus === 'Single'}
-                className={`${formData.maritalStatus === 'Single' ? 
-                  darkMode ? 'bg-gray-700/50 border-gray-600 text-gray-500 cursor-not-allowed' : 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed'
-                  : ''
-                } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
-              />
-              {formData.maritalStatus === 'Single' && (
-                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Marriage date is automatically disabled for Single status</p>
-              )}
-            </div> */}
           </div>
 
           {errors.maritalGeneral && (
@@ -2179,28 +2187,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
             {familySuccess && <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} />}
           </div>
 
-          {/* Employee ID Input for Family - HIDDEN */}
-          <div className="hidden mb-4">
-            <Label htmlFor="familyEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
-            </Label>
-            <Input
-              id="familyEmployeeId"
-              value={familyEmployeeId}
-              onChange={(e) => setFamilyEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className={`max-w-xs ${errors.familyEmployeeId ? 'border-red-500' : ''} ${generatedEmployeeId ? 
-                darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-300'
-                : ''
-              } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
-              readOnly={!!generatedEmployeeId}
-            />
-            {errors.familyEmployeeId && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.familyEmployeeId}</p>}
-            {generatedEmployeeId && (
-              <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>✓ Auto-filled from previous step</p>
-            )}
-          </div>
-
           {/* Family Members Table */}
           <div className={`overflow-x-auto mb-6 ${darkMode ? 'bg-gray-700/50' : 'bg-white/50'} rounded-lg p-4`}>
             <table className={`w-full border-collapse border ${darkMode ? 'border-gray-600' : 'border-gray-300'} rounded-lg`}>
@@ -2214,13 +2200,9 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               </thead>
               <tbody>
                 {familyMemberTypes.map(({ key, label }) => {
-                  // Logic to skip Employee row
                   if (key === 'employee') return null;
 
-                  // Logic to check if row is disabled
                   const isDisabled = isRowDisabled(key);
-                  
-                  // Logic to get fixed gender
                   const fixedGender = isGenderFixed(key);
 
                   return (
@@ -2242,14 +2224,12 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
                       </td>
                       <td className={`border ${darkMode ? 'border-gray-600' : 'border-gray-300'} px-2 py-2`}>
                         {fixedGender ? (
-                          // If gender is fixed (Father/Mother), show read-only input or disabled select
                           <Input
                             value={fixedGender.charAt(0).toUpperCase() + fixedGender.slice(1)}
                             readOnly
                             className={`text-sm ${darkMode ? 'bg-gray-600 text-gray-300 border-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-600 border-gray-300 cursor-not-allowed'}`}
                           />
                         ) : (
-                          // Normal gender selector
                           <select
                             value={formData.familyMembers[key]?.gender || ""}
                             onChange={(e) => handleFamilyMemberChange(key, 'gender', e.target.value)}
@@ -2290,7 +2270,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
               </tbody>
             </table>
             {formData.maritalStatus === 'Single' && (
-               <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2`}>* Spouse and Children fields are disabled for Single status</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2`}>* Spouse and Children fields are disabled for Single status</p>
             )}
           </div>
 
@@ -2345,28 +2325,6 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
                 Add Qualification
               </Button>
             </div>
-          </div>
-          
-          {/* Employee ID Input for Academic - HIDDEN */}
-          <div className="hidden mb-4">
-            <Label htmlFor="academicEmployeeId" className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>
-              Employee ID {generatedEmployeeId ? '(Auto-filled)' : '*'}
-            </Label>
-            <Input
-              id="academicEmployeeId"
-              value={academicEmployeeId}
-              onChange={(e) => setAcademicEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className={`max-w-xs ${errors.academicEmployeeId ? 'border-red-500' : ''} ${generatedEmployeeId ? 
-                darkMode ? 'bg-green-900/50 border-green-700' : 'bg-green-50 border-green-300'
-                : ''
-              } ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900'}`}
-              readOnly={!!generatedEmployeeId}
-            />
-            {errors.academicEmployeeId && <p className={`text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{errors.academicEmployeeId}</p>}
-            {generatedEmployeeId && (
-              <p className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>✓ Auto-filled from previous step</p>
-            )}
           </div>
           
           <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>• Please fill in Reverse Chronological Order</p>
@@ -2519,54 +2477,174 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           </Button>
         </Card>
 
+        {/* Education Certificates Upload Section - NEW */}
+        <Card className={`p-6 ${certificatesSuccess ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200'} ${darkMode ? 'from-gray-800 to-gray-700 border-gray-600' : ''}`}>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Upload className={darkMode ? "text-purple-400" : "text-purple-600"} size={20} />
+              <h2 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Education Certificates</h2>
+            </div>
+            {certificatesSuccess && <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} />}
+          </div>
+
+          <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+            Upload your educational certificates. Each certificate is optional. Supported formats: PDF, JPG, JPEG, PNG (Max 5MB each)
+          </p>
+
+          {/* Certificate Upload Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {certificateConfig.map((cert) => (
+              <div key={cert.key} className={`p-4 rounded-lg border ${darkMode ? 'border-gray-600 bg-gray-700/30' : 'border-gray-200 bg-gray-50'}`}>
+                <Label className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2 block`}>
+                  {cert.label}
+                </Label>
+                
+                <div className="space-y-3">
+                  {/* File Input (Hidden) */}
+                  <Input
+                    id={`cert-${cert.key}`}
+                    type="file"
+                    accept={cert.accept}
+                    onChange={(e) => handleCertificateFileSelect(cert.key, e)}
+                    className="hidden"
+                  />
+
+                  {/* File Selection Button */}
+                  {!certificateFiles[cert.key] && !uploadedCertificates[cert.key] && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById(`cert-${cert.key}`).click()}
+                      className={`w-full ${darkMode ? 'border-gray-600 hover:bg-gray-700' : 'border-gray-300 hover:bg-gray-50'}`}
+                    >
+                      <Upload size={14} className="mr-2" />
+                      Choose File
+                    </Button>
+                  )}
+
+                  {/* Selected File Display */}
+                  {certificateFiles[cert.key] && (
+                    <div className={`p-3 rounded-lg flex items-center justify-between ${darkMode ? 'bg-purple-900/30 border border-purple-700' : 'bg-purple-50 border border-purple-200'}`}>
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <FileText size={16} className={darkMode ? 'text-purple-400' : 'text-purple-600'} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${darkMode ? 'text-purple-300' : 'text-purple-700'}`}>
+                            {certificateFiles[cert.key].name}
+                          </p>
+                          <p className={`text-xs ${darkMode ? 'text-purple-400/70' : 'text-purple-600/70'}`}>
+                            {(certificateFiles[cert.key].size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleClearCertificateFile(cert.key)}
+                        className={`p-1 rounded-full flex-shrink-0 ${darkMode ? 'hover:bg-red-900/50 text-red-400' : 'hover:bg-red-100 text-red-500'}`}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Uploaded Indicator */}
+                  {uploadedCertificates[cert.key] && (
+                    <div className={`p-3 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-green-900/30 border border-green-700' : 'bg-green-50 border border-green-200'}`}>
+                      <CheckCircle size={16} className={darkMode ? 'text-green-400' : 'text-green-600'} />
+                      <span className={`text-sm font-medium ${darkMode ? 'text-green-300' : 'text-green-700'}`}>
+                        Uploaded successfully
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {certificateErrors[cert.key] && (
+                    <p className={`text-xs ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{certificateErrors[cert.key]}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Upload Button */}
+          <Button
+            onClick={submitCertificates}
+            disabled={certificatesLoading || !Object.values(certificateFiles).some(f => f !== null)}
+            className={`w-full ${certificatesSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'} text-white py-6 text-lg`}
+          >
+            {certificatesLoading ? (
+              <div className="flex items-center gap-2">
+                <RefreshCw size={18} className="mr-2 animate-spin" />
+                Uploading Certificates...
+              </div>
+            ) : certificatesSuccess ? (
+              <>
+                <CheckCircle size={18} className="mr-2" />
+                Certificates Uploaded Successfully
+              </>
+            ) : (
+              <>
+                <Upload size={18} className="mr-2" />
+                Upload Selected Certificates
+              </>
+            )}
+          </Button>
+        </Card>
+
         {/* Progress Indicator */}
         <Card className={`p-6 ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600' : 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200'}`}>
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <h3 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Form Completion Status</h3>
               <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                {allSectionsCompleted ? 'All sections completed!' : `${[bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length}/4 sections completed`}
+                {allSectionsCompleted ? 'All sections completed!' : `${[bankSuccess, maritalSuccess, familySuccess, academicSuccess, certificatesSuccess].filter(Boolean).length}/5 sections completed`}
               </span>
             </div>
             <div className={`w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-2.5`}>
               <div 
-                className={`bg-blue-600 h-2.5 rounded-full transition-all duration-300 ${darkMode ? '' : ''}`} 
-                style={{ width: `${([bankSuccess, maritalSuccess, familySuccess, academicSuccess].filter(Boolean).length / 4) * 100}%` }}
+                className={`bg-blue-600 h-2.5 rounded-full transition-all duration-300`} 
+                style={{ width: `${([bankSuccess, maritalSuccess, familySuccess, academicSuccess, certificatesSuccess].filter(Boolean).length / 5) * 100}%` }}
               ></div>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className={`text-center p-3 rounded-lg ${bankSuccess ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'} ${darkMode ? 'bg-gray-700/50 border-gray-600' : ''}`}>
               <div className="flex justify-center mb-2">
                 {bankSuccess ? <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} /> : <CreditCard className={darkMode ? "text-gray-400" : "text-gray-400"} size={20} />}
               </div>
-              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Bank Details</p>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{bankSuccess ? 'Completed' : 'Pending'}</p>
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Bank</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{bankSuccess ? '✓' : 'Pending'}</p>
             </div>
             
             <div className={`text-center p-3 rounded-lg ${maritalSuccess ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'} ${darkMode ? 'bg-gray-700/50 border-gray-600' : ''}`}>
               <div className="flex justify-center mb-2">
                 {maritalSuccess ? <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} /> : <Heart className={darkMode ? "text-gray-400" : "text-gray-400"} size={20} />}
               </div>
-              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Marital Status</p>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{maritalSuccess ? 'Completed' : 'Pending'}</p>
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Marital</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{maritalSuccess ? '✓' : 'Pending'}</p>
             </div>
             
             <div className={`text-center p-3 rounded-lg ${familySuccess ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'} ${darkMode ? 'bg-gray-700/50 border-gray-600' : ''}`}>
               <div className="flex justify-center mb-2">
                 {familySuccess ? <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} /> : <Users className={darkMode ? "text-gray-400" : "text-gray-400"} size={20} />}
               </div>
-              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Family Details</p>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{familySuccess ? 'Completed' : 'Pending'}</p>
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Family</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{familySuccess ? '✓' : 'Pending'}</p>
             </div>
             
             <div className={`text-center p-3 rounded-lg ${academicSuccess ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'} ${darkMode ? 'bg-gray-700/50 border-gray-600' : ''}`}>
               <div className="flex justify-center mb-2">
                 {academicSuccess ? <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} /> : <GraduationCap className={darkMode ? "text-gray-400" : "text-gray-400"} size={20} />}
               </div>
-              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Academic Details</p>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{academicSuccess ? 'Completed' : 'Pending'}</p>
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Academic</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{academicSuccess ? '✓' : 'Pending'}</p>
+            </div>
+
+            <div className={`text-center p-3 rounded-lg ${certificatesSuccess ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'} ${darkMode ? 'bg-gray-700/50 border-gray-600' : ''}`}>
+              <div className="flex justify-center mb-2">
+                {certificatesSuccess ? <CheckCircle className={darkMode ? "text-green-400" : "text-green-600"} size={20} /> : <FileText className={darkMode ? "text-gray-400" : "text-gray-400"} size={20} />}
+              </div>
+              <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Certificates</p>
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>{certificatesSuccess ? '✓' : 'Pending'}</p>
             </div>
           </div>
         </Card>
@@ -2599,7 +2677,7 @@ export default function BankAndFamilyForm({ initialData, generatedEmployeeId, on
           
           <Button
             onClick={handleSubmit}
-            disabled={loading} // Always enabled except when loading
+            disabled={loading}
             className={`px-8 py-3 font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
               !loading 
                 ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"

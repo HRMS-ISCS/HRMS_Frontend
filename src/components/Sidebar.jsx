@@ -1,4 +1,4 @@
-// // // src/components/Sidebar.jsx
+// // src/components/Sidebar.jsx (updated)
 // import React from "react";
 // import { Link, useLocation } from "react-router-dom";
 // import {
@@ -9,6 +9,7 @@
 //   Calendar,
 //   ChevronRight,
 //   ChevronLeft,
+//   DollarSign, // Add this import
 // } from "lucide-react";
 // import { useDarkMode } from "@/context/DarkModeContext";
 // import iscsLogo from "@/assets/iscslogo.png";
@@ -33,7 +34,8 @@
 //         ]),
 //     {
 //       id: "employees",
-//       label: "Employees",
+//       // Change label based on user role
+//       label: isEmployee ? "Employee" : "Employees",
 //       icon: Users,
 //       path: "/hrms/employees",
 //     },
@@ -47,6 +49,12 @@
 //             path: "/hrms/register",
 //           },
 //         ]),
+//     {
+//       id: "payroll", // Add this new menu item
+//       label: "Payroll",
+//       icon: DollarSign,
+//       path: "/hrms/payroll",
+//     },
 //     {
 //       id: "documents",
 //       label: "Documents",
@@ -93,7 +101,9 @@
 //                     active
 //                       ? "bg-green-100 text-green-700"
 //                       : "text-gray-600 hover:bg-gray-100"
-//                   }`}
+//                   }
+//                   ${darkMode && !active ? "text-gray-300 hover:bg-gray-700" : ""}
+//                   ${darkMode && active ? "bg-green-900/30 text-green-400" : ""}`}
 //                 >
 //                   <Icon size={20} />
 
@@ -134,7 +144,8 @@
 //     </div>
 //   );
 // }
-// src/components/Sidebar.jsx(employee)
+
+// src/components/Sidebar.jsx (updated)
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -145,6 +156,8 @@ import {
   Calendar,
   ChevronRight,
   ChevronLeft,
+  DollarSign,
+  HelpCircle, // Add this import
 } from "lucide-react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import iscsLogo from "@/assets/iscslogo.png";
@@ -185,6 +198,12 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
           },
         ]),
     {
+      id: "payroll",
+      label: "Payroll",
+      icon: DollarSign,
+      path: "/hrms/payroll",
+    },
+    {
       id: "documents",
       label: "Documents",
       icon: FileText,
@@ -195,6 +214,13 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       label: "Calendar",
       icon: Calendar,
       path: "/hrms/calendar",
+    },
+    // Add Help menu item at the bottom
+    {
+      id: "help",
+      label: "Help",
+      icon: HelpCircle,
+      path: "/hrms/help",
     },
   ];
 
@@ -215,7 +241,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       </div>
 
       {/* MENU */}
-      <nav className="mt-4 px-2">
+      <nav className="mt-4 px-2 h-[calc(100vh-180px)] overflow-y-auto">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -230,7 +256,9 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
                     active
                       ? "bg-green-100 text-green-700"
                       : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                  }
+                  ${darkMode && !active ? "text-gray-300 hover:bg-gray-700" : ""}
+                  ${darkMode && active ? "bg-green-900/30 text-green-400" : ""}`}
                 >
                   <Icon size={20} />
 
