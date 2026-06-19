@@ -9,7 +9,8 @@
 //   Calendar,
 //   ChevronRight,
 //   ChevronLeft,
-//   DollarSign, // Add this import
+//   DollarSign,
+//   HelpCircle, // Add this import
 // } from "lucide-react";
 // import { useDarkMode } from "@/context/DarkModeContext";
 // import iscsLogo from "@/assets/iscslogo.png";
@@ -50,7 +51,7 @@
 //           },
 //         ]),
 //     {
-//       id: "payroll", // Add this new menu item
+//       id: "payroll",
 //       label: "Payroll",
 //       icon: DollarSign,
 //       path: "/hrms/payroll",
@@ -66,6 +67,13 @@
 //       label: "Calendar",
 //       icon: Calendar,
 //       path: "/hrms/calendar",
+//     },
+//     // Add Help menu item at the bottom
+//     {
+//       id: "help",
+//       label: "Help",
+//       icon: HelpCircle,
+//       path: "/hrms/help",
 //     },
 //   ];
 
@@ -86,7 +94,7 @@
 //       </div>
 
 //       {/* MENU */}
-//       <nav className="mt-4 px-2">
+//       <nav className="mt-4 px-2 h-[calc(100vh-180px)] overflow-y-auto">
 //         <ul className="space-y-2">
 //           {menuItems.map((item) => {
 //             const Icon = item.icon;
@@ -144,8 +152,7 @@
 //     </div>
 //   );
 // }
-
-// src/components/Sidebar.jsx (updated)
+// src/components/Sidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -157,7 +164,8 @@ import {
   ChevronRight,
   ChevronLeft,
   DollarSign,
-  HelpCircle, // Add this import
+  HelpCircle,
+  FileCheck,
 } from "lucide-react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import iscsLogo from "@/assets/iscslogo.png";
@@ -170,6 +178,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
   const isEmployee = user?.role === "employee";
 
   const menuItems = [
+    // Dashboard — hidden from employees
     ...(isEmployee
       ? []
       : [
@@ -180,13 +189,16 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
             path: "/hrms/dashboard",
           },
         ]),
+
+    // Employees
     {
       id: "employees",
-      // Change label based on user role
       label: isEmployee ? "Employee" : "Employees",
       icon: Users,
       path: "/hrms/employees",
     },
+
+    // Employee REG — hidden from superadmin
     ...(isSuperAdmin
       ? []
       : [
@@ -197,25 +209,44 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
             path: "/hrms/register",
           },
         ]),
+
+    // Payroll
     {
       id: "payroll",
       label: "Payroll",
       icon: DollarSign,
       path: "/hrms/payroll",
     },
+
+    // Documents
     {
       id: "documents",
       label: "Documents",
       icon: FileText,
       path: "/hrms/documents",
     },
+
+    // Calendar
     {
       id: "calendar",
       label: "Calendar",
       icon: Calendar,
       path: "/hrms/calendar",
     },
-    // Add Help menu item at the bottom
+
+    // Appointment Letter — superadmin / HR / admin only (not employees)
+    ...(!isEmployee
+      ? [
+          {
+            id: "appointment",
+            label: "Appointment",
+            icon: FileCheck,
+            path: "/hrms/appointment",
+          },
+        ]
+      : []),
+
+    // Help
     {
       id: "help",
       label: "Help",
