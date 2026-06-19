@@ -476,6 +476,15 @@ import Appointment from "./components/Appointment";
 import ForgotPasswordPage from "./auth/ForgotPasswordPage";
 import ResetPasswordPage from "./auth/ResetPasswordPage";
 
+// ─── Helper: is this a public auth page that must never be blocked? ───────────
+const isPublicAuthPage = () => {
+  const path = window.location.pathname;
+  return (
+    path.includes("/reset-password") ||
+    path.includes("/forgot-password")
+  );
+};
+
 // ─── Protected Route ──────────────────────────────────────────────────────────
 function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
   if (!isLoggedIn) return <Navigate to="/hrms" replace />;
@@ -503,9 +512,8 @@ function AppContent({
     navigate("/hrms");
   };
 
-  // While validating the stored token show a spinner — but NOT on reset/forgot
-  // pages (those skip the token check so isCheckingToken resolves immediately).
-  if (isCheckingToken) {
+  // Only show loading spinner on normal pages — never block reset/forgot pages
+  if (isCheckingToken && !isPublicAuthPage()) {
     return <LoadingScreen onLoadingComplete={() => {}} />;
   }
 
@@ -517,7 +525,6 @@ function AppContent({
     return "/hrms/about-iscs";
   };
 
-  // Reusable layout shell
   const WithLayout = ({ children }) => (
     <div className="w-full min-h-screen">
       <div className="flex">
@@ -533,7 +540,6 @@ function AppContent({
   return (
     <>
       <Routes>
-        {/* Root redirect */}
         <Route path="/" element={<Navigate to="/hrms" replace />} />
 
         {/* ── LOGIN ── */}
@@ -548,29 +554,15 @@ function AppContent({
           }
         />
 
-        {/* ── FORGOT PASSWORD ──
-            Always render — never guard behind isLoggedIn.
-            A logged-in user who forgot their password must reach this page. */}
+        {/* ── FORGOT PASSWORD — always render, no auth guard ── */}
         <Route path="/hrms/forgot-password" element={<ForgotPasswordPage />} />
         <Route
           path="/forgot-password"
           element={<Navigate to="/hrms/forgot-password" replace />}
         />
 
-        {/* ── RESET PASSWORD ──
-            *** ROOT CAUSE FIX ***
-            Email links arrive as /hrms/reset-password?token=…
-            This route MUST render unconditionally — no isLoggedIn guard.
-
-            The old session in localStorage was causing:
-              1. checkToken() → setIsLoggedIn(true)
-              2. Route guard saw isLoggedIn=true → redirected to /hrms/about-iscs
-              3. ?token= param was lost → user ended up at /hrms in <1 second
-
-            Fix: render ResetPasswordPage with no condition. The page itself
-            clears tokens (removeToken + removeRefreshToken) on success. */}
+        {/* ── RESET PASSWORD — always render, no auth guard ── */}
         <Route path="/hrms/reset-password" element={<ResetPasswordPage />} />
-        {/* Alias without /hrms prefix — preserves the ?token= query string */}
         <Route
           path="/reset-password"
           element={
@@ -599,7 +591,7 @@ function AppContent({
           }
         />
 
-        {/* ── REGISTER (superadmin only) ── */}
+        {/* ── REGISTER ── */}
         <Route
           path="/hrms/register"
           element={
@@ -608,14 +600,12 @@ function AppContent({
               userRole={user?.role}
               requiredRole="superadmin"
             >
-              <WithLayout>
-                <RegisterPage />
-              </WithLayout>
+              <WithLayout><RegisterPage /></WithLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* ── DASHBOARD (not for employees) ── */}
+        {/* ── DASHBOARD ── */}
         <Route
           path="/hrms/dashboard"
           element={
@@ -623,9 +613,7 @@ function AppContent({
               {user?.role === "employee" ? (
                 <Navigate to="/hrms/employees" replace />
               ) : (
-                <WithLayout>
-                  <Dashboard user={user} />
-                </WithLayout>
+                <WithLayout><Dashboard user={user} /></WithLayout>
               )}
             </ProtectedRoute>
           }
@@ -636,9 +624,7 @@ function AppContent({
           path="/hrms/profile"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <Profile />
-              </WithLayout>
+              <WithLayout><Profile /></WithLayout>
             </ProtectedRoute>
           }
         />
@@ -648,9 +634,7 @@ function AppContent({
           path="/hrms/employees"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <Employees user={user} />
-              </WithLayout>
+              <WithLayout><Employees user={user} /></WithLayout>
             </ProtectedRoute>
           }
         />
@@ -660,9 +644,7 @@ function AppContent({
           path="/hrms/documents"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <Documents user={user} />
-              </WithLayout>
+              <WithLayout><Documents user={user} /></WithLayout>
             </ProtectedRoute>
           }
         />
@@ -672,9 +654,7 @@ function AppContent({
           path="/hrms/calendar"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <CalendarComponent user={user} />
-              </WithLayout>
+              <WithLayout><CalendarComponent user={user} /></WithLayout>
             </ProtectedRoute>
           }
         />
@@ -684,9 +664,7 @@ function AppContent({
           path="/hrms/payroll"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <Payroll user={user} />
-              </WithLayout>
+              <WithLayout><Payroll user={user} /></WithLayout>
             </ProtectedRoute>
           }
         />
@@ -696,14 +674,12 @@ function AppContent({
           path="/hrms/help"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <WithLayout>
-                <Help />
-              </WithLayout>
+              <WithLayout><Help /></WithLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* ── APPOINTMENT (not for employees) ── */}
+        {/* ── APPOINTMENT ── */}
         <Route
           path="/hrms/appointment"
           element={
@@ -711,9 +687,7 @@ function AppContent({
               {user?.role === "employee" ? (
                 <Navigate to="/hrms/employees" replace />
               ) : (
-                <WithLayout>
-                  <Appointment />
-                </WithLayout>
+                <WithLayout><Appointment /></WithLayout>
               )}
             </ProtectedRoute>
           }
@@ -740,7 +714,6 @@ function AppContent({
 // ─── InnerAppWrapper ──────────────────────────────────────────────────────────
 function InnerAppWrapper(props) {
   const { darkMode } = useDarkMode();
-
   return (
     <div className={darkMode ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-50"}>
       <Router>
@@ -754,37 +727,23 @@ function InnerAppWrapper(props) {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingToken, setIsCheckingToken] = useState(true);
   const [user, setUser] = useState(null);
 
+  // KEY FIX: if we're on a password page, don't show the loading spinner at all
+  // and don't run the token check — initialize isCheckingToken to false immediately.
+  const [isCheckingToken, setIsCheckingToken] = useState(!isPublicAuthPage());
+
   useEffect(() => {
+    // Skip token validation entirely on public auth pages.
+    // Previously: checkToken() would find an old access_token, set isLoggedIn=true,
+    // and the catch-all route would redirect away from /hrms/reset-password,
+    // dropping the ?token= param before ResetPasswordPage could render.
+    if (isPublicAuthPage()) return;
+
     const checkToken = async () => {
       try {
-        // ── KEY FIX ────────────────────────────────────────────────────────
-        // If the user landed directly on a password-reset or forgot-password
-        // URL, skip validating the stored session entirely.
-        //
-        // Without this, the sequence was:
-        //   1. /hrms/reset-password?token=XYZ loads
-        //   2. checkToken() finds old access_token → hits /db/Current_user/Profile
-        //   3. Sets isLoggedIn=true
-        //   4. Route guard (or catch-all) sees isLoggedIn=true → redirects to
-        //      /hrms/about-iscs, dropping the ?token= param from the URL
-        //   5. User ends up at /hrms within ~1 second — token is gone forever
-        //
-        // By returning early here, isLoggedIn stays false and isCheckingToken
-        // is set to false immediately, so ResetPasswordPage renders right away.
-        // ──────────────────────────────────────────────────────────────────
-        const path = window.location.pathname;
-        const isPasswordPage =
-          path.includes("/reset-password") ||
-          path.includes("/forgot-password");
-
-        if (isPasswordPage) return;
-
         const token = getToken();
         if (!token) return;
-
         const userData = await getCurrentUser();
         setUser(userData);
         setIsLoggedIn(true);
@@ -794,6 +753,7 @@ export default function App() {
         setIsCheckingToken(false);
       }
     };
+
     checkToken();
   }, []);
 
@@ -810,10 +770,7 @@ export default function App() {
         isLoading={isLoading}
         user={user}
         onLogin={handleLogin}
-        onLogout={() => {
-          setIsLoggedIn(false);
-          setUser(null);
-        }}
+        onLogout={() => { setIsLoggedIn(false); setUser(null); }}
         onLoadingComplete={() => setIsLoading(false)}
         isCheckingToken={isCheckingToken}
       />
