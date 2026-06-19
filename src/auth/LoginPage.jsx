@@ -1,5 +1,5 @@
 // src/auth/LoginPage.jsx
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Lock, Shield, User } from "lucide-react";
 import iscsLogo from "@/assets/iscs-logo.png";
 import { login } from "../api";
+import { Link } from "react-router-dom";
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -155,12 +156,12 @@ export default function LoginPage({ onLogin }) {
                   </Button>
                 </form>
 
-                <div className="text-center">
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    Forgot your password?
-                  </button>
-                </div>
-
+                
+<div className="text-center">
+  <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+    Forgot your password?
+  </Link>
+</div>
                 <div className="flex items-center gap-2 text-xs text-gray-400 mt-6">
                   <div className="flex-1 border-t border-gray-200"></div>
                   <span>ISCS Secure Login</span>
