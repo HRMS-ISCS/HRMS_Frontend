@@ -538,7 +538,10 @@ function AppContent({
           }
         />
 
-        {/* FORGOT PASSWORD - Public route */}
+        {/* ============ FIX: PASSWORD RESET ROUTES ============ */}
+        {/* Both /reset-password and /hrms/reset-password routes */}
+        
+        {/* FORGOT PASSWORD - Without /hrms prefix */}
         <Route
           path="/forgot-password"
           element={
@@ -549,8 +552,20 @@ function AppContent({
             )
           }
         />
+        
+        {/* FORGOT PASSWORD - With /hrms prefix (for email links) */}
+        <Route
+          path="/hrms/forgot-password"
+          element={
+            isLoggedIn ? (
+              <Navigate to={getHomeRedirectPath()} replace />
+            ) : (
+              <ForgotPasswordPage />
+            )
+          }
+        />
 
-        {/* RESET PASSWORD - Public route */}
+        {/* RESET PASSWORD - Without /hrms prefix */}
         <Route
           path="/reset-password"
           element={
@@ -561,6 +576,19 @@ function AppContent({
             )
           }
         />
+        
+        {/* RESET PASSWORD - With /hrms prefix (for email links) */}
+        <Route
+          path="/hrms/reset-password"
+          element={
+            isLoggedIn ? (
+              <Navigate to={getHomeRedirectPath()} replace />
+            ) : (
+              <ResetPasswordPage />
+            )
+          }
+        />
+        {/* ============ END OF FIX ============ */}
 
         {/* ABOUT ISCS - Accessible by all non-superadmin users including employees */}
         <Route
