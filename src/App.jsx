@@ -449,7 +449,13 @@
 
 // src/App.jsx
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import LoadingScreen from "./auth/LoadingScreen";
@@ -470,7 +476,7 @@ import Appointment from "./components/Appointment";
 import ForgotPasswordPage from "./auth/ForgotPasswordPage";
 import ResetPasswordPage from "./auth/ResetPasswordPage";
 
-// Protected Route
+// ─── Protected Route ─────────────────────────────────────────────────────────
 function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
   if (!isLoggedIn) return <Navigate to="/hrms" replace />;
   if (requiredRole && userRole === requiredRole)
@@ -478,7 +484,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
   return children;
 }
 
-// AppContent — must be rendered inside <Router>
+// ─── AppContent (must live inside <Router>) ───────────────────────────────────
 function AppContent({
   isLoggedIn,
   isLoading,
@@ -497,6 +503,7 @@ function AppContent({
     navigate("/hrms");
   };
 
+  // While validating the stored token, show a spinner so routes don't flash
   if (isCheckingToken) {
     return <LoadingScreen onLoadingComplete={() => {}} />;
   }
@@ -509,7 +516,7 @@ function AppContent({
     return "/hrms/about-iscs";
   };
 
-  // Reusable layout wrapper
+  // Reusable layout shell (Sidebar + Navbar)
   const WithLayout = ({ children }) => (
     <div className="w-full min-h-screen">
       <div className="flex">
@@ -525,9 +532,10 @@ function AppContent({
   return (
     <>
       <Routes>
+        {/* Root redirect */}
         <Route path="/" element={<Navigate to="/hrms" replace />} />
 
-        {/* LOGIN */}
+        {/* ── LOGIN ── */}
         <Route
           path="/hrms"
           element={
@@ -539,41 +547,34 @@ function AppContent({
           }
         />
 
-        {/* FORGOT PASSWORD */}
-        <Route
-          path="/hrms/forgot-password"
-          element={
-            isLoggedIn ? (
-              <Navigate to={getHomeRedirectPath()} replace />
-            ) : (
-              <ForgotPasswordPage />
-            )
-          }
-        />
-        {/* also support without /hrms prefix in case user navigates directly */}
+        {/* ── FORGOT PASSWORD ──
+            Always accessible — don't block logged-in users, they may still
+            want to reset. */}
+        <Route path="/hrms/forgot-password" element={<ForgotPasswordPage />} />
+        {/* Alias without /hrms prefix */}
         <Route
           path="/forgot-password"
           element={<Navigate to="/hrms/forgot-password" replace />}
         />
 
-        {/* RESET PASSWORD — email links point to /hrms/reset-password?token=... */}
-        <Route
-          path="/hrms/reset-password"
-          element={
-            isLoggedIn ? (
-              <Navigate to={getHomeRedirectPath()} replace />
-            ) : (
-              <ResetPasswordPage />
-            )
-          }
-        />
-        {/* also support without /hrms prefix */}
+        {/* ── RESET PASSWORD ──
+            *** ROOT CAUSE OF THE BUG ***
+            Email links arrive as /hrms/reset-password?token=…
+            If the user still has a valid session in localStorage, isLoggedIn
+            becomes true during the token-check and the old guard redirected
+            them to /hrms/about-iscs, silently discarding the token param.
+
+            Fix: NEVER redirect away from this route. Render ResetPasswordPage
+            unconditionally. The page itself logs the user out on success and
+            navigates to /hrms. */}
+        <Route path="/hrms/reset-password" element={<ResetPasswordPage />} />
+        {/* Alias without /hrms prefix — preserves the ?token= query string */}
         <Route
           path="/reset-password"
           element={<Navigate to={`/hrms/reset-password${window.location.search}`} replace />}
         />
 
-        {/* ABOUT ISCS */}
+        {/* ── ABOUT ISCS ── */}
         <Route
           path="/hrms/about-iscs"
           element={
@@ -581,7 +582,7 @@ function AppContent({
           }
         />
 
-        {/* LOADING SCREEN */}
+        {/* ── LOADING SCREEN ── */}
         <Route
           path="/hrms/loading"
           element={
@@ -591,7 +592,7 @@ function AppContent({
           }
         />
 
-        {/* REGISTER — superadmin only */}
+        {/* ── REGISTER (superadmin only) ── */}
         <Route
           path="/hrms/register"
           element={
@@ -607,7 +608,7 @@ function AppContent({
           }
         />
 
-        {/* DASHBOARD — not for employees */}
+        {/* ── DASHBOARD (not for employees) ── */}
         <Route
           path="/hrms/dashboard"
           element={
@@ -623,7 +624,7 @@ function AppContent({
           }
         />
 
-        {/* PROFILE */}
+        {/* ── PROFILE ── */}
         <Route
           path="/hrms/profile"
           element={
@@ -635,7 +636,7 @@ function AppContent({
           }
         />
 
-        {/* EMPLOYEES */}
+        {/* ── EMPLOYEES ── */}
         <Route
           path="/hrms/employees"
           element={
@@ -647,7 +648,7 @@ function AppContent({
           }
         />
 
-        {/* DOCUMENTS */}
+        {/* ── DOCUMENTS ── */}
         <Route
           path="/hrms/documents"
           element={
@@ -659,7 +660,7 @@ function AppContent({
           }
         />
 
-        {/* CALENDAR */}
+        {/* ── CALENDAR ── */}
         <Route
           path="/hrms/calendar"
           element={
@@ -671,7 +672,7 @@ function AppContent({
           }
         />
 
-        {/* PAYROLL */}
+        {/* ── PAYROLL ── */}
         <Route
           path="/hrms/payroll"
           element={
@@ -683,7 +684,7 @@ function AppContent({
           }
         />
 
-        {/* HELP */}
+        {/* ── HELP ── */}
         <Route
           path="/hrms/help"
           element={
@@ -695,7 +696,7 @@ function AppContent({
           }
         />
 
-        {/* APPOINTMENT — not for employees */}
+        {/* ── APPOINTMENT (not for employees) ── */}
         <Route
           path="/hrms/appointment"
           element={
@@ -711,7 +712,7 @@ function AppContent({
           }
         />
 
-        {/* Catch-all */}
+        {/* ── Catch-all ── */}
         <Route
           path="*"
           element={
@@ -729,14 +730,15 @@ function AppContent({
   );
 }
 
-// DarkMode wrapper — Router lives HERE so all children (including ResetPasswordPage)
-// can safely call useNavigate / useSearchParams
+// ─── InnerAppWrapper ──────────────────────────────────────────────────────────
+// Router lives here (inside DarkModeProvider but wrapping AppContent) so that
+// all children — including ResetPasswordPage — can safely call
+// useNavigate / useSearchParams.
 function InnerAppWrapper(props) {
   const { darkMode } = useDarkMode();
 
   return (
     <div className={darkMode ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-50"}>
-      {/* FIX: Router is now the outermost wrapper so hooks work everywhere */}
       <Router>
         <AppContent {...props} />
       </Router>
@@ -744,6 +746,7 @@ function InnerAppWrapper(props) {
   );
 }
 
+// ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -754,20 +757,16 @@ export default function App() {
     const checkToken = async () => {
       try {
         const token = getToken();
-        if (!token) {
-          setIsCheckingToken(false);
-          return;
-        }
+        if (!token) return;
         const userData = await getCurrentUser();
         setUser(userData);
         setIsLoggedIn(true);
-      } catch (e) {
+      } catch {
         setIsLoggedIn(false);
       } finally {
         setIsCheckingToken(false);
       }
     };
-
     checkToken();
   }, []);
 
@@ -777,12 +776,6 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
-  const handleLoadingComplete = () => setIsLoading(false);
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
   return (
     <DarkModeProvider>
       <InnerAppWrapper
@@ -790,8 +783,8 @@ export default function App() {
         isLoading={isLoading}
         user={user}
         onLogin={handleLogin}
-        onLogout={handleLogout}
-        onLoadingComplete={handleLoadingComplete}
+        onLogout={() => { setIsLoggedIn(false); setUser(null); }}
+        onLoadingComplete={() => setIsLoading(false)}
         isCheckingToken={isCheckingToken}
       />
     </DarkModeProvider>

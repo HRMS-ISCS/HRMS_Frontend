@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import iscsLogo from "@/assets/iscs-logo.png";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { resetPassword } from "../api";
+import { resetPassword, removeToken, removeRefreshToken } from "../api";
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -77,6 +77,9 @@ export default function ResetPasswordPage() {
         formData.new_password,
         formData.confirm_new_password
       );
+      // Clear any existing session so the user lands on a clean login page
+      removeToken();
+      removeRefreshToken();
       setSuccess(true);
       // FIX 1: was navigate("/login") — login route is /hrms
       setTimeout(() => {
