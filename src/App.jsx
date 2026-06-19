@@ -446,9 +446,10 @@
 //     </DarkModeProvider>
 //   );
 // }
+
 // src/App.jsx
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import LoadingScreen from "./auth/LoadingScreen";
@@ -463,13 +464,9 @@ import CalendarComponent from "./components/Calendar";
 import Help from "./components/Help";
 import Payroll from "./components/Payroll";
 import { Toaster } from "@/components/ui/toaster";
-import { getToken, removeToken, getCurrentUser, isTokenExpired } from "./api";
+import { getToken, removeToken, getCurrentUser } from "./api";
 import { DarkModeProvider, useDarkMode } from "@/context/DarkModeContext";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-
 import Appointment from "./components/Appointment";
-
-// Import new password reset components
 import ForgotPasswordPage from "./auth/ForgotPasswordPage";
 import ResetPasswordPage from "./auth/ResetPasswordPage";
 
@@ -481,7 +478,7 @@ function ProtectedRoute({ children, isLoggedIn, userRole, requiredRole }) {
   return children;
 }
 
-// AppContent function
+// AppContent — must be rendered inside <Router>
 function AppContent({
   isLoggedIn,
   isLoading,
@@ -504,29 +501,33 @@ function AppContent({
     return <LoadingScreen onLoadingComplete={() => {}} />;
   }
 
-  // sidebar width logic
   const sidebarMargin = collapsed ? "ml-20" : "ml-64";
 
-  // Helper function to get the appropriate redirect path based on user role
   const getHomeRedirectPath = () => {
     if (!user) return "/hrms";
-
-    if (user.role === "superadmin") {
-      return "/hrms/loading";
-    } else if (user.role === "employee") {
-      // Employees should go to AboutISCS first, then Loading, then Employees
-      return "/hrms/about-iscs";
-    } else {
-      return "/hrms/about-iscs";
-    }
+    if (user.role === "superadmin") return "/hrms/loading";
+    return "/hrms/about-iscs";
   };
+
+  // Reusable layout wrapper
+  const WithLayout = ({ children }) => (
+    <div className="w-full min-h-screen">
+      <div className="flex">
+        <Sidebar user={user} collapsed={collapsed} setCollapsed={setCollapsed} />
+        <div className={`flex-1 ${sidebarMargin} transition-all`}>
+          <Navbar onLogout={handleLogout} collapsed={collapsed} />
+          <main className="min-h-screen pt-16">{children}</main>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
       <Routes>
         <Route path="/" element={<Navigate to="/hrms" replace />} />
 
-        {/* HOME */}
+        {/* LOGIN */}
         <Route
           path="/hrms"
           element={
@@ -538,22 +539,7 @@ function AppContent({
           }
         />
 
-        {/* ============ FIX: PASSWORD RESET ROUTES ============ */}
-        {/* Both /reset-password and /hrms/reset-password routes */}
-        
-        {/* FORGOT PASSWORD - Without /hrms prefix */}
-        <Route
-          path="/forgot-password"
-          element={
-            isLoggedIn ? (
-              <Navigate to={getHomeRedirectPath()} replace />
-            ) : (
-              <ForgotPasswordPage />
-            )
-          }
-        />
-        
-        {/* FORGOT PASSWORD - With /hrms prefix (for email links) */}
+        {/* FORGOT PASSWORD */}
         <Route
           path="/hrms/forgot-password"
           element={
@@ -564,20 +550,13 @@ function AppContent({
             )
           }
         />
-
-        {/* RESET PASSWORD - Without /hrms prefix */}
+        {/* also support without /hrms prefix in case user navigates directly */}
         <Route
-          path="/reset-password"
-          element={
-            isLoggedIn ? (
-              <Navigate to={getHomeRedirectPath()} replace />
-            ) : (
-              <ResetPasswordPage />
-            )
-          }
+          path="/forgot-password"
+          element={<Navigate to="/hrms/forgot-password" replace />}
         />
-        
-        {/* RESET PASSWORD - With /hrms prefix (for email links) */}
+
+        {/* RESET PASSWORD — email links point to /hrms/reset-password?token=... */}
         <Route
           path="/hrms/reset-password"
           element={
@@ -588,18 +567,17 @@ function AppContent({
             )
           }
         />
-        {/* ============ END OF FIX ============ */}
+        {/* also support without /hrms prefix */}
+        <Route
+          path="/reset-password"
+          element={<Navigate to={`/hrms/reset-password${window.location.search}`} replace />}
+        />
 
-        {/* ABOUT ISCS - Accessible by all non-superadmin users including employees */}
+        {/* ABOUT ISCS */}
         <Route
           path="/hrms/about-iscs"
           element={
-            isLoggedIn ? (
-              // Allow both regular users AND employees to view AboutISCS
-              <AboutISCS />
-            ) : (
-              <Navigate to="/hrms" replace />
-            )
+            isLoggedIn ? <AboutISCS /> : <Navigate to="/hrms" replace />
           }
         />
 
@@ -613,7 +591,7 @@ function AppContent({
           }
         />
 
-        {/* REGISTER - Only accessible by superadmin */}
+        {/* REGISTER — superadmin only */}
         <Route
           path="/hrms/register"
           element={
@@ -622,28 +600,14 @@ function AppContent({
               userRole={user?.role}
               requiredRole="superadmin"
             >
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <RegisterPage />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <RegisterPage />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* DASHBOARD - Not accessible by employees */}
+        {/* DASHBOARD — not for employees */}
         <Route
           path="/hrms/dashboard"
           element={
@@ -651,23 +615,9 @@ function AppContent({
               {user?.role === "employee" ? (
                 <Navigate to="/hrms/employees" replace />
               ) : (
-                <div className="w-full min-h-screen">
-                  <div className="flex">
-                    <Sidebar
-                      user={user}
-                      collapsed={collapsed}
-                      setCollapsed={setCollapsed}
-                    />
-
-                    <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                      <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                      <main className="min-h-screen pt-16">
-                        <Dashboard user={user} />
-                      </main>
-                    </div>
-                  </div>
-                </div>
+                <WithLayout>
+                  <Dashboard user={user} />
+                </WithLayout>
               )}
             </ProtectedRoute>
           }
@@ -678,49 +628,21 @@ function AppContent({
           path="/hrms/profile"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <Profile />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <Profile />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* EMPLOYEES - Accessible by all roles */}
+        {/* EMPLOYEES */}
         <Route
           path="/hrms/employees"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <Employees user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <Employees user={user} />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
@@ -730,23 +652,9 @@ function AppContent({
           path="/hrms/documents"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <Documents user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <Documents user={user} />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
@@ -756,23 +664,9 @@ function AppContent({
           path="/hrms/calendar"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <CalendarComponent user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <CalendarComponent user={user} />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
@@ -782,23 +676,9 @@ function AppContent({
           path="/hrms/payroll"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <Payroll user={user} />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <Payroll user={user} />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
@@ -808,28 +688,14 @@ function AppContent({
           path="/hrms/help"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <div className="w-full min-h-screen">
-                <div className="flex">
-                  <Sidebar
-                    user={user}
-                    collapsed={collapsed}
-                    setCollapsed={setCollapsed}
-                  />
-
-                  <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                    <Navbar onLogout={handleLogout} collapsed={collapsed} />
-
-                    <main className="min-h-screen pt-16">
-                      <Help />
-                    </main>
-                  </div>
-                </div>
-              </div>
+              <WithLayout>
+                <Help />
+              </WithLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* APPOINTMENT LETTER - Superadmin / HR / Admin only (not employees) */}
+        {/* APPOINTMENT — not for employees */}
         <Route
           path="/hrms/appointment"
           element={
@@ -837,27 +703,15 @@ function AppContent({
               {user?.role === "employee" ? (
                 <Navigate to="/hrms/employees" replace />
               ) : (
-                <div className="w-full min-h-screen">
-                  <div className="flex">
-                    <Sidebar
-                      user={user}
-                      collapsed={collapsed}
-                      setCollapsed={setCollapsed}
-                    />
-                    <div className={`flex-1 ${sidebarMargin} transition-all`}>
-                      <Navbar onLogout={handleLogout} collapsed={collapsed} />
-                      <main className="min-h-screen pt-16">
-                        <Appointment />
-                      </main>
-                    </div>
-                  </div>
-                </div>
+                <WithLayout>
+                  <Appointment />
+                </WithLayout>
               )}
             </ProtectedRoute>
           }
         />
 
-        {/* Catch all route */}
+        {/* Catch-all */}
         <Route
           path="*"
           element={
@@ -875,16 +729,14 @@ function AppContent({
   );
 }
 
-// Wrapper
+// DarkMode wrapper — Router lives HERE so all children (including ResetPasswordPage)
+// can safely call useNavigate / useSearchParams
 function InnerAppWrapper(props) {
   const { darkMode } = useDarkMode();
 
   return (
-    <div
-      className={`${
-        darkMode ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-50"
-      }`}
-    >
+    <div className={darkMode ? "min-h-screen bg-gray-900" : "min-h-screen bg-gray-50"}>
+      {/* FIX: Router is now the outermost wrapper so hooks work everywhere */}
       <Router>
         <AppContent {...props} />
       </Router>
@@ -902,12 +754,10 @@ export default function App() {
     const checkToken = async () => {
       try {
         const token = getToken();
-
         if (!token) {
           setIsCheckingToken(false);
           return;
         }
-
         const userData = await getCurrentUser();
         setUser(userData);
         setIsLoggedIn(true);
@@ -927,10 +777,7 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
-
+  const handleLoadingComplete = () => setIsLoading(false);
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);

@@ -17,11 +17,11 @@ export default function ResetPasswordPage() {
 
   const [formData, setFormData] = useState({
     new_password: "",
-    confirm_new_password: ""
+    confirm_new_password: "",
   });
   const [showPasswords, setShowPasswords] = useState({
     new: false,
-    confirm: false
+    confirm: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,40 +29,40 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!token) {
-      setError("Invalid or missing reset token. Please request a new password reset.");
+      setError(
+        "Invalid or missing reset token. Please request a new password reset."
+      );
     }
   }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
-      [field]: !prev[field]
+      [field]: !prev[field],
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!token) {
       setError("Invalid reset token");
       return;
     }
 
-    // Validate passwords match
     if (formData.new_password !== formData.confirm_new_password) {
       setError("Passwords do not match");
       return;
     }
 
-    // Validate password length
     if (formData.new_password.length < 8) {
       setError("Password must be at least 8 characters long");
       return;
@@ -72,10 +72,15 @@ export default function ResetPasswordPage() {
     setError("");
 
     try {
-      await resetPassword(token, formData.new_password, formData.confirm_new_password);
+      await resetPassword(
+        token,
+        formData.new_password,
+        formData.confirm_new_password
+      );
       setSuccess(true);
+      // FIX 1: was navigate("/login") — login route is /hrms
       setTimeout(() => {
-        navigate("/login");
+        navigate("/hrms");
       }, 3000);
     } catch (error) {
       setError(error.message || "Failed to reset password. Please try again.");
@@ -94,12 +99,15 @@ export default function ResetPasswordPage() {
                 <Lock className="w-8 h-8 text-red-600" />
               </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Invalid Reset Link</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Invalid Reset Link
+            </h2>
             <p className="text-gray-600 text-sm mb-6">
-              This password reset link is invalid or has expired.
-              Please request a new password reset.
+              This password reset link is invalid or has expired. Please request
+              a new password reset.
             </p>
-            <Link to="/forgot-password">
+            {/* FIX 2: was /forgot-password — route is /hrms/forgot-password */}
+            <Link to="/hrms/forgot-password">
               <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
                 Request New Reset Link
               </Button>
@@ -126,12 +134,15 @@ export default function ResetPasswordPage() {
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Password Reset Successful!</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Password Reset Successful!
+              </h2>
               <p className="text-gray-600 text-sm mb-6">
-                Your password has been reset successfully.
-                You will be redirected to the login page shortly.
+                Your password has been reset successfully. You will be
+                redirected to the login page shortly.
               </p>
-              <Link to="/login">
+              {/* FIX 3: was /login — login route is /hrms */}
+              <Link to="/hrms">
                 <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
                   Go to Login
                 </Button>
@@ -162,7 +173,9 @@ export default function ResetPasswordPage() {
                   className="h-12 object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-bold text-gray-800">Create New Password</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Create New Password
+              </h1>
               <p className="text-gray-600 text-sm mt-2">
                 Enter your new password below
               </p>
@@ -171,11 +184,17 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* New Password */}
               <div>
-                <Label htmlFor="new_password" className="text-gray-700 text-sm font-medium">
+                <Label
+                  htmlFor="new_password"
+                  className="text-gray-700 text-sm font-medium"
+                >
                   New Password
                 </Label>
                 <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                   <Input
                     id="new_password"
                     name="new_password"
@@ -189,7 +208,7 @@ export default function ResetPasswordPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => togglePasswordVisibility('new')}
+                    onClick={() => togglePasswordVisibility("new")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -199,11 +218,17 @@ export default function ResetPasswordPage() {
 
               {/* Confirm Password */}
               <div>
-                <Label htmlFor="confirm_new_password" className="text-gray-700 text-sm font-medium">
+                <Label
+                  htmlFor="confirm_new_password"
+                  className="text-gray-700 text-sm font-medium"
+                >
                   Confirm New Password
                 </Label>
                 <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                   <Input
                     id="confirm_new_password"
                     name="confirm_new_password"
@@ -216,10 +241,14 @@ export default function ResetPasswordPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => togglePasswordVisibility('confirm')}
+                    onClick={() => togglePasswordVisibility("confirm")}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPasswords.confirm ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -246,7 +275,11 @@ export default function ResetPasswordPage() {
               </Button>
 
               <div className="text-center">
-                <Link to="/login" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                {/* FIX 4: was /login — login route is /hrms */}
+                <Link
+                  to="/hrms"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
                   ← Back to Login
                 </Link>
               </div>
