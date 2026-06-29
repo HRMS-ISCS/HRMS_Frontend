@@ -1038,7 +1038,7 @@ export default function Appointment() {
                                 <SelectItem value="relieving">
                                     <div className="flex items-center gap-2">
                                         <LogOut size={16} />
-                                        <span className="text-sm">Relieving /amp; Experience</span>
+                                        <span className="text-sm">Relieving/Experience</span>
                                     </div>
                                 </SelectItem>
                             </SelectContent>
