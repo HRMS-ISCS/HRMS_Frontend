@@ -67,7 +67,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
     // Documents
     {
       id: "documents",
-      label: "Documents",
+      label: "EMP Documents",
       icon: FileText,
       path: "/hrms/documents",
     },
