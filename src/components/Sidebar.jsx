@@ -109,13 +109,20 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
       ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}
     >
       {/* LOGO */}
-      <div className="p-4 border-b flex justify-center">
+      {/* <div className="p-4 border-b flex justify-center">
         <img
           src={iscsLogo}
           alt="logo"
           className={`transition-all ${collapsed ? "h-8" : "h-10"}`}
         />
-      </div>
+      </div> */}
+      <div className="h-16 border-b flex items-center justify-center px-4">
+  <img
+    src={iscsLogo}
+    alt="logo"
+    className={`transition-all ${collapsed ? "h-8" : "h-10"}`}
+  />
+</div>
 
       {/* MENU */}
       <nav className="mt-4 px-2 h-[calc(100vh-180px)] overflow-y-auto">
