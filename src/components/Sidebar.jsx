@@ -59,7 +59,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
     // Payroll
     {
       id: "payroll",
-      label: "Payroll",
+      label: "Payslips",
       icon: DollarSign,
       path: "/hrms/payroll",
     },

@@ -709,6 +709,57 @@ import {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SectionHeader is defined OUTSIDE Appointment so React never remounts it
+// on a parent re-render (which was causing inputs to lose focus mid-typing).
+// ─────────────────────────────────────────────────────────────────────────────
+const SectionHeader = ({
+    icon: Icon,
+    title,
+    section,
+    expandedSections,
+    toggleSection,
+    colorClass,
+    darkMode,
+    children,
+}) => {
+    const sectionTitleClass = `text-sm sm:text-base md:text-lg font-semibold ${
+        darkMode ? "text-gray-100" : "text-gray-800"
+    }`;
+
+    return (
+        <div className="mb-3 sm:mb-4">
+            <button
+                type="button"
+                onClick={() => toggleSection(section)}
+                className="flex items-center justify-between w-full group"
+            >
+                <div className="flex items-center gap-2">
+                    <Icon
+                        className={`text-${colorClass}-500 dark:text-${colorClass}-400`}
+                        size={18}
+                    />
+                    <h2 className={sectionTitleClass}>{title}</h2>
+                </div>
+                <div className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    {expandedSections[section] ? (
+                        <ChevronUp size={18} className="text-gray-500" />
+                    ) : (
+                        <ChevronDown size={18} className="text-gray-500" />
+                    )}
+                </div>
+            </button>
+
+            {expandedSections[section] && (
+                <div className="mt-3 sm:mt-4">{children}</div>
+            )}
+        </div>
+    );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main component
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Appointment() {
     const { darkMode } = useDarkMode();
     const { toast } = useToast();
@@ -723,7 +774,6 @@ export default function Appointment() {
         settings: true,
     });
 
-    // Common fields for all letter types
     const [formData, setFormData] = useState({
         employee_name: "",
         gender_prefix: "",
@@ -754,53 +804,81 @@ export default function Appointment() {
 
     const buildRequestBody = () => {
         const body = {};
-        
+
         if (formData.employee_name.trim()) body.employee_name = formData.employee_name.trim();
-        if (formData.gender_prefix) body.gender_prefix = formData.gender_prefix;
-        if (formData.father_name.trim()) body.father_name = formData.father_name.trim();
+        if (formData.gender_prefix)        body.gender_prefix = formData.gender_prefix;
+        if (formData.father_name.trim())   body.father_name   = formData.father_name.trim();
         if (formData.address_line1.trim()) body.address_line1 = formData.address_line1.trim();
         if (formData.address_line2.trim()) body.address_line2 = formData.address_line2.trim();
         if (formData.address_line3.trim()) body.address_line3 = formData.address_line3.trim();
-        if (formData.designation.trim()) body.designation = formData.designation.trim();
-        if (formData.date_of_joining) body.date_of_joining = formData.date_of_joining;
-        if (formData.annual_ctc) body.annual_ctc = parseFloat(formData.annual_ctc);
-        if (formData.letter_date) body.letter_date = formData.letter_date;
-        
+        if (formData.designation.trim())   body.designation   = formData.designation.trim();
+        if (formData.date_of_joining)      body.date_of_joining = formData.date_of_joining;
+        if (formData.annual_ctc)           body.annual_ctc    = parseFloat(formData.annual_ctc);
+        if (formData.letter_date)          body.letter_date   = formData.letter_date;
+
         if (letterType === "relieving") {
-            if (formData.relieving_date) body.relieving_date = formData.relieving_date;
-            if (formData.client_name.trim()) body.client_name = formData.client_name.trim();
-            if (formData.client_release_date) body.client_release_date = formData.client_release_date;
-            if (formData.reference_number.trim()) body.reference_number = formData.reference_number.trim();
+            if (formData.relieving_date)          body.relieving_date    = formData.relieving_date;
+            if (formData.client_name.trim())      body.client_name       = formData.client_name.trim();
+            if (formData.client_release_date)     body.client_release_date = formData.client_release_date;
+            if (formData.reference_number.trim()) body.reference_number  = formData.reference_number.trim();
         }
-        
+
         return body;
     };
 
     const getEndpoint = () => {
-        switch(letterType) {
-            case "appointment":
-                return `${API_BASE_URL}/appointment-letter/generate`;
-            case "proposed":
-                return `${API_BASE_URL}/proposed-offer-letter/generate`;
-            case "relieving":
-                return `${API_BASE_URL}/relieving-experience-letter/generate`;
-            default:
-                return `${API_BASE_URL}/appointment-letter/generate`;
+        switch (letterType) {
+            case "appointment": return `${API_BASE_URL}/appointment-letter/generate`;
+            case "proposed":    return `${API_BASE_URL}/proposed-offer-letter/generate`;
+            case "relieving":   return `${API_BASE_URL}/relieving-experience-letter/generate`;
+            default:            return `${API_BASE_URL}/appointment-letter/generate`;
         }
     };
 
     const getDefaultFilename = () => {
-        const name = formData.employee_name.trim() || "Employee";
+        const name     = formData.employee_name.trim() || "Employee";
         const safeName = name.replace(/\s+/g, "_");
-        switch(letterType) {
-            case "appointment":
-                return `Appointment_Letter_${safeName}.pdf`;
-            case "proposed":
-                return `Proposed_Offer_Letter_${safeName}.pdf`;
-            case "relieving":
-                return `Relieving_Experience_Letter_${safeName}.pdf`;
-            default:
-                return `Letter_${safeName}.pdf`;
+        switch (letterType) {
+            case "appointment": return `Appointment_Letter_${safeName}.pdf`;
+            case "proposed":    return `Proposed_Offer_Letter_${safeName}.pdf`;
+            case "relieving":   return `Relieving_Experience_Letter_${safeName}.pdf`;
+            default:            return `Letter_${safeName}.pdf`;
+        }
+    };
+
+    const getLetterTypeDisplay = () => {
+        switch (letterType) {
+            case "appointment": return "Appointment Letter";
+            case "proposed":    return "Proposed Offer Letter";
+            case "relieving":   return "Relieving & Experience Letter";
+            default:            return "Letter";
+        }
+    };
+
+    const getLetterTypeIcon = () => {
+        switch (letterType) {
+            case "appointment": return FileCheck;
+            case "proposed":    return FileSignature;
+            case "relieving":   return LogOut;
+            default:            return FileText;
+        }
+    };
+
+    const getLetterTypeDescription = () => {
+        switch (letterType) {
+            case "appointment": return "Generates full appointment letters with salary breakup table";
+            case "proposed":    return "Generates proposed offer letters with salary breakup table";
+            case "relieving":   return "Generates relieving & experience letters with tenure details";
+            default:            return "Generate letter";
+        }
+    };
+
+    const getLetterTypeColor = () => {
+        switch (letterType) {
+            case "appointment": return "blue";
+            case "proposed":    return "purple";
+            case "relieving":   return "orange";
+            default:            return "blue";
         }
     };
 
@@ -809,9 +887,9 @@ export default function Appointment() {
         setGeneratedFilename(null);
 
         try {
-            const token = getToken();
+            const token    = getToken();
             const endpoint = getEndpoint();
-            
+
             const response = await fetch(endpoint, {
                 method: "POST",
                 headers: {
@@ -834,9 +912,9 @@ export default function Appointment() {
             }
 
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            const url  = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
-            link.href = url;
+            link.href     = url;
             link.download = filename;
             document.body.appendChild(link);
             link.click();
@@ -845,10 +923,9 @@ export default function Appointment() {
 
             setGeneratedFilename(filename);
 
-            const letterTypeDisplay = getLetterTypeDisplay();
             toast({
                 title: "Success",
-                description: `${letterTypeDisplay} generated: ${filename}`,
+                description: `${getLetterTypeDisplay()} generated: ${filename}`,
                 className: darkMode
                     ? "bg-gray-800 border-gray-700 text-gray-100"
                     : "bg-white border-gray-200 text-gray-800",
@@ -867,76 +944,32 @@ export default function Appointment() {
 
     const handleReset = () => {
         setFormData({
-            employee_name: "",
-            gender_prefix: "",
-            father_name: "",
-            address_line1: "",
-            address_line2: "",
-            address_line3: "",
-            designation: "",
-            date_of_joining: "",
-            annual_ctc: "",
-            letter_date: "",
-            relieving_date: "",
-            client_name: "",
-            client_release_date: "",
-            reference_number: "",
+            employee_name:      "",
+            gender_prefix:      "",
+            father_name:        "",
+            address_line1:      "",
+            address_line2:      "",
+            address_line3:      "",
+            designation:        "",
+            date_of_joining:    "",
+            annual_ctc:         "",
+            letter_date:        "",
+            relieving_date:     "",
+            client_name:        "",
+            client_release_date:"",
+            reference_number:   "",
         });
         setGeneratedFilename(null);
     };
 
-    const getLetterTypeDisplay = () => {
-        switch(letterType) {
-            case "appointment":
-                return "Appointment Letter";
-            case "proposed":
-                return "Proposed Offer Letter";
-            case "relieving":
-                return "Relieving & Experience Letter";
-            default:
-                return "Letter";
-        }
-    };
+    // ── Derived values ────────────────────────────────────────────────────────
+    const letterTypeDisplay = getLetterTypeDisplay();
+    const LetterIcon        = getLetterTypeIcon();
+    const colorClass        = getLetterTypeColor();
+    const isRelieving       = letterType === "relieving";
 
-    const getLetterTypeIcon = () => {
-        switch(letterType) {
-            case "appointment":
-                return FileCheck;
-            case "proposed":
-                return FileSignature;
-            case "relieving":
-                return LogOut;
-            default:
-                return FileText;
-        }
-    };
-
-    const getLetterTypeDescription = () => {
-        switch(letterType) {
-            case "appointment":
-                return "Generates full appointment letters with salary breakup table";
-            case "proposed":
-                return "Generates proposed offer letters with salary breakup table";
-            case "relieving":
-                return "Generates relieving & experience letters with tenure details";
-            default:
-                return "Generate letter";
-        }
-    };
-
-    const getLetterTypeColor = () => {
-        switch(letterType) {
-            case "appointment":
-                return "blue";
-            case "proposed":
-                return "purple";
-            case "relieving":
-                return "orange";
-            default:
-                return "blue";
-        }
-    };
-
+    // Stable class strings (not re-created per keystroke since they only
+    // depend on `darkMode`, which changes rarely)
     const inputClass = `h-10 text-sm w-full ${
         darkMode
             ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 placeholder-gray-400"
@@ -949,44 +982,14 @@ export default function Appointment() {
         darkMode ? "bg-gray-800 border-gray-700" : "bg-white border border-gray-200"
     } shadow-sm rounded-lg`;
 
-    const sectionTitleClass = `text-sm sm:text-base md:text-lg font-semibold ${
-        darkMode ? "text-gray-100" : "text-gray-800"
-    }`;
+    // Shared props passed to every SectionHeader
+    const sharedHeaderProps = { expandedSections, toggleSection, colorClass, darkMode };
 
-    const letterTypeDisplay = getLetterTypeDisplay();
-    const LetterIcon = getLetterTypeIcon();
-    const isRelieving = letterType === "relieving";
-    const colorClass = getLetterTypeColor();
-
-    const SectionHeader = ({ icon: Icon, title, section, children }) => (
-        <div className="mb-3 sm:mb-4">
-            <button
-                onClick={() => toggleSection(section)}
-                className="flex items-center justify-between w-full group"
-            >
-                <div className="flex items-center gap-2">
-                    <Icon className={`text-${colorClass}-500 dark:text-${colorClass}-400`} size={18} />
-                    <h2 className={sectionTitleClass}>{title}</h2>
-                </div>
-                <div className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    {expandedSections[section] ? (
-                        <ChevronUp size={18} className="text-gray-500" />
-                    ) : (
-                        <ChevronDown size={18} className="text-gray-500" />
-                    )}
-                </div>
-            </button>
-            {expandedSections[section] && (
-                <div className="mt-3 sm:mt-4">
-                    {children}
-                </div>
-            )}
-        </div>
-    );
-
+    // ─────────────────────────────────────────────────────────────────────────
     return (
         <div className={`w-full min-h-screen p-2 sm:p-3 md:p-6 ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
-            {/* Header */}
+
+            {/* ── Header ── */}
             <div className="mb-4 sm:mb-6">
                 <div className="flex flex-col gap-3">
                     <div>
@@ -997,8 +1000,8 @@ export default function Appointment() {
                             Generate and download {letterTypeDisplay.toLowerCase()} for employees as PDF
                         </p>
                     </div>
-                    
-                    {/* Letter Type Dropdown - Mobile Optimized */}
+
+                    {/* Letter Type Dropdown */}
                     <div className="w-full sm:w-auto sm:min-w-[220px]">
                         <Label className={labelClass}>Letter Type</Label>
                         <Select
@@ -1035,7 +1038,7 @@ export default function Appointment() {
                                 <SelectItem value="relieving">
                                     <div className="flex items-center gap-2">
                                         <LogOut size={16} />
-                                        <span className="text-sm">Relieving & Experience</span>
+                                        <span className="text-sm">Relieving &amp; Experience</span>
                                     </div>
                                 </SelectItem>
                             </SelectContent>
@@ -1044,7 +1047,7 @@ export default function Appointment() {
                 </div>
             </div>
 
-            {/* Info Note - Mobile Optimized */}
+            {/* ── Info Note ── */}
             <div
                 className={`mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 rounded-lg border flex items-start gap-2 sm:gap-3 ${
                     darkMode
@@ -1065,7 +1068,12 @@ export default function Appointment() {
 
             {/* ── Section 1: Employee Identity ── */}
             <Card className={sectionCardClass}>
-                <SectionHeader icon={User} title="Employee Identity" section="identity">
+                <SectionHeader
+                    {...sharedHeaderProps}
+                    icon={User}
+                    title="Employee Identity"
+                    section="identity"
+                >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <Label className={labelClass}>Salutation</Label>
@@ -1119,10 +1127,15 @@ export default function Appointment() {
                 </SectionHeader>
             </Card>
 
-            {/* ── Section 2: Address ── */}
+            {/* ── Section 2: Address (hidden for relieving) ── */}
             {!isRelieving && (
                 <Card className={sectionCardClass}>
-                    <SectionHeader icon={MapPin} title="Address" section="address">
+                    <SectionHeader
+                        {...sharedHeaderProps}
+                        icon={MapPin}
+                        title="Address"
+                        section="address"
+                    >
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                             <div>
                                 <Label className={labelClass}>Address Line 1</Label>
@@ -1161,9 +1174,10 @@ export default function Appointment() {
 
             {/* ── Section 3: Details ── */}
             <Card className={sectionCardClass}>
-                <SectionHeader 
-                    icon={isRelieving ? Building : Briefcase} 
-                    title={isRelieving ? "Relieving Details" : "Appointment Details"} 
+                <SectionHeader
+                    {...sharedHeaderProps}
+                    icon={isRelieving ? Building : Briefcase}
+                    title={isRelieving ? "Relieving Details" : "Appointment Details"}
                     section="details"
                 >
                     {isRelieving ? (
@@ -1268,7 +1282,12 @@ export default function Appointment() {
 
             {/* ── Section 4: Letter Settings ── */}
             <Card className={sectionCardClass}>
-                <SectionHeader icon={FileText} title="Letter Settings" section="settings">
+                <SectionHeader
+                    {...sharedHeaderProps}
+                    icon={FileText}
+                    title="Letter Settings"
+                    section="settings"
+                >
                     <div className="max-w-xs w-full">
                         <Label className={labelClass}>
                             {isRelieving ? "Generated Date" : "Letter Date"}
@@ -1320,7 +1339,7 @@ export default function Appointment() {
                     ) : (
                         <>
                             <Download size={18} className="mr-2 flex-shrink-0" />
-                            <span>Generate & Download</span>
+                            <span>Generate &amp; Download</span>
                         </>
                     )}
                 </Button>
@@ -1339,7 +1358,7 @@ export default function Appointment() {
                 </Button>
             </div>
 
-            {/* Footer - Mobile Optimized */}
+            {/* ── Footer ── */}
             <Card
                 className={`bg-gradient-to-r ${
                     darkMode
@@ -1349,9 +1368,9 @@ export default function Appointment() {
             >
                 <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-1">
-                        {React.createElement(LetterIcon, { 
-                            size: 18, 
-                            className: darkMode ? `text-${colorClass}-400` : `text-${colorClass}-600` 
+                        {React.createElement(LetterIcon, {
+                            size: 18,
+                            className: darkMode ? `text-${colorClass}-400` : `text-${colorClass}-600`,
                         })}
                         <h3 className={`text-sm sm:text-base font-semibold ${darkMode ? "text-gray-100" : "text-gray-800"}`}>
                             {letterTypeDisplay}
