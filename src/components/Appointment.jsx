@@ -850,7 +850,7 @@ export default function Appointment() {
         switch (letterType) {
             case "appointment": return "Appointment Letter";
             case "proposed":    return "Proposed Offer Letter";
-            case "relieving":   return "Relieving & Experience Letter";
+            case "relieving":   return "Relieving/Experience Letter";
             default:            return "Letter";
         }
     };
@@ -868,7 +868,7 @@ export default function Appointment() {
         switch (letterType) {
             case "appointment": return "Generates full appointment letters with salary breakup table";
             case "proposed":    return "Generates proposed offer letters with salary breakup table";
-            case "relieving":   return "Generates relieving & experience letters with tenure details";
+            case "relieving":   return "Generates relieving/experience letters with tenure details";
             default:            return "Generate letter";
         }
     };
