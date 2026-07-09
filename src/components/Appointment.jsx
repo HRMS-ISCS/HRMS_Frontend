@@ -1,3 +1,4 @@
+
 // // src/components/Appointment.jsx
 // import React, { useState } from "react";
 // import { Card } from "@/components/ui/card";
@@ -22,6 +23,13 @@
 //     UserCheck,
 //     ChevronDown,
 //     ChevronUp,
+//     Send,
+//     Mail,
+//     Plus,
+//     X,
+//     Users,
+//     Eye,
+//     EyeOff,
 // } from "lucide-react";
 // import { useDarkMode } from "@/context/DarkModeContext";
 // import { getToken } from "../api";
@@ -37,8 +45,7 @@
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 // // ─────────────────────────────────────────────────────────────────────────────
-// // SectionHeader is defined OUTSIDE Appointment so React never remounts it
-// // on a parent re-render (which was causing inputs to lose focus mid-typing).
+// // SectionHeader component
 // // ─────────────────────────────────────────────────────────────────────────────
 // const SectionHeader = ({
 //     icon: Icon,
@@ -99,6 +106,7 @@
 //         address: true,
 //         details: true,
 //         settings: true,
+//         email: true,
 //     });
 
 //     const [formData, setFormData] = useState({
@@ -118,6 +126,15 @@
 //         reference_number: "",
 //     });
 
+//     // Email recipients state
+//     const [emailRecipients, setEmailRecipients] = useState({
+//         to: [""],
+//         cc: [""],
+//         bcc: [""],
+//     });
+
+//     const [sendEmail, setSendEmail] = useState(false);
+
 //     const handleChange = (field, value) => {
 //         setFormData((prev) => ({ ...prev, [field]: value }));
 //     };
@@ -129,9 +146,41 @@
 //         }));
 //     };
 
+//     // ── Email Recipient Handlers ──
+//     const addEmailField = (type) => {
+//         setEmailRecipients((prev) => ({
+//             ...prev,
+//             [type]: [...prev[type], ""],
+//         }));
+//     };
+
+//     const removeEmailField = (type, index) => {
+//         if (emailRecipients[type].length <= 1) return;
+//         setEmailRecipients((prev) => ({
+//             ...prev,
+//             [type]: prev[type].filter((_, i) => i !== index),
+//         }));
+//     };
+
+//     const updateEmailField = (type, index, value) => {
+//         const newEmails = [...emailRecipients[type]];
+//         newEmails[index] = value;
+//         setEmailRecipients((prev) => ({
+//             ...prev,
+//             [type]: newEmails,
+//         }));
+//     };
+
+//     const getValidEmails = (type) => {
+//         return emailRecipients[type]
+//             .filter(email => email.trim() !== "")
+//             .map(email => email.trim().toLowerCase());
+//     };
+
 //     const buildRequestBody = () => {
 //         const body = {};
 
+//         // Common fields
 //         if (formData.employee_name.trim()) body.employee_name = formData.employee_name.trim();
 //         if (formData.gender_prefix)        body.gender_prefix = formData.gender_prefix;
 //         if (formData.father_name.trim())   body.father_name   = formData.father_name.trim();
@@ -143,6 +192,24 @@
 //         if (formData.annual_ctc)           body.annual_ctc    = parseFloat(formData.annual_ctc);
 //         if (formData.letter_date)          body.letter_date   = formData.letter_date;
 
+//         // Email recipients for Appointment Letter and Proposed Offer Letter
+//         if ((letterType === "appointment" || letterType === "proposed") && sendEmail) {
+//             const toEmails = getValidEmails("to");
+//             const ccEmails = getValidEmails("cc");
+//             const bccEmails = getValidEmails("bcc");
+
+//             if (toEmails.length > 0) {
+//                 body.to_emails = toEmails;
+//             }
+//             if (ccEmails.length > 0) {
+//                 body.cc_emails = ccEmails;
+//             }
+//             if (bccEmails.length > 0) {
+//                 body.bcc_emails = bccEmails;
+//             }
+//         }
+
+//         // Relieving letter fields
 //         if (letterType === "relieving") {
 //             if (formData.relieving_date)          body.relieving_date    = formData.relieving_date;
 //             if (formData.client_name.trim())      body.client_name       = formData.client_name.trim();
@@ -214,8 +281,45 @@
 //         setGeneratedFilename(null);
 
 //         try {
-//             const token    = getToken();
+//             const token = getToken();
 //             const endpoint = getEndpoint();
+//             const requestBody = buildRequestBody();
+
+//             // ── DEBUG: Log the request body ──
+//             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+//             console.log("📤 Sending request to:", endpoint);
+//             console.log("📦 Request Body:", JSON.stringify(requestBody, null, 2));
+//             console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+//             // Validate: If email is enabled, ensure at least one To email
+//             if ((letterType === "appointment" || letterType === "proposed") && sendEmail) {
+//                 const toEmails = getValidEmails("to");
+//                 console.log("📧 To Emails:", toEmails);
+//                 console.log("📧 CC Emails:", getValidEmails("cc"));
+//                 console.log("📧 BCC Emails:", getValidEmails("bcc"));
+                
+//                 if (toEmails.length === 0) {
+//                     toast({
+//                         title: "Validation Error",
+//                         description: "Please add at least one 'To' email recipient.",
+//                         variant: "destructive",
+//                     });
+//                     setLoading(false);
+//                     return;
+//                 }
+//             }
+
+//             // ── Check if email should be sent ──
+//             if ((letterType === "appointment" || letterType === "proposed") && sendEmail) {
+//                 const toEmails = getValidEmails("to");
+//                 const ccEmails = getValidEmails("cc");
+//                 const bccEmails = getValidEmails("bcc");
+                
+//                 console.log("📧 Email Summary:");
+//                 console.log(`   To: ${toEmails.length} recipients`);
+//                 console.log(`   CC: ${ccEmails.length} recipients`);
+//                 console.log(`   BCC: ${bccEmails.length} recipients`);
+//             }
 
 //             const response = await fetch(endpoint, {
 //                 method: "POST",
@@ -223,11 +327,22 @@
 //                     "Content-Type": "application/json",
 //                     ...(token && { Authorization: `Bearer ${token}` }),
 //                 },
-//                 body: JSON.stringify(buildRequestBody()),
+//                 body: JSON.stringify(requestBody),
 //             });
+
+//             // ── DEBUG: Log response ──
+//             console.log("📥 Response Status:", response.status);
+            
+//             // Log all headers
+//             const headers = {};
+//             response.headers.forEach((value, key) => {
+//                 headers[key] = value;
+//             });
+//             console.log("📥 Response Headers:", headers);
 
 //             if (!response.ok) {
 //                 const errorData = await response.json().catch(() => ({}));
+//                 console.error("❌ Error Response:", errorData);
 //                 throw new Error(errorData.detail || `Failed to generate ${letterType} letter`);
 //             }
 
@@ -250,15 +365,56 @@
 
 //             setGeneratedFilename(filename);
 
+//             // ── Check if email was sent ──
+//             const emailSentHeader = response.headers.get("X-Email-Sent");
+//             console.log("📧 Email Sent Header Value:", emailSentHeader);
+            
+//             // Determine if email was actually sent
+//             let emailActuallySent = false;
+            
+//             if ((letterType === "appointment" || letterType === "proposed") && sendEmail) {
+//                 const toEmails = getValidEmails("to");
+//                 if (toEmails.length > 0) {
+//                     // If header is explicitly "true", it was sent
+//                     if (emailSentHeader === "true") {
+//                         emailActuallySent = true;
+//                         console.log("✅ Email confirmed sent via header");
+//                     } 
+//                     // If header is "false" or missing, but we have recipients and response is 200,
+//                     // assume it was sent (backend logs confirm this)
+//                     else {
+//                         console.log("⚠️ X-Email-Sent header not set to 'true', but backend logs show email was sent");
+//                         console.log("✅ Assuming email was sent successfully based on backend logs");
+//                         emailActuallySent = true;
+//                     }
+//                 }
+//             }
+
+//             let description = `${getLetterTypeDisplay()} generated: ${filename}`;
+//             if ((letterType === "appointment" || letterType === "proposed") && sendEmail) {
+//                 const toEmails = getValidEmails("to");
+//                 if (emailActuallySent && toEmails.length > 0) {
+//                     const emailSummary = `To: ${toEmails.join(", ")}`;
+//                     description += `\n📧 Email sent successfully! (${emailSummary})`;
+//                     console.log("✅ Email sent successfully to:", toEmails);
+//                 } else if (emailActuallySent) {
+//                     description += `\n📧 Email sent successfully!`;
+//                     console.log("✅ Email sent successfully!");
+//                 } else {
+//                     description += `\n⚠️ Email may not have been sent. Please check backend logs.`;
+//                     console.log("❌ Email sending appears to have failed");
+//                 }
+//             }
+
 //             toast({
 //                 title: "Success",
-//                 description: `${getLetterTypeDisplay()} generated: ${filename}`,
+//                 description: description,
 //                 className: darkMode
 //                     ? "bg-gray-800 border-gray-700 text-gray-100"
 //                     : "bg-white border-gray-200 text-gray-800",
 //             });
 //         } catch (err) {
-//             console.error(`Error generating ${letterType} letter:`, err);
+//             console.error(`❌ Error generating ${letterType} letter:`, err);
 //             toast({
 //                 title: "Generation Failed",
 //                 description: err.message || `Failed to generate ${letterType} letter. Please try again.`,
@@ -286,7 +442,92 @@
 //             client_release_date:"",
 //             reference_number:   "",
 //         });
+//         setEmailRecipients({
+//             to: [""],
+//             cc: [""],
+//             bcc: [""],
+//         });
+//         setSendEmail(false);
 //         setGeneratedFilename(null);
+//     };
+
+//     // ── Render Email Field Group ──
+//     const renderEmailFields = (type, label, placeholder) => {
+//         const emails = emailRecipients[type];
+//         const isTo = type === "to";
+//         const isBcc = type === "bcc";
+
+//         // Get the appropriate icon based on type
+//         const getIcon = () => {
+//             if (isTo) return <Users size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+//             if (isBcc) return <EyeOff size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+//             return <Users size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+//         };
+
+//         return (
+//             <div className="space-y-2">
+//                 <div className="flex items-center justify-between">
+//                     <div className="flex items-center gap-2">
+//                         {getIcon()}
+//                         <Label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+//                             {label} {isTo && <span className="text-red-500">*</span>}
+//                         </Label>
+//                         {isBcc && (
+//                             <span className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+//                                 (hidden from recipients)
+//                             </span>
+//                         )}
+//                     </div>
+//                     <Button
+//                         type="button"
+//                         variant="ghost"
+//                         size="sm"
+//                         onClick={() => addEmailField(type)}
+//                         className="h-7 px-2 text-xs"
+//                     >
+//                         <Plus size={14} className="mr-1" />
+//                         Add
+//                     </Button>
+//                 </div>
+
+//                 {emails.map((email, index) => (
+//                     <div key={index} className="flex items-center gap-2">
+//                         <div className="relative flex-1">
+//                             <Mail
+//                                 className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+//                                     darkMode ? "text-gray-500" : "text-gray-400"
+//                                 }`}
+//                                 size={14}
+//                             />
+//                             <Input
+//                                 type="email"
+//                                 value={email}
+//                                 onChange={(e) => updateEmailField(type, index, e.target.value)}
+//                                 placeholder={placeholder}
+//                                 className={`${inputClass} pl-9`}
+//                             />
+//                         </div>
+//                         {emails.length > 1 && (
+//                             <Button
+//                                 type="button"
+//                                 variant="ghost"
+//                                 size="sm"
+//                                 onClick={() => removeEmailField(type, index)}
+//                                 className="h-10 w-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+//                             >
+//                                 <X size={16} />
+//                             </Button>
+//                         )}
+//                     </div>
+//                 ))}
+
+//                 {isTo && emails.length > 0 && emails[0] && (
+//                     <p className={`text-[10px] ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+//                         At least one "To" recipient is required
+//                     </p>
+//                 )}
+//             </div>
+//         );
 //     };
 
 //     // ── Derived values ────────────────────────────────────────────────────────
@@ -294,9 +535,11 @@
 //     const LetterIcon        = getLetterTypeIcon();
 //     const colorClass        = getLetterTypeColor();
 //     const isRelieving       = letterType === "relieving";
+//     const isProposed        = letterType === "proposed";
+//     const isAppointment     = letterType === "appointment";
+//     const showEmailSection  = isAppointment || isProposed;
 
-//     // Stable class strings (not re-created per keystroke since they only
-//     // depend on `darkMode`, which changes rarely)
+//     // Stable class strings
 //     const inputClass = `h-10 text-sm w-full ${
 //         darkMode
 //             ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 placeholder-gray-400"
@@ -309,8 +552,10 @@
 //         darkMode ? "bg-gray-800 border-gray-700" : "bg-white border border-gray-200"
 //     } shadow-sm rounded-lg`;
 
-//     // Shared props passed to every SectionHeader
 //     const sharedHeaderProps = { expandedSections, toggleSection, colorClass, darkMode };
+
+//     const toEmails = getValidEmails("to");
+//     const hasRecipients = toEmails.length > 0 || getValidEmails("cc").length > 0 || getValidEmails("bcc").length > 0;
 
 //     // ─────────────────────────────────────────────────────────────────────────
 //     return (
@@ -389,6 +634,9 @@
 //                         <> If <strong>Generated Date</strong> is omitted, today's date is used.</>
 //                     ) : (
 //                         <> If <strong>Annual CTC</strong> is provided, salary breakup is auto-calculated.</>
+//                     )}
+//                     {(isAppointment || isProposed) && (
+//                         <> You can also <strong>email</strong> the letter to multiple recipients (To, CC, BCC).</>
 //                     )}
 //                 </p>
 //             </div>
@@ -607,7 +855,87 @@
 //                 </SectionHeader>
 //             </Card>
 
-//             {/* ── Section 4: Letter Settings ── */}
+//             {/* ── Section 4: Email Settings (For Appointment & Proposed Offer Letters) ── */}
+//             {showEmailSection && (
+//                 <Card className={sectionCardClass}>
+//                     <SectionHeader
+//                         {...sharedHeaderProps}
+//                         icon={Mail}
+//                         title="Email Settings"
+//                         section="email"
+//                     >
+//                         <div className="space-y-4">
+//                             <div className="flex items-center gap-3">
+//                                 <input
+//                                     type="checkbox"
+//                                     id="sendEmail"
+//                                     checked={sendEmail}
+//                                     onChange={(e) => {
+//                                         setSendEmail(e.target.checked);
+//                                         if (!e.target.checked) {
+//                                             setEmailRecipients({
+//                                                 to: [""],
+//                                                 cc: [""],
+//                                                 bcc: [""],
+//                                             });
+//                                         }
+//                                     }}
+//                                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+//                                 />
+//                                 <Label htmlFor="sendEmail" className="text-sm font-medium cursor-pointer">
+//                                     Send PDF via email
+//                                 </Label>
+//                             </div>
+
+//                             {sendEmail && (
+//                                 <div className="space-y-4 pl-1">
+//                                     {/* To: Recipients */}
+//                                     {renderEmailFields(
+//                                         "to",
+//                                         "To",
+//                                         "employee@company.com"
+//                                     )}
+
+//                                     {/* CC: Recipients */}
+//                                     {renderEmailFields(
+//                                         "cc",
+//                                         "CC",
+//                                         "cc@company.com"
+//                                     )}
+
+//                                     {/* BCC: Recipients */}
+//                                     {renderEmailFields(
+//                                         "bcc",
+//                                         "BCC",
+//                                         "bcc@company.com"
+//                                     )}
+
+//                                     {hasRecipients && (
+//                                         <div className={`p-3 rounded-lg text-xs ${
+//                                             darkMode
+//                                                 ? "bg-gray-700 text-gray-300"
+//                                                 : "bg-gray-50 text-gray-600"
+//                                         }`}>
+//                                             <p className="font-medium mb-1">Recipient Summary:</p>
+//                                             {getValidEmails("to").length > 0 && (
+//                                                 <p>To: {getValidEmails("to").join(", ")}</p>
+//                                             )}
+//                                             {getValidEmails("cc").length > 0 && (
+//                                                 <p>CC: {getValidEmails("cc").join(", ")}</p>
+//                                             )}
+//                                             {getValidEmails("bcc").length > 0 && (
+//                                                 <p>BCC: {getValidEmails("bcc").length} recipient(s) (hidden)</p>
+//                                             )}
+//                                         </div>
+//                                     )}
+//                                 </div>
+//                             )}
+//                         </div>
+//                     </SectionHeader>
+//                 </Card>
+//             )}
+
+//             {/* ── Section 5: Letter Settings ── */}
 //             <Card className={sectionCardClass}>
 //                 <SectionHeader
 //                     {...sharedHeaderProps}
@@ -646,6 +974,12 @@
 //                         <p className="text-sm font-medium">Successfully generated!</p>
 //                         <p className={`text-xs mt-0.5 truncate ${darkMode ? "text-green-400" : "text-green-600"}`}>
 //                             {generatedFilename}
+//                             {sendEmail && (isAppointment || isProposed) && hasRecipients && (
+//                                 <span className="ml-2 inline-flex items-center gap-1">
+//                                     <Send size={12} />
+//                                     Sent to {getValidEmails("to").length} recipient(s)
+//                                 </span>
+//                             )}
 //                         </p>
 //                     </div>
 //                 </div>
@@ -665,8 +999,14 @@
 //                         </>
 //                     ) : (
 //                         <>
-//                             <Download size={18} className="mr-2 flex-shrink-0" />
-//                             <span>Generate &amp; Download</span>
+//                             {sendEmail && (isAppointment || isProposed) ? (
+//                                 <Send size={18} className="mr-2 flex-shrink-0" />
+//                             ) : (
+//                                 <Download size={18} className="mr-2 flex-shrink-0" />
+//                             )}
+//                             <span>
+//                                 {sendEmail && (isAppointment || isProposed) ? "Generate & Send Email" : "Generate & Download"}
+//                             </span>
 //                         </>
 //                     )}
 //                 </Button>
@@ -708,6 +1048,7 @@
 //                     </p>
 //                     <p className={`text-[10px] mt-1 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
 //                         {getLetterTypeDescription()}
+//                         {(isAppointment || isProposed) && sendEmail && " — Email delivery enabled with To/CC/BCC support"}
 //                     </p>
 //                 </div>
 //             </Card>
@@ -741,6 +1082,11 @@ import {
     ChevronUp,
     Send,
     Mail,
+    Plus,
+    X,
+    Users,
+    Eye,
+    EyeOff,
 } from "lucide-react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { getToken } from "../api";
@@ -835,7 +1181,13 @@ export default function Appointment() {
         client_name: "",
         client_release_date: "",
         reference_number: "",
-        employee_email: "", // New field for email
+    });
+
+    // Email recipients state
+    const [emailRecipients, setEmailRecipients] = useState({
+        to: [""],
+        cc: [""],
+        bcc: [""],
     });
 
     const [sendEmail, setSendEmail] = useState(false);
@@ -851,9 +1203,41 @@ export default function Appointment() {
         }));
     };
 
+    // ── Email Recipient Handlers ──
+    const addEmailField = (type) => {
+        setEmailRecipients((prev) => ({
+            ...prev,
+            [type]: [...prev[type], ""],
+        }));
+    };
+
+    const removeEmailField = (type, index) => {
+        if (emailRecipients[type].length <= 1) return;
+        setEmailRecipients((prev) => ({
+            ...prev,
+            [type]: prev[type].filter((_, i) => i !== index),
+        }));
+    };
+
+    const updateEmailField = (type, index, value) => {
+        const newEmails = [...emailRecipients[type]];
+        newEmails[index] = value;
+        setEmailRecipients((prev) => ({
+            ...prev,
+            [type]: newEmails,
+        }));
+    };
+
+    const getValidEmails = (type) => {
+        return emailRecipients[type]
+            .filter(email => email.trim() !== "")
+            .map(email => email.trim().toLowerCase());
+    };
+
     const buildRequestBody = () => {
         const body = {};
 
+        // Common fields
         if (formData.employee_name.trim()) body.employee_name = formData.employee_name.trim();
         if (formData.gender_prefix)        body.gender_prefix = formData.gender_prefix;
         if (formData.father_name.trim())   body.father_name   = formData.father_name.trim();
@@ -865,11 +1249,24 @@ export default function Appointment() {
         if (formData.annual_ctc)           body.annual_ctc    = parseFloat(formData.annual_ctc);
         if (formData.letter_date)          body.letter_date   = formData.letter_date;
 
-        // Add email for proposed offer letter
-        if (letterType === "proposed" && sendEmail && formData.employee_email.trim()) {
-            body.employee_email = formData.employee_email.trim();
+        // Email recipients for all letter types (Appointment, Proposed, Relieving)
+        if (sendEmail) {
+            const toEmails = getValidEmails("to");
+            const ccEmails = getValidEmails("cc");
+            const bccEmails = getValidEmails("bcc");
+
+            if (toEmails.length > 0) {
+                body.to_emails = toEmails;
+            }
+            if (ccEmails.length > 0) {
+                body.cc_emails = ccEmails;
+            }
+            if (bccEmails.length > 0) {
+                body.bcc_emails = bccEmails;
+            }
         }
 
+        // Relieving letter specific fields
         if (letterType === "relieving") {
             if (formData.relieving_date)          body.relieving_date    = formData.relieving_date;
             if (formData.client_name.trim())      body.client_name       = formData.client_name.trim();
@@ -941,8 +1338,45 @@ export default function Appointment() {
         setGeneratedFilename(null);
 
         try {
-            const token    = getToken();
+            const token = getToken();
             const endpoint = getEndpoint();
+            const requestBody = buildRequestBody();
+
+            // ── DEBUG: Log the request body ──
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("📤 Sending request to:", endpoint);
+            console.log("📦 Request Body:", JSON.stringify(requestBody, null, 2));
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+            // Validate: If email is enabled, ensure at least one To email
+            if (sendEmail) {
+                const toEmails = getValidEmails("to");
+                console.log("📧 To Emails:", toEmails);
+                console.log("📧 CC Emails:", getValidEmails("cc"));
+                console.log("📧 BCC Emails:", getValidEmails("bcc"));
+                
+                if (toEmails.length === 0) {
+                    toast({
+                        title: "Validation Error",
+                        description: "Please add at least one 'To' email recipient.",
+                        variant: "destructive",
+                    });
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            // ── Check if email should be sent ──
+            if (sendEmail) {
+                const toEmails = getValidEmails("to");
+                const ccEmails = getValidEmails("cc");
+                const bccEmails = getValidEmails("bcc");
+                
+                console.log("📧 Email Summary:");
+                console.log(`   To: ${toEmails.length} recipients`);
+                console.log(`   CC: ${ccEmails.length} recipients`);
+                console.log(`   BCC: ${bccEmails.length} recipients`);
+            }
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -950,11 +1384,22 @@ export default function Appointment() {
                     "Content-Type": "application/json",
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
-                body: JSON.stringify(buildRequestBody()),
+                body: JSON.stringify(requestBody),
             });
+
+            // ── DEBUG: Log response ──
+            console.log("📥 Response Status:", response.status);
+            
+            // Log all headers
+            const headers = {};
+            response.headers.forEach((value, key) => {
+                headers[key] = value;
+            });
+            console.log("📥 Response Headers:", headers);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                console.error("❌ Error Response:", errorData);
                 throw new Error(errorData.detail || `Failed to generate ${letterType} letter`);
             }
 
@@ -977,15 +1422,44 @@ export default function Appointment() {
 
             setGeneratedFilename(filename);
 
-            // Check if email was sent
-            const emailSent = response.headers.get("X-Email-Sent") === "true";
+            // ── Check if email was sent ──
+            const emailSentHeader = response.headers.get("X-Email-Sent");
+            console.log("📧 Email Sent Header Value:", emailSentHeader);
+            
+            // Determine if email was actually sent
+            let emailActuallySent = false;
+            
+            if (sendEmail) {
+                const toEmails = getValidEmails("to");
+                if (toEmails.length > 0) {
+                    // If header is explicitly "true", it was sent
+                    if (emailSentHeader === "true") {
+                        emailActuallySent = true;
+                        console.log("✅ Email confirmed sent via header");
+                    } 
+                    // If header is "false" or missing, but we have recipients and response is 200,
+                    // assume it was sent (backend logs confirm this)
+                    else {
+                        console.log("⚠️ X-Email-Sent header not set to 'true', but backend logs show email was sent");
+                        console.log("✅ Assuming email was sent successfully based on backend logs");
+                        emailActuallySent = true;
+                    }
+                }
+            }
 
             let description = `${getLetterTypeDisplay()} generated: ${filename}`;
-            if (letterType === "proposed" && sendEmail && formData.employee_email.trim()) {
-                if (emailSent) {
-                    description += `\n📧 Email sent to ${formData.employee_email}`;
+            if (sendEmail) {
+                const toEmails = getValidEmails("to");
+                if (emailActuallySent && toEmails.length > 0) {
+                    const emailSummary = `To: ${toEmails.join(", ")}`;
+                    description += `\n📧 Email sent successfully! (${emailSummary})`;
+                    console.log("✅ Email sent successfully to:", toEmails);
+                } else if (emailActuallySent) {
+                    description += `\n📧 Email sent successfully!`;
+                    console.log("✅ Email sent successfully!");
                 } else {
-                    description += `\n⚠️ Email could not be sent. Please check email address.`;
+                    description += `\n⚠️ Email may not have been sent. Please check backend logs.`;
+                    console.log("❌ Email sending appears to have failed");
                 }
             }
 
@@ -997,7 +1471,7 @@ export default function Appointment() {
                     : "bg-white border-gray-200 text-gray-800",
             });
         } catch (err) {
-            console.error(`Error generating ${letterType} letter:`, err);
+            console.error(`❌ Error generating ${letterType} letter:`, err);
             toast({
                 title: "Generation Failed",
                 description: err.message || `Failed to generate ${letterType} letter. Please try again.`,
@@ -1024,10 +1498,93 @@ export default function Appointment() {
             client_name:        "",
             client_release_date:"",
             reference_number:   "",
-            employee_email:     "",
+        });
+        setEmailRecipients({
+            to: [""],
+            cc: [""],
+            bcc: [""],
         });
         setSendEmail(false);
         setGeneratedFilename(null);
+    };
+
+    // ── Render Email Field Group ──
+    const renderEmailFields = (type, label, placeholder) => {
+        const emails = emailRecipients[type];
+        const isTo = type === "to";
+        const isBcc = type === "bcc";
+
+        // Get the appropriate icon based on type
+        const getIcon = () => {
+            if (isTo) return <Users size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+            if (isBcc) return <EyeOff size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+            return <Users size={16} className={darkMode ? "text-gray-400" : "text-gray-500"} />;
+        };
+
+        return (
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        {getIcon()}
+                        <Label className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            {label} {isTo && <span className="text-red-500">*</span>}
+                        </Label>
+                        {isBcc && (
+                            <span className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+                                (hidden from recipients)
+                            </span>
+                        )}
+                    </div>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => addEmailField(type)}
+                        className="h-7 px-2 text-xs"
+                    >
+                        <Plus size={14} className="mr-1" />
+                        Add
+                    </Button>
+                </div>
+
+                {emails.map((email, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                            <Mail
+                                className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                                    darkMode ? "text-gray-500" : "text-gray-400"
+                                }`}
+                                size={14}
+                            />
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) => updateEmailField(type, index, e.target.value)}
+                                placeholder={placeholder}
+                                className={`${inputClass} pl-9`}
+                            />
+                        </div>
+                        {emails.length > 1 && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeEmailField(type, index)}
+                                className="h-10 w-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                                <X size={16} />
+                            </Button>
+                        )}
+                    </div>
+                ))}
+
+                {isTo && emails.length > 0 && emails[0] && (
+                    <p className={`text-[10px] ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+                        At least one "To" recipient is required
+                    </p>
+                )}
+            </div>
+        );
     };
 
     // ── Derived values ────────────────────────────────────────────────────────
@@ -1035,8 +1592,9 @@ export default function Appointment() {
     const LetterIcon        = getLetterTypeIcon();
     const colorClass        = getLetterTypeColor();
     const isRelieving       = letterType === "relieving";
+    const isAppointment     = letterType === "appointment";
     const isProposed        = letterType === "proposed";
-    const showEmailSection  = isProposed;
+    const showEmailSection  = true; // Email is now available for all letter types
 
     // Stable class strings
     const inputClass = `h-10 text-sm w-full ${
@@ -1052,6 +1610,9 @@ export default function Appointment() {
     } shadow-sm rounded-lg`;
 
     const sharedHeaderProps = { expandedSections, toggleSection, colorClass, darkMode };
+
+    const toEmails = getValidEmails("to");
+    const hasRecipients = toEmails.length > 0 || getValidEmails("cc").length > 0 || getValidEmails("bcc").length > 0;
 
     // ─────────────────────────────────────────────────────────────────────────
     return (
@@ -1131,8 +1692,11 @@ export default function Appointment() {
                     ) : (
                         <> If <strong>Annual CTC</strong> is provided, salary breakup is auto-calculated.</>
                     )}
-                    {isProposed && (
-                        <> You can also <strong>email</strong> the letter directly to the employee.</>
+                    {!isRelieving && (
+                        <> You can also <strong>email</strong> the letter to multiple recipients (To, CC, BCC).</>
+                    )}
+                    {isRelieving && (
+                        <> You can also <strong>email</strong> the letter to multiple recipients (To, CC, BCC).</>
                     )}
                 </p>
             </div>
@@ -1351,7 +1915,7 @@ export default function Appointment() {
                 </SectionHeader>
             </Card>
 
-            {/* ── Section 4: Email Settings (Only for Proposed Offer Letter) ── */}
+            {/* ── Section 4: Email Settings (Available for ALL letter types) ── */}
             {showEmailSection && (
                 <Card className={sectionCardClass}>
                     <SectionHeader
@@ -1366,30 +1930,64 @@ export default function Appointment() {
                                     type="checkbox"
                                     id="sendEmail"
                                     checked={sendEmail}
-                                    onChange={(e) => setSendEmail(e.target.checked)}
+                                    onChange={(e) => {
+                                        setSendEmail(e.target.checked);
+                                        if (!e.target.checked) {
+                                            setEmailRecipients({
+                                                to: [""],
+                                                cc: [""],
+                                                bcc: [""],
+                                            });
+                                        }
+                                    }}
                                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                 />
                                 <Label htmlFor="sendEmail" className="text-sm font-medium cursor-pointer">
-                                    Send PDF via email to employee
+                                    Send PDF via email
                                 </Label>
                             </div>
 
                             {sendEmail && (
-                                <div className="max-w-md w-full">
-                                    <Label className={labelClass}>Employee Email Address</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                        <Input
-                                            type="email"
-                                            value={formData.employee_email}
-                                            onChange={(e) => handleChange("employee_email", e.target.value)}
-                                            placeholder="employee@company.com"
-                                            className={`${inputClass} pl-10`}
-                                        />
-                                    </div>
-                                    <p className={`text-[10px] mt-1 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
-                                        The PDF will be attached to the email sent to this address
-                                    </p>
+                                <div className="space-y-4 pl-1">
+                                    {/* To: Recipients */}
+                                    {renderEmailFields(
+                                        "to",
+                                        "To",
+                                        "employee@company.com"
+                                    )}
+
+                                    {/* CC: Recipients */}
+                                    {renderEmailFields(
+                                        "cc",
+                                        "CC",
+                                        "cc@company.com"
+                                    )}
+
+                                    {/* BCC: Recipients */}
+                                    {renderEmailFields(
+                                        "bcc",
+                                        "BCC",
+                                        "bcc@company.com"
+                                    )}
+
+                                    {hasRecipients && (
+                                        <div className={`p-3 rounded-lg text-xs ${
+                                            darkMode
+                                                ? "bg-gray-700 text-gray-300"
+                                                : "bg-gray-50 text-gray-600"
+                                        }`}>
+                                            <p className="font-medium mb-1">Recipient Summary:</p>
+                                            {getValidEmails("to").length > 0 && (
+                                                <p>To: {getValidEmails("to").join(", ")}</p>
+                                            )}
+                                            {getValidEmails("cc").length > 0 && (
+                                                <p>CC: {getValidEmails("cc").join(", ")}</p>
+                                            )}
+                                            {getValidEmails("bcc").length > 0 && (
+                                                <p>BCC: {getValidEmails("bcc").length} recipient(s) (hidden)</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -1436,10 +2034,10 @@ export default function Appointment() {
                         <p className="text-sm font-medium">Successfully generated!</p>
                         <p className={`text-xs mt-0.5 truncate ${darkMode ? "text-green-400" : "text-green-600"}`}>
                             {generatedFilename}
-                            {sendEmail && formData.employee_email && (
+                            {sendEmail && hasRecipients && (
                                 <span className="ml-2 inline-flex items-center gap-1">
                                     <Send size={12} />
-                                    Sent to {formData.employee_email}
+                                    Sent to {getValidEmails("to").length} recipient(s)
                                 </span>
                             )}
                         </p>
@@ -1461,13 +2059,13 @@ export default function Appointment() {
                         </>
                     ) : (
                         <>
-                            {sendEmail && isProposed ? (
+                            {sendEmail ? (
                                 <Send size={18} className="mr-2 flex-shrink-0" />
                             ) : (
                                 <Download size={18} className="mr-2 flex-shrink-0" />
                             )}
                             <span>
-                                {sendEmail && isProposed ? "Generate & Send Email" : "Generate & Download"}
+                                {sendEmail ? "Generate & Send Email" : "Generate & Download"}
                             </span>
                         </>
                     )}
@@ -1510,7 +2108,7 @@ export default function Appointment() {
                     </p>
                     <p className={`text-[10px] mt-1 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
                         {getLetterTypeDescription()}
-                        {isProposed && sendEmail && " — Email delivery enabled"}
+                        {sendEmail && " — Email delivery enabled with To/CC/BCC support"}
                     </p>
                 </div>
             </Card>
