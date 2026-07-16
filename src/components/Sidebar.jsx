@@ -157,7 +157,7 @@ export default function Sidebar({ user, collapsed, setCollapsed }) {
               </li>
             );
           })}
-        </ul>
+        </ul> 
       </nav>
 
       {/* FOOTER */}
